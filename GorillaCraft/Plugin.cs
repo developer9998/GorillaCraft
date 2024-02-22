@@ -1,11 +1,9 @@
 ﻿using BepInEx;
 using Bepinject;
-using GorillaCraft.Extensions;
 using GorillaCraft.Patches;
 using HarmonyLib;
 using System;
 using System.Reflection;
-using UnityEngine;
 using Utilla;
 
 namespace GorillaCraft

@@ -1,5 +1,7 @@
-﻿using GorillaCraft.Interfaces;
+﻿using ExitGames.Client.Photon;
+using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
+using GorillaCraft.Tools;
 using GorillaCraft.Utilities;
 using Newtonsoft.Json;
 using Photon.Pun;
@@ -12,7 +14,7 @@ using UnityEngine;
 namespace GorillaCraft.Behaviours.Networking
 {
     [DisallowMultipleComponent]
-    public class PlayerSerializer : MonoBehaviourPun
+    public class PlayerSerializer : MonoBehaviourPun, IPhotonViewCallback, IOnPhotonViewPreNetDestroy
     {
         public static PlayerSerializer Local;
 
@@ -24,6 +26,7 @@ namespace GorillaCraft.Behaviours.Networking
             if (photonView.IsMine)
             {
                 Local = this;
+                PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
             }
             else
             {
@@ -33,17 +36,9 @@ namespace GorillaCraft.Behaviours.Networking
             Rig = RigCacheUtils.GetField<VRRig>(photonView.Owner);
         }
 
-        public void OnDestroy()
+        public void DistributeBlock(bool isCreating, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale)
         {
-            if (Local == this)
-            {
-                Local = null;
-            }
-        }
-
-        public void HandleBlock(bool isCreating, GameObject blockObject, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale)
-        {
-            photonView.RPC(nameof(ServerIndividualBlock), RpcTarget.Others, isCreating, block != null ? block.GetType().Name : "None", blockPosition, blockEuler, blockScale);
+            MultiplayerManager.BlockInteraction(isCreating, block != null ? block.GetType().Name : "None", blockPosition, blockEuler, blockScale);
 
             if (isCreating)
             {
@@ -65,14 +60,33 @@ namespace GorillaCraft.Behaviours.Networking
             }
         }
 
-        private void ReplaceMatch(ref List<string> list, string original, string sub)
+        public void OnEvent(EventData data)
         {
-            for (int i = 0; i < list.Count; i++)
+            if (data.Code != MultiplayerManager.BlockInteractionCode && data.Code != MultiplayerManager.SurfaceTapCode) return;
+
+            var sender = PhotonNetwork.CurrentRoom.GetPlayer(data.Sender);
+            var eventData = (object[])data.CustomData;
+
+            if (data.Code == MultiplayerManager.BlockInteractionCode)
             {
-                if (list[i] == original)
+                if (sender == photonView.Owner)
                 {
-                    list[i] = sub;
-                    break;
+                    if ((bool)eventData[0])
+                    {
+                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], (Vector3)eventData[2], (Vector3)eventData[3], (Vector3)eventData[4], photonView.Owner);
+                    }
+                    else
+                    {
+                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock((Vector3)eventData[2], photonView.Owner);
+                    }
+                }
+            }
+            else if (data.Code == MultiplayerManager.SurfaceTapCode)
+            {
+                if (sender == photonView.Owner)
+                {
+                    Type surfaceType = typeof(Plugin).Assembly.GetTypes().First(type => type.Name == (string)eventData[0]);
+                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlayTapSound(Rig, surfaceType, (bool)eventData[1]);
                 }
             }
         }
@@ -82,93 +96,49 @@ namespace GorillaCraft.Behaviours.Networking
         {
             if (photonView.IsMine)
             {
-                List<string> blocks = new()
-                {
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                };
+                List<string> blocks = new();
 
                 foreach (var block in BlockInfo)
                 {
-                    if (blocks.Any(a => a == string.Empty))
+                    if (blocks.Count < 10)
                     {
-                        ReplaceMatch(ref blocks, string.Empty, JsonConvert.SerializeObject(block, Formatting.None));
+                        blocks.Add(JsonConvert.SerializeObject(block, Formatting.None));
                         continue;
                     }
 
-                    photonView.RPC(nameof(ServerRecoverBlock), player, blocks[0], blocks[1], blocks[2], blocks[3]);
-                    blocks = new()
-                    {
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty
-                    };
+                    photonView.RPC(nameof(ServerRecoverBlocks), player, new object[] { blocks.ToArray() });
+                    blocks.Clear();
+                    blocks.Add(JsonConvert.SerializeObject(block, Formatting.None));
                 }
 
-                if (blocks.Any(a => a == string.Empty))
+                if (blocks.Count > 0)
                 {
-                    photonView.RPC(nameof(ServerRecoverBlock), player, blocks[0], blocks[1], blocks[2], blocks[3]);
+                    photonView.RPC(nameof(ServerRecoverBlocks), player, new object[] { blocks.ToArray() });
                 }
             }
         }
 
         [PunRPC]
-        public void ServerRecoverBlock(string block1, string block2, string block3, string block4, PhotonMessageInfo info)
+        public void ServerRecoverBlocks(string[] blocks, PhotonMessageInfo info)
         {
             if (info.photonView.Owner == info.Sender)
             {
-                if (block1 != string.Empty)
+                foreach (string block in blocks)
                 {
-                    BlockGeneralInfo blockInfo = JsonConvert.DeserializeObject<BlockGeneralInfo>(block1);
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, blockInfo.Name, blockInfo.Position, blockInfo.Euler, blockInfo.Scale, info.Sender);
-                }
-
-                if (block2 != string.Empty)
-                {
-                    BlockGeneralInfo blockInfo = JsonConvert.DeserializeObject<BlockGeneralInfo>(block2);
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, blockInfo.Name, blockInfo.Position, blockInfo.Euler, blockInfo.Scale, info.Sender);
-                }
-
-                if (block3 != string.Empty)
-                {
-                    BlockGeneralInfo blockInfo = JsonConvert.DeserializeObject<BlockGeneralInfo>(block3);
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, blockInfo.Name, blockInfo.Position, blockInfo.Euler, blockInfo.Scale, info.Sender);
-                }
-
-                if (block4 != string.Empty)
-                {
-                    BlockGeneralInfo blockInfo = JsonConvert.DeserializeObject<BlockGeneralInfo>(block4);
+                    BlockGeneralInfo blockInfo = JsonConvert.DeserializeObject<BlockGeneralInfo>(block);
                     GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, blockInfo.Name, blockInfo.Position, blockInfo.Euler, blockInfo.Scale, info.Sender);
                 }
             }
         }
 
-        [PunRPC]
-        public void ServerIndividualBlock(bool isCreating, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, PhotonMessageInfo info)
+        public void OnPreNetDestroy(PhotonView rootView)
         {
-            if (info.photonView.Owner == info.Sender)
+            if (Local == this)
             {
-                if (isCreating)
-                {
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, block, blockPosition, blockEuler, blockScale, photonView.Owner);
-                    return;
-                }
-
-                GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock(blockPosition, photonView.Owner);
+                Local = null;
             }
-        }
 
-        [PunRPC]
-        public void PlaySurfaceType(string typeName, bool isLeftHand, PhotonMessageInfo info)
-        {
-            if (info.Sender == photonView.Owner)
-            {
-                Type surfaceType = typeof(Plugin).Assembly.GetTypes().First(type => type.Name == typeName);
-                GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlayTapSound(Rig, surfaceType, isLeftHand);
-            }
+            PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
         }
     }
 }

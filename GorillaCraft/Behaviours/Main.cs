@@ -14,7 +14,7 @@ namespace GorillaCraft.Behaviours
         private MenuHandler MenuHandler;
         private ModeMenuHandler MenuHandler_Mode;
 
-        private bool _buttonHeld;
+        private bool ModeBindActivated;
 
         [Inject]
         public void Construct(PlacementHelper placementHelper, AssetLoader assetLoader)
@@ -60,17 +60,17 @@ namespace GorillaCraft.Behaviours
             }
 
             bool buttonHeld = ControllerInputPoller.instance.leftControllerPrimaryButton;
-            if (buttonHeld && buttonHeld != _buttonHeld)
+            if (buttonHeld && buttonHeld != ModeBindActivated)
             {
                 MenuHandler_Mode.gameObject.SetActive(true);
                 MenuHandler.gameObject.SetActive(false);
             }
-            else if (!buttonHeld && buttonHeld != _buttonHeld)
+            else if (!buttonHeld && buttonHeld != ModeBindActivated)
             {
                 MenuHandler_Mode.gameObject.SetActive(false);
                 MenuHandler.gameObject.SetActive(PlacementHelper.GetBuildMode() != 2);
             }
-            _buttonHeld = buttonHeld;
+            ModeBindActivated = buttonHeld;
         }
 
         private void OnRoomUpdated(bool inRoom)
@@ -81,7 +81,7 @@ namespace GorillaCraft.Behaviours
 
         private void OnJoinRoom()
         {
-            MenuHandler.gameObject.SetActive(true);
+            MenuHandler.gameObject.SetActive(PlacementHelper.GetBuildMode() != 2);
         }
 
         private void OnLeaveRoom()

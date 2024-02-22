@@ -1,9 +1,8 @@
 ﻿using GorillaCraft.Behaviours.Block;
-using GorillaCraft.Behaviours.Networking;
+using GorillaCraft.Tools;
 using GorillaLocomotion;
 using HarmonyLib;
 using Photon.Pun;
-using UnityEngine;
 
 namespace GorillaCraft.Patches
 {
@@ -20,7 +19,7 @@ namespace GorillaCraft.Patches
                 GorillaSurfaceOverride currentOverride = isLeftHand ? Player.Instance.leftHandSurfaceOverride : Player.Instance.rightHandSurfaceOverride;
                 if (currentOverride != null && currentOverride.TryGetComponent(out Face))
                 {
-                    __instance.RPC(nameof(PlayerSerializer.PlaySurfaceType), RpcTarget.Others, Face.surfaceType.Name, isLeftHand);
+                    MultiplayerManager.SurfaceTap(Face.surfaceType.Name, isLeftHand);
                     return false;
                 }
             }

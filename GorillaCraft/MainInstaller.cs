@@ -51,8 +51,8 @@ namespace GorillaCraft
             Container.Bind<IBlock>().To<MagentaWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<PinkWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<BlackWoolBlock>().AsSingle();
-            Container.Bind<IBlock>().To<LightGreyWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<GreyWoolBlock>().AsSingle();
+            Container.Bind<IBlock>().To<LightGreyWoolBlock>().AsSingle();
 
             Container.Bind<IBlock>().To<WhiteWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<CoalOreBlock>().AsSingle();

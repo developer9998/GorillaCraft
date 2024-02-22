@@ -162,7 +162,7 @@ namespace GorillaCraft.Behaviours
 
             if (placeType == BlockPlaceType.Local)
             {
-                PlayerSerializer.Local?.HandleBlock(true, newBlock, block, blockPosition, blockEuler, blockScale);
+                PlayerSerializer.Local?.DistributeBlock(true, block, blockPosition, blockEuler, blockScale);
             }
 
             return true;
@@ -196,7 +196,7 @@ namespace GorillaCraft.Behaviours
 
             if (sender.IsLocal)
             {
-                PlayerSerializer.Local?.HandleBlock(false, null, null, parent.transform.position, Vector3.zero, Vector3.zero);
+                PlayerSerializer.Local?.DistributeBlock(false, null, parent.transform.position, Vector3.zero, Vector3.zero);
             }
 
             PlaySound_Destroy(GetPlaceType(parent.Block.DestroySoundType));
