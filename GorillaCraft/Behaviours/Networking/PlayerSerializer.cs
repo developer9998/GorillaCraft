@@ -104,7 +104,7 @@ namespace GorillaCraft.Behaviours.Networking
 
                 foreach (var block in BlockInfo)
                 {
-                    if (blocks.Count < 10)
+                    if (blocks.Count < 24)
                     {
                         blocks.Add(JsonConvert.SerializeObject(block, Formatting.None));
                         continue;
