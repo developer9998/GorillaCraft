@@ -7,7 +7,7 @@ using System;
 using UnityEngine;
 using Zenject;
 
-namespace GorillaCraft
+namespace GorillaCraft.Models
 {
     public class MainInstaller : Installer
     {

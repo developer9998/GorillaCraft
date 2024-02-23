@@ -7,8 +7,8 @@ namespace GorillaCraft.Tools
 {
     public class MultiplayerManager
     {
-        public const byte BlockInteractionCode = 160;
-        public const byte SurfaceTapCode = 161;
+        public const byte BlockInteractionCode = 130;
+        public const byte SurfaceTapCode = 131;
 
         public static void BlockInteraction(bool isCreating, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale)
         {

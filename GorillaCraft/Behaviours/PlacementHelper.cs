@@ -85,12 +85,12 @@ namespace GorillaCraft.Behaviours
             LineRenderer.material.color = iMode == 0 ? new Color(0, 0.8245816f, 1, 0.2f) : new Color(1, 0, 0, 0.2f);
 
             // Adjust the scale for the preview objects based on the player's scale
-            PlaceIndicator.transform.localScale = Vector3.one * Player.scale;
-            DestroyIndicator.transform.localScale = Vector3.one * Player.scale;
-            LineRenderer.startWidth = 0.045f * Player.scale;
-            LineRenderer.endWidth = 0.045f * Player.scale;
+            PlaceIndicator.transform.localScale = Vector3.one * Mathf.Clamp01(Player.scale);
+            DestroyIndicator.transform.localScale = Vector3.one * Mathf.Clamp01(Player.scale);
+            LineRenderer.startWidth = 0.045f * Mathf.Clamp01(Player.scale);
+            LineRenderer.endWidth = 0.045f * Mathf.Clamp01(Player.scale);
 
-            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 25 * Player.scale, Player.Instance.locomotionEnabledLayers, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 25 * Mathf.Clamp01(Player.scale), Player.Instance.locomotionEnabledLayers, QueryTriggerInteraction.Ignore))
             {
                 LineRenderer.enabled = true;
                 if (!PlaceIndicator.activeSelf && iMode == 0)
@@ -125,7 +125,7 @@ namespace GorillaCraft.Behaviours
                             _ => Vector3.zero,
                         };
 
-                        BlockHandler.PlaceBlock(BlockPlaceType.Local, BlockList[iPlacement].GetType().Name, PlaceIndicator.transform.position, eulerAngles, Vector3.one * Player.scale, PhotonNetwork.LocalPlayer);
+                        BlockHandler.PlaceBlock(BlockPlaceType.Local, BlockList[iPlacement].GetType().Name, PlaceIndicator.transform.position, eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer);
                         IndexActivated = triggerPressed;
                         return;
                     }

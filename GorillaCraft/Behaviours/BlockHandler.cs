@@ -170,7 +170,7 @@ namespace GorillaCraft.Behaviours
 
         public void RemoveBlock(Vector3 position, Player sender)
         {
-            if (BlockLocations.TryGetValue(position, out BlockParent parent))
+            if (BlockLocations.TryGetValue(position, out BlockParent _))
             {
                 RemoveBlock(BlockLocations[position], sender);
             }
