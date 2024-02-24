@@ -1,4 +1,5 @@
 ﻿using ExitGames.Client.Photon;
+using GorillaCraft.Extensions;
 using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
 using GorillaCraft.Tools;
@@ -14,17 +15,19 @@ using UnityEngine;
 namespace GorillaCraft.Behaviours.Networking
 {
     [DisallowMultipleComponent]
-    public class PlayerSerializer : MonoBehaviourPun, IPhotonViewCallback, IOnPhotonViewPreNetDestroy
+    public class PlayerSerializer : MonoBehaviour, IPhotonViewCallback, IOnPhotonViewPreNetDestroy
     {
         public static PlayerSerializer Local;
 
         private PhotonView View;
         private VRRig Rig;
+
         private readonly List<BlockGeneralInfo> BlockInfo = new();
 
         public void Start()
         {
-            View = GetComponent<PhotonView>();  
+            View = GetComponent<PhotonView>();
+            PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
 
             if (View.IsMine)
             {
@@ -34,8 +37,6 @@ namespace GorillaCraft.Behaviours.Networking
             {
                 View.RPC(nameof(RequestBlocks), View.Owner, PhotonNetwork.LocalPlayer);
             }
-
-            PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
 
             Rig = RigCacheUtils.GetField<VRRig>(View.Owner);
         }
@@ -104,14 +105,12 @@ namespace GorillaCraft.Behaviours.Networking
 
                 foreach (var block in BlockInfo)
                 {
-                    if (blocks.Count < 24)
+                    if (blocks.Count >= 30)
                     {
-                        blocks.Add(JsonConvert.SerializeObject(block, Formatting.None));
-                        continue;
+                        View.RPC(nameof(ServerRecoverBlocks), player, new object[] { blocks.ToArray() });
+                        blocks.Clear();
                     }
 
-                    View.RPC(nameof(ServerRecoverBlocks), player, new object[] { blocks.ToArray() });
-                    blocks.Clear();
                     blocks.Add(JsonConvert.SerializeObject(block, Formatting.None));
                 }
 
@@ -125,7 +124,7 @@ namespace GorillaCraft.Behaviours.Networking
         [PunRPC]
         public void ServerRecoverBlocks(string[] blocks, PhotonMessageInfo info)
         {
-            if (info.photonView.Owner == info.Sender)
+            if (info.IsValid())
             {
                 foreach (string block in blocks)
                 {

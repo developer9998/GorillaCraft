@@ -1,10 +1,11 @@
 ﻿using GorillaCraft.Behaviours.Block;
 using GorillaCraft.Behaviours.Networking;
+using GorillaCraft.Extensions;
 using GorillaCraft.Factories;
 using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
 using GorillaCraft.Sounds;
-using GorillaExtensions;
+using GorillaCraft.Utilities;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
@@ -26,7 +27,7 @@ namespace GorillaCraft.Behaviours
         private List<IBlock> BlockList;
 
         private Dictionary<IBlock, GameObject> BlockDictionary;
-        private GameObject BlockTemplate, ParticleTemplate;
+        private GameObject SolidTemplate, NonsolidTemplate, OtherDevTemplate, ParticleTemplate;
 
         private Dictionary<Type, IDataType> FootstepSound_Cache, InteractionSound_Cache;
 
@@ -60,10 +61,12 @@ namespace GorillaCraft.Behaviours
             InteractionSound_Cache = new Dictionary<Type, IDataType>();
             BlockDictionary = new Dictionary<IBlock, GameObject>();
 
-            BlockTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.BlockName);
+            SolidTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.SolidBlockName);
+            NonsolidTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.NonsolidBlockName);
+            OtherDevTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.OtherDevBlockName);
             ParticleTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.ParticleName);
 
-            async Task<BlockFace> PrepareFace(GameObject currentObject, Material[] materialArray, string name, int materialIndex, BlockFaceInfo info, BlockParent _blockParent)
+            async Task<BlockFace> Solid_PrepareSurface(GameObject currentObject, Material[] materialArray, string name, int materialIndex, BlockFaceInfo info, BlockParent _blockParent)
             {
                 materialArray[materialIndex] = await AssetLoader.LoadAsset<Material>(info.FaceName);
 
@@ -80,25 +83,63 @@ namespace GorillaCraft.Behaviours
                 return blockFace;
             }
 
+            BlockFace NonSolid_PrepareSurface(GameObject currentObject, string name, BlockParent blockParent)
+            {
+                Transform relativeFace = currentObject.transform.Find("Collider/" + name);
+                relativeFace.gameObject.layer = 19;
+                relativeFace.parent.gameObject.layer = 19;
+
+                BlockFace blockFace = relativeFace.gameObject.AddComponent<BlockFace>();
+                blockFace.baseBlock = blockParent;
+
+                return blockFace;
+            }
+
             foreach (IBlock _currentBlock in BlockList)
             {
-                GameObject _currentObject = Instantiate(BlockTemplate);
+                GameObject _currentObject = null;
+                if (_currentBlock.BlockForm != BlockForm.Nonsolid)
+                {
+                    _currentObject = Instantiate(_currentBlock.BlockForm switch
+                    {
+                        BlockForm.Solid_OtherDev => OtherDevTemplate,
+                        _ => SolidTemplate
+                    });
 
-                _currentObject.name = _currentBlock.BlockDefinition;
-                _currentObject.transform.localPosition = Vector3.zero;
+                    _currentObject.name = _currentBlock.BlockDefinition;
+                    _currentObject.transform.localPosition = Vector3.zero;
 
-                MeshRenderer _rendererObject = _currentObject.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
-                Material[] _materialArray = _rendererObject.materials;
+                    MeshRenderer _rendererObject = _currentObject.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
+                    Material[] _materialArray = _rendererObject.materials;
 
-                BlockParent _blockParent = _currentObject.AddComponent<BlockParent>();
-                _blockParent.Back = await PrepareFace(_currentObject, _materialArray, "Back", 0, _currentBlock.Back, _blockParent);
-                _blockParent.Left = await PrepareFace(_currentObject, _materialArray, "Left", 1, _currentBlock.Left, _blockParent);
-                _blockParent.Front = await PrepareFace(_currentObject, _materialArray, "Front", 2, _currentBlock.Front, _blockParent);
-                _blockParent.Right = await PrepareFace(_currentObject, _materialArray, "Right", 3, _currentBlock.Right, _blockParent);
-                _blockParent.Bottom = await PrepareFace(_currentObject, _materialArray, "Bottom", 4, _currentBlock.Down, _blockParent);
-                _blockParent.Top = await PrepareFace(_currentObject, _materialArray, "Top", 5, _currentBlock.Up, _blockParent);
+                    BlockParent _blockParent = _currentObject.AddComponent<BlockParent>();
+                    _blockParent.Back = await Solid_PrepareSurface(_currentObject, _materialArray, "Back", 0, _currentBlock.Back, _blockParent);
+                    _blockParent.Left = await Solid_PrepareSurface(_currentObject, _materialArray, "Left", 1, _currentBlock.Left, _blockParent);
+                    _blockParent.Front = await Solid_PrepareSurface(_currentObject, _materialArray, "Front", 2, _currentBlock.Front, _blockParent);
+                    _blockParent.Right = await Solid_PrepareSurface(_currentObject, _materialArray, "Right", 3, _currentBlock.Right, _blockParent);
+                    _blockParent.Bottom = await Solid_PrepareSurface(_currentObject, _materialArray, "Bottom", 4, _currentBlock.Down, _blockParent);
+                    _blockParent.Top = await Solid_PrepareSurface(_currentObject, _materialArray, "Top", 5, _currentBlock.Up, _blockParent);
 
-                _rendererObject.materials = _materialArray;
+                    _rendererObject.materials = _materialArray;
+                }
+                else
+                {
+                    _currentObject = Instantiate(NonsolidTemplate);
+
+                    _currentObject.name = _currentBlock.BlockDefinition;
+                    _currentObject.transform.localPosition = Vector3.zero;
+
+                    _currentObject.transform.Find("MinecraftDecorSample").GetComponent<MeshRenderer>().material = await AssetLoader.LoadAsset<Material>(_currentBlock.Front.FaceName);
+
+                    BlockParent _blockParent = _currentObject.AddComponent<BlockParent>();
+                    _blockParent.Back = NonSolid_PrepareSurface(_currentObject, "Back", _blockParent);
+                    _blockParent.Left = NonSolid_PrepareSurface(_currentObject, "Left", _blockParent);
+                    _blockParent.Front = NonSolid_PrepareSurface(_currentObject, "Front", _blockParent);
+                    _blockParent.Right = NonSolid_PrepareSurface(_currentObject, "Right", _blockParent);
+                    _blockParent.Bottom = NonSolid_PrepareSurface(_currentObject, "Bottom", _blockParent);
+                    _blockParent.Top = NonSolid_PrepareSurface(_currentObject, "Top", _blockParent);
+                }
+
                 BlockDictionary.Add(_currentBlock, _currentObject);
                 _currentObject.SetActive(false);
             }
@@ -133,30 +174,21 @@ namespace GorillaCraft.Behaviours
             newBlock.transform.eulerAngles = blockEuler;
             newBlock.transform.localScale = blockScale;
 
-            async void PlaySound_Place(IDataType currentPlaceSound)
-            {
-                AudioSource placeSource = newBlock.AddComponent<AudioSource>();
-                string currentSound = string.Concat("Dig_", currentPlaceSound.Name, UnityEngine.Random.Range(1, currentPlaceSound.MaxRange - 1));
-                placeSource.spatialBlend = 1f;
-                placeSource.clip = await AssetLoader.LoadAsset<AudioClip>(currentSound);
-                placeSource.volume = currentPlaceSound.Volume / 4f;
-                placeSource.pitch = currentPlaceSound.Pitch;
-                placeSource.Play();
-                Destroy(placeSource, 4);
-            }
+            if (placeType != BlockPlaceType.Recovery) BlockAudioUtils.PlaySound(AssetLoader, newBlock, GetInteractionType(block.PlaceSoundType));
 
-            if (placeType != BlockPlaceType.Recovery) PlaySound_Place(GetPlaceType(block.PlaceSoundType));
-
-            BlockParent blockParent = newBlock.GetComponent<BlockParent>();
+            BlockParent blockParent = newBlock.GetOrAddComponent<BlockParent>();
             blockParent.Owner = player;
             blockParent.Block = block;
 
-            blockParent.Back.surfaceType = originalParent.Back.surfaceType;
-            blockParent.Left.surfaceType = originalParent.Left.surfaceType;
-            blockParent.Front.surfaceType = originalParent.Front.surfaceType;
-            blockParent.Right.surfaceType = originalParent.Right.surfaceType;
-            blockParent.Bottom.surfaceType = originalParent.Bottom.surfaceType;
-            blockParent.Top.surfaceType = originalParent.Top.surfaceType;
+            if (block.BlockForm != BlockForm.Nonsolid)
+            {
+                blockParent.Back.surfaceType = originalParent.Back.surfaceType;
+                blockParent.Left.surfaceType = originalParent.Left.surfaceType;
+                blockParent.Front.surfaceType = originalParent.Front.surfaceType;
+                blockParent.Right.surfaceType = originalParent.Right.surfaceType;
+                blockParent.Bottom.surfaceType = originalParent.Bottom.surfaceType;
+                blockParent.Top.surfaceType = originalParent.Top.surfaceType;
+            }
 
             BlockLocations.Add(blockPosition, blockParent);
 
@@ -182,48 +214,64 @@ namespace GorillaCraft.Behaviours
 
             BlockLocations.Remove(parent.transform.position);
 
-            async void PlaySound_Destroy(IDataType currentPlaceSound)
-            {
-                AudioSource placeSource = parent.gameObject.GetOrAddComponent<AudioSource>();
-                string currentSound = string.Concat("Dig_", currentPlaceSound.Name, UnityEngine.Random.Range(1, currentPlaceSound.MaxRange - 1));
-                placeSource.spatialBlend = 1f;
-                placeSource.clip = await AssetLoader.LoadAsset<AudioClip>(currentSound);
-                placeSource.volume = currentPlaceSound.Volume / 4f;
-                placeSource.pitch = currentPlaceSound.Pitch;
-                placeSource.Play();
-                Destroy(placeSource, 4);
-            }
-
             if (sender.IsLocal)
             {
                 PlayerSerializer.Local?.DistributeBlock(false, null, parent.transform.position, Vector3.zero, Vector3.zero);
             }
 
-            PlaySound_Destroy(GetPlaceType(parent.Block.DestroySoundType));
+            BlockAudioUtils.PlaySound(AssetLoader, parent.gameObject, GetInteractionType(parent.Block.DestroySoundType));
 
-            MeshRenderer _rendererObject = parent.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
-            Material[] _materialArray = _rendererObject.materials;
-
-            GameObject particles = Instantiate(ParticleTemplate);
-            particles.transform.position = parent.transform.position;
-
-            for (int i = 0; i < _materialArray.Length; i++)
+            if (parent.Block.BlockForm != BlockForm.Nonsolid)
             {
-                Material particleMaterial = new(_materialArray[i])
+                MeshRenderer _rendererObject = parent.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
+                Material[] _materialArray = _rendererObject.materials;
+
+                GameObject particles = Instantiate(ParticleTemplate);
+                particles.transform.position = parent.transform.position;
+
+                for (int i = 0; i < _materialArray.Length; i++)
                 {
-                    mainTextureOffset = new Vector2(UnityEngine.Random.value, UnityEngine.Random.value),
-                    mainTextureScale = Vector2.one / 6f
-                };
+                    Material particleMaterial = new(_materialArray[i])
+                    {
+                        mainTextureOffset = new Vector2(UnityEngine.Random.value, UnityEngine.Random.value),
+                        mainTextureScale = Vector2.one / 6f
+                    };
 
-                Transform particleObj = particles.transform.Find($"Particle ({i + 1})");
+                    Transform particleObj = particles.transform.Find($"Particle ({i + 1})");
 
-                ParticleSystemRenderer particleSystem = particleObj.GetComponent<ParticleSystemRenderer>();
-                particleSystem.material = particleMaterial;
+                    ParticleSystemRenderer particleSystem = particleObj.GetComponent<ParticleSystemRenderer>();
+                    particleSystem.material = particleMaterial;
 
-                particleObj.GetComponent<ParticleSystem>().Play();
+                    particleObj.GetComponent<ParticleSystem>().Play();
+                }
+
+                Destroy(particles, 3);
             }
+            else
+            {
+                Material baseMat = parent.transform.Find("MinecraftDecorSample").GetComponent<MeshRenderer>().material;
 
-            Destroy(particles, 3);
+                GameObject particles = Instantiate(ParticleTemplate);
+                particles.transform.position = parent.transform.position;
+
+                for (int i = 0; i < 6; i++)
+                {
+                    Material particleMaterial = new(baseMat)
+                    {
+                        mainTextureOffset = new Vector2(UnityEngine.Random.value, UnityEngine.Random.value),
+                        mainTextureScale = Vector2.one / 6f
+                    };
+
+                    Transform particleObj = particles.transform.Find($"Particle ({i + 1})");
+
+                    ParticleSystemRenderer particleSystem = particleObj.GetComponent<ParticleSystemRenderer>();
+                    particleSystem.material = particleMaterial;
+
+                    particleObj.GetComponent<ParticleSystem>().Play();
+                }
+
+                Destroy(particles, 3);
+            }
             parent.Destroy();
         }
 
@@ -249,7 +297,7 @@ namespace GorillaCraft.Behaviours
             return newStepType;
         }
 
-        IDataType GetPlaceType(Type placeType)
+        IDataType GetInteractionType(Type placeType)
         {
             // Check to see if we already have a place/remove sound under this type
             if (InteractionSound_Cache.TryGetValue(placeType, out var cachedType)) return cachedType;

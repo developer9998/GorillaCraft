@@ -6,7 +6,7 @@ namespace GorillaCraft.Models
     [Serializable]
     public class BlockGeneralInfo
     {
-        public string Name { get; set; }
+        public string Name;
         public Vector3 Position, Euler, Scale;
     }
 }

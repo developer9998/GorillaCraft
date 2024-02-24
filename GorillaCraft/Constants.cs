@@ -5,7 +5,7 @@
         public const string
             GUID = "dev.gorillacraft",
             Name = "GorillaCraft",
-            Version = "1.0.0.0";
+            Version = "1.0.0.3";
 
         public const string BundleDirectory = "GorillaCraft.Content.devminecraft";
 
@@ -16,7 +16,9 @@
             PageGridName = "UI Parent/Pages/Page (1)";
 
         public const string
-            BlockName = "Block Template",
+            SolidBlockName = "Block_Solid",
+            NonsolidBlockName = "Block_NonSolid",
+            OtherDevBlockName = "Block_TheThing",
             ParticleName = "BlockParticle";
 
         public const int GridTile = 1;

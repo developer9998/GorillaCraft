@@ -16,6 +16,8 @@ namespace GorillaCraft.Behaviours
 
         private Player Player;
 
+        private LayerMask BuildMask, RemoveMask;
+
         private AssetLoader AssetLoader;
         private BlockHandler BlockHandler;
         private List<IBlock> BlockList;
@@ -34,6 +36,11 @@ namespace GorillaCraft.Behaviours
             Initialized = true;
 
             Player = GetComponent<Player>();
+
+            BuildMask = (int)Player.locomotionEnabledLayers;
+            RemoveMask = (int)Player.locomotionEnabledLayers;
+            RemoveMask |= 1 << 19;
+
             AssetLoader = assetLoader;
 
             BlockHandler = blockHandler;
@@ -90,7 +97,7 @@ namespace GorillaCraft.Behaviours
             LineRenderer.startWidth = 0.045f * Mathf.Clamp01(Player.scale);
             LineRenderer.endWidth = 0.045f * Mathf.Clamp01(Player.scale);
 
-            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 25 * Mathf.Clamp01(Player.scale), Player.Instance.locomotionEnabledLayers, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 24 * Mathf.Clamp01(Player.scale), iMode == 0 ? BuildMask : RemoveMask, QueryTriggerInteraction.UseGlobal))
             {
                 LineRenderer.enabled = true;
                 if (!PlaceIndicator.activeSelf && iMode == 0)
@@ -118,10 +125,10 @@ namespace GorillaCraft.Behaviours
                 {
                     if (iMode == 0)
                     {
-                        Vector3 eulerAngles = BlockList[iPlacement].BlockType switch
+                        Vector3 eulerAngles = BlockList[iPlacement].BlockPlacement switch
                         {
-                            BlockBehaviourType.LimitedRotation => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f),
-                            BlockBehaviourType.FullRotation => new Vector3(Mathf.RoundToInt(Player.rightControllerTransform.eulerAngles.x) != 0 ? Mathf.RoundToInt(Player.rightControllerTransform.eulerAngles.x / 90f) * 90 : 0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f),
+                            BlockPlacement.LimitedRotation => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f),
+                            BlockPlacement.FullRotation => new Vector3(Mathf.RoundToInt(Player.rightControllerTransform.eulerAngles.x) != 0 ? Mathf.RoundToInt(Player.rightControllerTransform.eulerAngles.x / 90f) * 90 : 0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f),
                             _ => Vector3.zero,
                         };
 

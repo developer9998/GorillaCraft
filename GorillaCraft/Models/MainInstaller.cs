@@ -1,5 +1,6 @@
 ﻿using GorillaCraft.Behaviours;
-using GorillaCraft.Blocks;
+using GorillaCraft.Blocks.Nonsolid;
+using GorillaCraft.Blocks.Solid;
 using GorillaCraft.Factories;
 using GorillaCraft.Interfaces;
 using GorillaLocomotion;
@@ -35,33 +36,43 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<GlassBlock>().AsSingle();
 
             Container.Bind<IBlock>().To<MossCobblestoneBlock>().AsSingle();
+            Container.Bind<IBlock>().To<SaplingBlock>().AsSingle();
+            Container.Bind<IBlock>().To<DandelionBlock>().AsSingle();
+            Container.Bind<IBlock>().To<PoppyBlock>().AsSingle();
+            Container.Bind<IBlock>().To<BrownMushroomBlock>().AsSingle();
+            Container.Bind<IBlock>().To<RedMushroomBlock>().AsSingle();
             Container.Bind<IBlock>().To<SandBlock>().AsSingle();
             Container.Bind<IBlock>().To<GravelBlock>().AsSingle();
             Container.Bind<IBlock>().To<SpongeBlock>().AsSingle();
+
             Container.Bind<IBlock>().To<RedWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<OrangeWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<YellowWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<LimeWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<GreenWoolBlock>().AsSingle();
-
             Container.Bind<IBlock>().To<CyanWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<LightBlueWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<BlueWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<PurpleWoolBlock>().AsSingle();
+
             Container.Bind<IBlock>().To<MagentaWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<PinkWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<BlackWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<GreyWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<LightGreyWoolBlock>().AsSingle();
-
             Container.Bind<IBlock>().To<WhiteWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<CoalOreBlock>().AsSingle();
             Container.Bind<IBlock>().To<IronOreBlock>().AsSingle();
             Container.Bind<IBlock>().To<GoldOreBlock>().AsSingle();
+
+            Container.Bind<IBlock>().To<DiamondOreBlock>().AsSingle();
             Container.Bind<IBlock>().To<IronBlock>().AsSingle();
             Container.Bind<IBlock>().To<GoldBlock>().AsSingle();
+            Container.Bind<IBlock>().To<DiamondBlock>().AsSingle();
+            Container.Bind<IBlock>().To<CraftingBenchBlock>().AsSingle();
             Container.Bind<IBlock>().To<BookshelfBlock>().AsSingle();
             Container.Bind<IBlock>().To<TNTBlock>().AsSingle();
+            Container.Bind<IBlock>().To<MobSpawnerBlock>().AsSingle();
             Container.Bind<IBlock>().To<ObsidianBlock>().AsSingle();
         }
     }
