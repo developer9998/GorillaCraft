@@ -1,5 +1,4 @@
 ﻿using ExitGames.Client.Photon;
-using GorillaCraft.Extensions;
 using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
 using GorillaCraft.Tools;
@@ -35,7 +34,7 @@ namespace GorillaCraft.Behaviours.Networking
             }
             else
             {
-                View.RPC(nameof(RequestBlocks), View.Owner, PhotonNetwork.LocalPlayer);
+                MultiplayerManager.RequestBlocks(View.Owner);
             }
 
             Rig = RigCacheUtils.GetField<VRRig>(View.Owner);
@@ -67,7 +66,7 @@ namespace GorillaCraft.Behaviours.Networking
 
         public void OnEvent(EventData data)
         {
-            if (data.Code != MultiplayerManager.BlockInteractionCode && data.Code != MultiplayerManager.SurfaceTapCode) return;
+            if (data.Code != MultiplayerManager.BlockInteractionCode && data.Code != MultiplayerManager.SurfaceTapCode && data.Code != MultiplayerManager.RequestBlocksCode && data.Code != MultiplayerManager.SendBlocksCode) return;
 
             var sender = PhotonNetwork.CurrentRoom.GetPlayer(data.Sender);
             var eventData = (object[])data.CustomData;
@@ -94,42 +93,40 @@ namespace GorillaCraft.Behaviours.Networking
                     GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlayTapSound(Rig, surfaceType, (bool)eventData[1]);
                 }
             }
-        }
-
-        [PunRPC]
-        public void RequestBlocks(Player player, PhotonMessageInfo info)
-        {
-            if (View.IsMine)
+            else if (data.Code == MultiplayerManager.RequestBlocksCode)
             {
-                List<string> blocks = new();
-
-                foreach (var block in BlockInfo)
+                if (View.IsMine)
                 {
-                    if (blocks.Count >= 30)
+                    Player player = (Player)eventData[0];
+                    List<string> blocks = new();
+
+                    foreach (var block in BlockInfo)
                     {
-                        View.RPC(nameof(ServerRecoverBlocks), player, new object[] { blocks.ToArray() });
-                        blocks.Clear();
+                        if (blocks.Count >= 8)
+                        {
+                            MultiplayerManager.SendBlocks(blocks.ToArray(), player);
+                            blocks.Clear();
+                        }
+
+                        blocks.Add(JsonConvert.SerializeObject(block, Formatting.None));
                     }
 
-                    blocks.Add(JsonConvert.SerializeObject(block, Formatting.None));
-                }
-
-                if (blocks.Count > 0)
-                {
-                    View.RPC(nameof(ServerRecoverBlocks), player, new object[] { blocks.ToArray() });
+                    if (blocks.Count > 0)
+                    {
+                        MultiplayerManager.SendBlocks(blocks.ToArray(), player);
+                    }
                 }
             }
-        }
-
-        [PunRPC]
-        public void ServerRecoverBlocks(string[] blocks, PhotonMessageInfo info)
-        {
-            if (info.IsValid())
+            else if (data.Code == MultiplayerManager.SendBlocksCode)
             {
-                foreach (string block in blocks)
+                if (sender != View.Owner)
                 {
-                    BlockGeneralInfo blockInfo = JsonConvert.DeserializeObject<BlockGeneralInfo>(block);
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, blockInfo.Name, blockInfo.Position, blockInfo.Euler, blockInfo.Scale, info.Sender);
+                    string[] blocks = (string[])eventData[0];
+                    foreach (string block in blocks)
+                    {
+                        BlockGeneralInfo blockInfo = JsonConvert.DeserializeObject<BlockGeneralInfo>(block);
+                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, blockInfo.Name, blockInfo.Position, blockInfo.Euler, blockInfo.Scale, sender);
+                    }
                 }
             }
         }

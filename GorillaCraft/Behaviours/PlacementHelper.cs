@@ -24,11 +24,10 @@ namespace GorillaCraft.Behaviours
 
         private List<IBlock> BlockList;
 
-        private GameObject PlaceIndicator, DestroyIndicator;
+        private GameObject Crosshair, PlaceIndicator, DestroyIndicator;
         private LineRenderer LineRenderer;
 
-        internal int Mode;
-        internal int Placement { get; set; }
+        internal int Mode, Placement;
 
         private bool IndexActivated;
 
@@ -54,10 +53,14 @@ namespace GorillaCraft.Behaviours
             linePrefab.transform.localPosition = Vector3.zero;
             LineRenderer = linePrefab.GetComponent<LineRenderer>();
 
+            Crosshair = Instantiate(await AssetLoader.LoadAsset<GameObject>("Crosshair"));
+            Crosshair.transform.localPosition = Vector3.zero;
+            Crosshair.SetActive(false);
+
             PlaceIndicator = Instantiate(await AssetLoader.LoadAsset<GameObject>("BlockIndicator"));
             PlaceIndicator.transform.localPosition = Vector3.zero;
 
-            DestroyIndicator = Instantiate(await AssetLoader.LoadAsset<GameObject>("BlockIndicatorRed"));
+            DestroyIndicator = Instantiate(await AssetLoader.LoadAsset<GameObject>("BlockRemovalIndicator"));
             DestroyIndicator.SetActive(false);
             DestroyIndicator.transform.localPosition = Vector3.zero;
         }
@@ -74,37 +77,46 @@ namespace GorillaCraft.Behaviours
 
             if (Mode == 2 || !Main.isActivated)
             {
-                if (PlaceIndicator.activeSelf || DestroyIndicator.activeSelf)
+                if (PlaceIndicator.activeSelf || DestroyIndicator.activeSelf || Crosshair.activeSelf)
                 {
                     PlaceIndicator.SetActive(false);
                     DestroyIndicator.SetActive(false);
+                    Crosshair.SetActive(false);
                 }
                 LineRenderer.enabled = false;
                 return;
             }
 
-
             LineRenderer.SetPosition(0, Player.rightControllerTransform.position);
-            LineRenderer.material.color = Mode == 0 ? new Color(0, 0.8245816f, 1, 0.2f) : new Color(1, 0, 0, 0.2f);
 
             // Adjust the scale for the preview objects based on the player's scale
             PlaceIndicator.transform.localScale = Vector3.one * Mathf.Clamp01(Player.scale);
-            DestroyIndicator.transform.localScale = Vector3.one * Mathf.Clamp01(Player.scale);
-            LineRenderer.startWidth = 0.045f * Mathf.Clamp01(Player.scale);
-            LineRenderer.endWidth = 0.045f * Mathf.Clamp01(Player.scale);
+            Crosshair.transform.localScale = Vector3.one * 0.04458661f * Mathf.Clamp01(Player.scale);
+            LineRenderer.startWidth = 0.007f * Mathf.Clamp01(Player.scale);
+            LineRenderer.endWidth = 0.007f * Mathf.Clamp01(Player.scale);
 
             if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 24 * Mathf.Clamp01(Player.scale), Mode == 0 ? BuildMask : RemoveMask, QueryTriggerInteraction.UseGlobal))
             {
                 LineRenderer.enabled = true;
+                if (!Crosshair.activeSelf) Crosshair.SetActive(true);
+
                 if (!PlaceIndicator.activeSelf && Mode == 0)
                 {
                     PlaceIndicator.SetActive(true);
                     DestroyIndicator.SetActive(false);
                 }
-                if (!DestroyIndicator.activeSelf && Mode == 1)
+
+                bool blockExists = hit.transform.GetComponent<BlockFace>() != null;
+                if (Mode == 1 && blockExists && !DestroyIndicator.activeSelf)
                 {
                     PlaceIndicator.SetActive(false);
                     DestroyIndicator.SetActive(true);
+                    DestroyIndicator.transform.localScale = hit.transform.GetComponent<BlockFace>().baseBlock.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(Player.scale)));
+                }
+                else if (Mode == 1 && !blockExists)
+                {
+                    PlaceIndicator.SetActive(false);
+                    DestroyIndicator.SetActive(false);
                 }
 
                 Vector3 adjustedPosition = new(hit.point.x.RoundToInt(Player.scale), hit.point.y.RoundToInt(Player.scale), hit.point.z.RoundToInt(Player.scale));
@@ -112,9 +124,10 @@ namespace GorillaCraft.Behaviours
 
                 PlaceIndicator.transform.position = adjustedPosition;
                 DestroyIndicator.transform.position = adjustedPosition;
-                DestroyIndicator.transform.localScale = hit.transform.GetComponent<BlockFace>() != null ? hit.transform.GetComponent<BlockFace>().baseBlock.transform.localScale + Vector3.one * 0.025f : DestroyIndicator.transform.localScale;
 
-                LineRenderer.SetPosition(1, PlaceIndicator.transform.position);
+                LineRenderer.SetPosition(1, hit.point);
+                Crosshair.transform.position = hit.point;
+                Crosshair.transform.up = hit.normal;
 
                 bool triggerPressed = ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f;
                 if (triggerPressed && triggerPressed != IndexActivated)
@@ -144,6 +157,7 @@ namespace GorillaCraft.Behaviours
 
             PlaceIndicator.SetActive(false);
             DestroyIndicator.SetActive(false);
+            Crosshair.SetActive(false);
             LineRenderer.enabled = false;
         }
     }

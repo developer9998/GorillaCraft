@@ -5,7 +5,7 @@
         public const string
             GUID = "dev.gorillacraft",
             Name = "GorillaCraft",
-            Version = "1.0.0.4";
+            Version = "1.0.0.5";
 
         public const string BundleDirectory = "GorillaCraft.Content.devminecraft";
 

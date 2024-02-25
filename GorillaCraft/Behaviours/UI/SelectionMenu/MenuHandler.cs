@@ -16,7 +16,7 @@ namespace GorillaCraft.Behaviours.UI.SelectionMenu
 
         private const int
             _minimumPage = 0,
-            _maximumPage = 4;
+            _maximumPage = 5;
         private int _currentPage = 0;
 
         public Vector3

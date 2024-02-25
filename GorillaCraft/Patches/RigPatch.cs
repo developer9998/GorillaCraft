@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace GorillaCraft.Patches
 {
     [HarmonyPatch]
-    public class RigPatches
+    public class RigPatch
     {
         public static async void AddPatch(Player player, VRRig vrrig)
         {
@@ -25,12 +25,6 @@ namespace GorillaCraft.Patches
                 }
             }
             photonView.gameObject.AddComponent<PlayerSerializer>();
-        }
-
-        public static void RemovePatch(Player player, VRRig vrrig)
-        {
-            //PhotonView photonView = RigCacheUtils.GetField<PhotonView>(player);
-            //Object.Destroy(photonView.GetComponent<PlayerSerializer>());
         }
     }
 }

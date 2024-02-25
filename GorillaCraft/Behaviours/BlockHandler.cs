@@ -72,7 +72,7 @@ namespace GorillaCraft.Behaviours
                 materialArray[materialIndex] = await AssetLoader.LoadAsset<Material>(info.FaceName);
 
                 Transform relativeFace = currentObject.transform.Find("Collider/" + name);
-                relativeFace.GetComponent<Collider>().material = info.IsSlippery ? Slippery : relativeFace.GetComponent<Collider>().material;
+                relativeFace.GetComponent<Collider>().material = _blockParent.Block.GetType() == typeof(IceBlock) ? Slippery : relativeFace.GetComponent<Collider>().material;
 
                 BlockFace blockFace = relativeFace.gameObject.AddComponent<BlockFace>();
                 blockFace.baseBlock = _blockParent;

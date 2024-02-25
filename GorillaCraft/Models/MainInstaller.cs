@@ -103,17 +103,27 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<DiamondBlock>().AsSingle();
             Container.Bind<IBlock>().To<CraftingBenchBlock>().AsSingle();
             Container.Bind<IBlock>().To<FurnaceBlock>().AsSingle();
-            Container.Bind<IBlock>().To<MobSpawnerBlock>().AsSingle();
+            Container.Bind<IBlock>().To<JukeboxBlock>().AsSingle();
 
+            Container.Bind<IBlock>().To<MobSpawnerBlock>().AsSingle();
             Container.Bind<IBlock>().To<BookshelfBlock>().AsSingle();
             Container.Bind<IBlock>().To<TNTBlock>().AsSingle();
             Container.Bind<IBlock>().To<ObsidianBlock>().AsSingle();
+            Container.Bind<IBlock>().To<BedrockBlock>().AsSingle();
+            Container.Bind<IBlock>().To<OakSaplingBlock>().AsSingle();
+            Container.Bind<IBlock>().To<SpruceSaplingBlock>().AsSingle();
+            Container.Bind<IBlock>().To<BirchSaplingBlock>().AsSingle();
+            Container.Bind<IBlock>().To<JungleSaplingBlock>().AsSingle();
+
+            Container.Bind<IBlock>().To<AcaciaSaplingBlock>().AsSingle();
+            Container.Bind<IBlock>().To<DarkOakSaplingBlock>().AsSingle();
             Container.Bind<IBlock>().To<BushBlock>().AsSingle();
-            Container.Bind<IBlock>().To<SaplingBlock>().AsSingle();
             Container.Bind<IBlock>().To<PoppyBlock>().AsSingle();
             Container.Bind<IBlock>().To<DandelionBlock>().AsSingle();
             Container.Bind<IBlock>().To<RedMushroomBlock>().AsSingle();
             Container.Bind<IBlock>().To<BrownMushroomBlock>().AsSingle();
+            //Container.Bind<IBlock>().To<>().AsSingle();
+            //Container.Bind<IBlock>().To<>().AsSingle();
         }
     }
 }
