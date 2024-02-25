@@ -1,5 +1,6 @@
 ﻿using GorillaCraft.Behaviours.Block;
 using GorillaCraft.Behaviours.Networking;
+using GorillaCraft.Blocks.Solid;
 using GorillaCraft.Extensions;
 using GorillaCraft.Factories;
 using GorillaCraft.Interfaces;
@@ -78,7 +79,7 @@ namespace GorillaCraft.Behaviours
                 blockFace.surfaceType = info.FaceSurfaceType;
 
                 GorillaSurfaceOverride surface = relativeFace.gameObject.AddComponent<GorillaSurfaceOverride>();
-                surface.overrideIndex = info.FaceSurfaceType == typeof(Interaction_Snow) ? 32 : 0;
+                surface.overrideIndex = info.FaceSurfaceType == typeof(Surface_Snow) ? 32 : (_blockParent.Block.GetType() == typeof(IceBlock) ? 59 : 0);
 
                 return blockFace;
             }
@@ -113,6 +114,7 @@ namespace GorillaCraft.Behaviours
                     Material[] _materialArray = _rendererObject.materials;
 
                     BlockParent _blockParent = _currentObject.AddComponent<BlockParent>();
+                    _blockParent.Block = _currentBlock;
                     _blockParent.Back = await Solid_PrepareSurface(_currentObject, _materialArray, "Back", 0, _currentBlock.Back, _blockParent);
                     _blockParent.Left = await Solid_PrepareSurface(_currentObject, _materialArray, "Left", 1, _currentBlock.Left, _blockParent);
                     _blockParent.Front = await Solid_PrepareSurface(_currentObject, _materialArray, "Front", 2, _currentBlock.Front, _blockParent);
@@ -191,18 +193,14 @@ namespace GorillaCraft.Behaviours
             }
 
             BlockLocations.Add(blockPosition, blockParent);
-
-            if (placeType == BlockPlaceType.Local)
-            {
-                PlayerSerializer.Local?.DistributeBlock(true, block, blockPosition, blockEuler, blockScale);
-            }
+            if (placeType == BlockPlaceType.Local) PlayerSerializer.Local?.DistributeBlock(true, block, blockPosition, blockEuler, blockScale);
 
             return true;
         }
 
         public void RemoveBlock(Vector3 position, Player sender)
         {
-            if (BlockLocations.TryGetValue(position, out BlockParent _))
+            if (BlockLocations.ContainsKey(position))
             {
                 RemoveBlock(BlockLocations[position], sender);
             }

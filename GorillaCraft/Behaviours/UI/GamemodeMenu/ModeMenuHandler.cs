@@ -60,7 +60,7 @@ namespace GorillaCraft.Behaviours.UI.GamemodeMenu
             source.PlayOneShot(source.clip);
 
             _currentModeIndex = _modeItemCollection[sender];
-            _placementHelper.SetBuildMode(_currentModeIndex);
+            _placementHelper.Mode = _currentModeIndex;
             Redraw();
         }
     }

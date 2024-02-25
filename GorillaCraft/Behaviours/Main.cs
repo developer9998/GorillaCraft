@@ -8,6 +8,8 @@ namespace GorillaCraft.Behaviours
 {
     public class Main : MonoBehaviour, IInitializable
     {
+        internal bool isActivated;
+
         private PlacementHelper PlacementHelper;
         private AssetLoader AssetLoader;
 
@@ -25,7 +27,7 @@ namespace GorillaCraft.Behaviours
 
         public async void Initialize()
         {
-            Plugin.RoomChanged += OnRoomUpdated;
+            Plugin.Allowed.AddCallback(OnRoomEntered);
 
             await AssetLoader.LoadAsset<GameObject>("ItemSelector");
             await AssetLoader.LoadAsset<GameObject>("GamemodeSelector");
@@ -52,7 +54,7 @@ namespace GorillaCraft.Behaviours
         {
             if (!MenuHandler_Mode || !MenuHandler) return;
 
-            if (!Plugin.InRoom)
+            if (!isActivated)
             {
                 MenuHandler_Mode.gameObject.SetActive(false);
                 MenuHandler.gameObject.SetActive(false);
@@ -68,26 +70,23 @@ namespace GorillaCraft.Behaviours
             else if (!buttonHeld && buttonHeld != ModeBindActivated)
             {
                 MenuHandler_Mode.gameObject.SetActive(false);
-                MenuHandler.gameObject.SetActive(PlacementHelper.GetBuildMode() != 2);
+                MenuHandler.gameObject.SetActive(PlacementHelper.Mode != 2);
             }
             ModeBindActivated = buttonHeld;
         }
 
-        private void OnRoomUpdated(bool inRoom)
+        private void OnRoomEntered(bool state)
         {
-            Action action = inRoom ? OnJoinRoom : OnLeaveRoom;
-            action.Invoke();
-        }
-
-        private void OnJoinRoom()
-        {
-            MenuHandler.gameObject.SetActive(PlacementHelper.GetBuildMode() != 2);
-        }
-
-        private void OnLeaveRoom()
-        {
-            MenuHandler_Mode.gameObject.SetActive(false);
-            MenuHandler.gameObject.SetActive(false);
+            isActivated = state;
+            if (isActivated)
+            {
+                MenuHandler.gameObject.SetActive(PlacementHelper.Mode != 2);
+            }
+            else
+            {
+                MenuHandler_Mode.gameObject.SetActive(false);
+                MenuHandler.gameObject.SetActive(false);
+            }
         }
     }
 }

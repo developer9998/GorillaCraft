@@ -1,0 +1,24 @@
+﻿using GorillaCraft.Interfaces;
+using GorillaCraft.Models;
+using GorillaCraft.Sounds;
+using System;
+
+namespace GorillaCraft.Blocks.Solid
+{
+    public class JukeboxBlock : IBlock
+    {
+        public BlockFaceInfo Front => new("JukeboxSide", typeof(Surface_Default));
+        public BlockFaceInfo Left => new("JukeboxSide", typeof(Surface_Default));
+        public BlockFaceInfo Back => new("JukeboxSide", typeof(Surface_Default));
+        public BlockFaceInfo Right => new("JukeboxSide", typeof(Surface_Default));
+        public BlockFaceInfo Up => new("JukeboxTop", typeof(Surface_Default));
+        public BlockFaceInfo Down => new("JukeboxSide", typeof(Surface_Default));
+
+        public Type PlaceSoundType => typeof(Interaction_Default);
+        public Type DestroySoundType => typeof(Interaction_Default);
+
+        public string BlockDefinition => "Jukebox";
+        public BlockForm BlockForm => BlockForm.Solid;
+        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+    }
+}

@@ -5,21 +5,24 @@ using GorillaCraft.Patches;
 using HarmonyLib;
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using Utilla;
 
 namespace GorillaCraft
 {
-    [ModdedGamemode, BepInPlugin(Constants.GUID, Constants.Name, Constants.Version), BepInIncompatibility("dev.devminecraftinternal")]
+    // Methods are made asynchronous to avoid potential decompilations (I've never heard a single cheater utter the word "ilspy" shut up)
+    [ModdedGamemode, BepInPlugin(Constants.GUID, Constants.Name, Constants.Version), BepInIncompatibility("dev.devminecraftinternal"), BepInIncompatibility("org.iidk.gorillatag.iimenu")]
     public class Plugin : BaseUnityPlugin
     {
-        public static bool InRoom;
-        public static event Action<bool> RoomChanged;
+        public static Watchable<bool> Allowed { get; private set; }
 
         Assembly GTAssembly => typeof(GorillaTagger).Assembly;
         Type RigPatchType => typeof(RigPatches);
 
-        public void Awake()
+        public async void Awake()
         {
+            Allowed = new Watchable<bool>();
+
             Zenjector.Install<MainInstaller>().OnProject().WithConfig(Config).WithLog(Logger);
 
             Harmony harmony = new(Constants.GUID);
@@ -31,17 +34,15 @@ namespace GorillaCraft
         }
 
         [ModdedGamemodeJoin]
-        public void OnJoin()
+        public async void OnJoin()
         {
-            InRoom = true;
-            RoomChanged?.Invoke(true);
+            Allowed.value = true;
         }
 
         [ModdedGamemodeLeave]
-        public void OnLeave()
+        public async void OnLeave()
         {
-            InRoom = false;
-            RoomChanged?.Invoke(false);
+            Allowed.value = false;  
         }
     }
 }

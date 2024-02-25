@@ -18,19 +18,22 @@ namespace GorillaCraft.Behaviours
 
         private LayerMask BuildMask, RemoveMask;
 
+        private Main Main;
         private AssetLoader AssetLoader;
         private BlockHandler BlockHandler;
+
         private List<IBlock> BlockList;
 
         private GameObject PlaceIndicator, DestroyIndicator;
         private LineRenderer LineRenderer;
 
-        private int iMode = 0, iPlacement = 0;
+        internal int Mode;
+        internal int Placement { get; set; }
 
         private bool IndexActivated;
 
         [Inject]
-        public async void Construct(AssetLoader assetLoader, BlockHandler blockHandler, List<IBlock> blockList)
+        public async void Construct(Main main, AssetLoader assetLoader, BlockHandler blockHandler, List<IBlock> blockList)
         {
             if (Initialized) return;
             Initialized = true;
@@ -41,9 +44,10 @@ namespace GorillaCraft.Behaviours
             RemoveMask = (int)Player.locomotionEnabledLayers;
             RemoveMask |= 1 << 19;
 
+            Main = main;
             AssetLoader = assetLoader;
-
             BlockHandler = blockHandler;
+
             BlockList = blockList;
 
             GameObject linePrefab = Instantiate(await AssetLoader.LoadAsset<GameObject>("lineRendererExample"));
@@ -58,25 +62,17 @@ namespace GorillaCraft.Behaviours
             DestroyIndicator.transform.localPosition = Vector3.zero;
         }
 
-        public int GetBuildMode() => iMode;
-
-        public void SetBuildMode(int modeIndex)
-        {
-            iMode = modeIndex;
-            Update();
-        }
-
         public IBlock SetBlock(int blockIndex)
         {
-            iPlacement = BlockList.Count - 1 < blockIndex ? 0 : blockIndex;
-            return BlockList[iPlacement];
+            Placement = BlockList.Count - 1 < blockIndex ? 0 : blockIndex;
+            return BlockList[Placement];
         }
 
         public void Update()
         {
             if (Player == null || PlaceIndicator == null || LineRenderer == null) return;
 
-            if (iMode == 2 || !Plugin.InRoom)
+            if (Mode == 2 || !Main.isActivated)
             {
                 if (PlaceIndicator.activeSelf || DestroyIndicator.activeSelf)
                 {
@@ -89,7 +85,7 @@ namespace GorillaCraft.Behaviours
 
 
             LineRenderer.SetPosition(0, Player.rightControllerTransform.position);
-            LineRenderer.material.color = iMode == 0 ? new Color(0, 0.8245816f, 1, 0.2f) : new Color(1, 0, 0, 0.2f);
+            LineRenderer.material.color = Mode == 0 ? new Color(0, 0.8245816f, 1, 0.2f) : new Color(1, 0, 0, 0.2f);
 
             // Adjust the scale for the preview objects based on the player's scale
             PlaceIndicator.transform.localScale = Vector3.one * Mathf.Clamp01(Player.scale);
@@ -97,22 +93,22 @@ namespace GorillaCraft.Behaviours
             LineRenderer.startWidth = 0.045f * Mathf.Clamp01(Player.scale);
             LineRenderer.endWidth = 0.045f * Mathf.Clamp01(Player.scale);
 
-            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 24 * Mathf.Clamp01(Player.scale), iMode == 0 ? BuildMask : RemoveMask, QueryTriggerInteraction.UseGlobal))
+            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 24 * Mathf.Clamp01(Player.scale), Mode == 0 ? BuildMask : RemoveMask, QueryTriggerInteraction.UseGlobal))
             {
                 LineRenderer.enabled = true;
-                if (!PlaceIndicator.activeSelf && iMode == 0)
+                if (!PlaceIndicator.activeSelf && Mode == 0)
                 {
                     PlaceIndicator.SetActive(true);
                     DestroyIndicator.SetActive(false);
                 }
-                if (!DestroyIndicator.activeSelf && iMode == 1)
+                if (!DestroyIndicator.activeSelf && Mode == 1)
                 {
                     PlaceIndicator.SetActive(false);
                     DestroyIndicator.SetActive(true);
                 }
 
                 Vector3 adjustedPosition = new(hit.point.x.RoundToInt(Player.scale), hit.point.y.RoundToInt(Player.scale), hit.point.z.RoundToInt(Player.scale));
-                adjustedPosition = iMode == 1 && hit.transform.GetComponent<BlockFace>() != null ? hit.transform.GetComponent<BlockFace>().baseBlock.transform.position : adjustedPosition;
+                adjustedPosition = Mode == 1 && hit.transform.GetComponent<BlockFace>() != null ? hit.transform.GetComponent<BlockFace>().baseBlock.transform.position : adjustedPosition;
 
                 PlaceIndicator.transform.position = adjustedPosition;
                 DestroyIndicator.transform.position = adjustedPosition;
@@ -123,16 +119,16 @@ namespace GorillaCraft.Behaviours
                 bool triggerPressed = ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f;
                 if (triggerPressed && triggerPressed != IndexActivated)
                 {
-                    if (iMode == 0)
+                    if (Mode == 0)
                     {
-                        Vector3 eulerAngles = BlockList[iPlacement].BlockPlacement switch
+                        Vector3 eulerAngles = BlockList[Placement].BlockPlacement switch
                         {
-                            BlockPlacement.LimitedRotation => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f),
+                            BlockPlacement.LimitedRotation => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90) - 90 : 0, 0f),
                             BlockPlacement.FullRotation => new Vector3(Mathf.RoundToInt(Player.rightControllerTransform.eulerAngles.x) != 0 ? Mathf.RoundToInt(Player.rightControllerTransform.eulerAngles.x / 90f) * 90 : 0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f),
                             _ => Vector3.zero,
                         };
 
-                        BlockHandler.PlaceBlock(BlockPlaceType.Local, BlockList[iPlacement].GetType().Name, PlaceIndicator.transform.position, eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer);
+                        BlockHandler.PlaceBlock(BlockPlaceType.Local, BlockList[Placement].GetType().Name, PlaceIndicator.transform.position, eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer);
                         IndexActivated = triggerPressed;
                         return;
                     }
