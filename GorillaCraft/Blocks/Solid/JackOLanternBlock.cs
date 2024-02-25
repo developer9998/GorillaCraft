@@ -17,7 +17,7 @@ namespace GorillaCraft.Blocks.Solid
         public Type PlaceSoundType => typeof(Interaction_Wood);
         public Type DestroySoundType => typeof(Interaction_Wood);
 
-        public string BlockDefinition => "Jack O' Lantern";
+        public string BlockDefinition => "Jack o'Lantern";
         public BlockForm BlockForm => BlockForm.Solid;
         public BlockPlacement BlockPlacement => BlockPlacement.LimitedRotation;
     }

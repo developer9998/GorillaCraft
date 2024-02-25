@@ -17,7 +17,7 @@ namespace GorillaCraft.Blocks.Solid
         public Type PlaceSoundType => typeof(Interaction_Default);
         public Type DestroySoundType => typeof(Interaction_Default);
 
-        public string BlockDefinition => "Redstone Block";
+        public string BlockDefinition => "Block of Redstone";
         public BlockForm BlockForm => BlockForm.Solid;
         public BlockPlacement BlockPlacement => BlockPlacement.Default;
     }
