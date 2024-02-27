@@ -2,8 +2,6 @@
 using GorillaCraft.Models;
 using GorillaCraft.Sounds;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GorillaCraft.Blocks.Solid
 {
@@ -21,6 +19,6 @@ namespace GorillaCraft.Blocks.Solid
 
         public string BlockDefinition => "Crafting Table";
         public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.LimitedRotation;
+        public BlockPlacement BlockPlacement => BlockPlacement.VerticalRotation_90;
     }
 }

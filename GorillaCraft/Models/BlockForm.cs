@@ -3,7 +3,7 @@
     public enum BlockForm
     {
         Solid,
-        Solid_OtherDev,
-        Nonsolid
+        DevSpawner,
+        Decoration
     }
 }

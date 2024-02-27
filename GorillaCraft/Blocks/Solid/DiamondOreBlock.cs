@@ -2,8 +2,6 @@
 using GorillaCraft.Models;
 using GorillaCraft.Sounds;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GorillaCraft.Blocks.Solid
 {

@@ -7,6 +7,7 @@ using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
 using GorillaCraft.Sounds;
 using GorillaCraft.Utilities;
+using HarmonyLib;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
@@ -99,11 +100,11 @@ namespace GorillaCraft.Behaviours
             foreach (IBlock _currentBlock in BlockList)
             {
                 GameObject _currentObject = null;
-                if (_currentBlock.BlockForm != BlockForm.Nonsolid)
+                if (_currentBlock.BlockForm != BlockForm.Decoration)
                 {
                     _currentObject = Instantiate(_currentBlock.BlockForm switch
                     {
-                        BlockForm.Solid_OtherDev => OtherDevTemplate,
+                        BlockForm.DevSpawner => OtherDevTemplate,
                         _ => SolidTemplate
                     });
 
@@ -182,7 +183,7 @@ namespace GorillaCraft.Behaviours
             blockParent.Owner = player;
             blockParent.Block = block;
 
-            if (block.BlockForm != BlockForm.Nonsolid)
+            if (block.BlockForm != BlockForm.Decoration)
             {
                 blockParent.Back.surfaceType = originalParent.Back.surfaceType;
                 blockParent.Left.surfaceType = originalParent.Left.surfaceType;
@@ -190,10 +191,20 @@ namespace GorillaCraft.Behaviours
                 blockParent.Right.surfaceType = originalParent.Right.surfaceType;
                 blockParent.Bottom.surfaceType = originalParent.Bottom.surfaceType;
                 blockParent.Top.surfaceType = originalParent.Top.surfaceType;
+
+                if (block.BlockForm == BlockForm.DevSpawner)
+                {
+                    RngObject randomAnim = new(1, 7);
+                    randomAnim.Out(value => newBlock.transform.Find("Other Dev Container/metarig").GetComponent<Animator>().Play(string.Concat("Other Dev ", value)));
+                    randomAnim.Dispose();
+                }
             }
 
             BlockLocations.Add(blockPosition, blockParent);
-            if (placeType == BlockPlaceType.Local) PlayerSerializer.Local?.DistributeBlock(true, block, blockPosition, blockEuler, blockScale);
+            if (placeType == BlockPlaceType.Local)
+            {
+                PlayerSerializer.Local?.DistributeBlock(true, block, blockPosition, blockEuler, blockScale);
+            }
 
             return true;
         }
@@ -219,7 +230,7 @@ namespace GorillaCraft.Behaviours
 
             BlockAudioUtils.PlaySound(AssetLoader, parent.gameObject, GetInteractionType(parent.Block.DestroySoundType));
 
-            if (parent.Block.BlockForm != BlockForm.Nonsolid)
+            if (parent.Block.BlockForm != BlockForm.Decoration)
             {
                 MeshRenderer _rendererObject = parent.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
                 Material[] _materialArray = _rendererObject.materials;
@@ -309,38 +320,16 @@ namespace GorillaCraft.Behaviours
         {
             base.OnLeftRoom();
 
-            foreach (KeyValuePair<Vector3, BlockParent> blockData in BlockLocations)
-            {
-                try
-                {
-                    blockData.Value?.Destroy();
-                }
-                catch
-                {
-
-                }
-            }
-
-            BlockLocations = new();
+            BlockLocations.Where(data => data.Value != null).Do(data => data.Value.Destroy());
+            BlockLocations.Clear();
         }
 
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
             base.OnPlayerLeftRoom(otherPlayer);
 
-            foreach (KeyValuePair<Vector3, BlockParent> blockData in BlockLocations.Where(data => data.Value.Owner == otherPlayer))
-            {
-                try
-                {
-                    blockData.Value?.Destroy();
-                }
-                catch
-                {
-
-                }
-            }
-
-            BlockLocations = BlockLocations.Where(data => data.Value != null).ToDictionary(x => x.Key, x => x.Value);
+            BlockLocations.Where(data => data.Value.Owner == otherPlayer).Do(data => data.Value.Destroy());
+            BlockLocations = BlockLocations.Where(data => data.Value.Owner != otherPlayer).ToDictionary(x => x.Key, x => x.Value);
         }
     }
 }

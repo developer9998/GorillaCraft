@@ -19,6 +19,6 @@ namespace GorillaCraft.Blocks.Solid
 
         public string BlockDefinition => "Pumpkin";
         public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.LimitedRotation;
+        public BlockPlacement BlockPlacement => BlockPlacement.VerticalRotation_90;
     }
 }

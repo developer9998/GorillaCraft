@@ -3,10 +3,11 @@ using GorillaCraft.Tools;
 using GorillaLocomotion;
 using HarmonyLib;
 using Photon.Pun;
+using System;
 
 namespace GorillaCraft.Patches
 {
-    [HarmonyPatch(typeof(PhotonView), nameof(PhotonView.RPC), new System.Type[] { typeof(string), typeof(RpcTarget), typeof(object[]) })]
+    [HarmonyPatch(typeof(PhotonView), nameof(PhotonView.RPC), new Type[] { typeof(string), typeof(RpcTarget), typeof(object[]) })]
     public class PhotonRPCPatch
     {
         private static BlockFace Face;

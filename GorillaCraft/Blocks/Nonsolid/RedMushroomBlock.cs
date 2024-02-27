@@ -18,7 +18,7 @@ namespace GorillaCraft.Blocks.Nonsolid
         public Type DestroySoundType => typeof(Interaction_Grass);
 
         public string BlockDefinition => "Red Mushroom";
-        public BlockForm BlockForm => BlockForm.Nonsolid;
+        public BlockForm BlockForm => BlockForm.Decoration;
         public BlockPlacement BlockPlacement => BlockPlacement.Default;
     }
 }

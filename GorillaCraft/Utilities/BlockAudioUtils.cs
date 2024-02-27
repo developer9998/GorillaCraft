@@ -1,5 +1,6 @@
 ﻿using GorillaCraft.Extensions;
 using GorillaCraft.Interfaces;
+using GorillaCraft.Models;
 using UnityEngine;
 
 namespace GorillaCraft.Utilities
@@ -8,7 +9,9 @@ namespace GorillaCraft.Utilities
     {
         public static async void PlaySound(AssetLoader assetLoader, GameObject block, IDataType dataType)
         {
-            string currentSound = string.Concat("Dig_", dataType.Name, Random.Range(1, dataType.MaxRange));
+            RngObject randomSound = new(1, dataType.MaxRange);
+
+            string currentSound = string.Concat("Dig_", dataType.Name, randomSound.Get());
             AudioClip sound = await assetLoader.LoadAsset<AudioClip>(currentSound);
 
             AudioSource audioSource = block.GetOrAddComponent<AudioSource>();
@@ -18,6 +21,7 @@ namespace GorillaCraft.Utilities
             audioSource.pitch = dataType.Pitch;
             audioSource.Play();
 
+            randomSound.Dispose();
             Object.Destroy(audioSource, sound.length);
         }
     }

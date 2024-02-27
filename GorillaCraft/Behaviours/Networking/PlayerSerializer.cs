@@ -14,7 +14,7 @@ using UnityEngine;
 namespace GorillaCraft.Behaviours.Networking
 {
     [DisallowMultipleComponent]
-    public class PlayerSerializer : MonoBehaviour, IPhotonViewCallback, IOnPhotonViewPreNetDestroy
+    public class PlayerSerializer : MonoBehaviourPunCallbacks, IPhotonViewCallback, IOnPhotonViewPreNetDestroy
     {
         public static PlayerSerializer Local;
 
@@ -38,6 +38,13 @@ namespace GorillaCraft.Behaviours.Networking
             }
 
             Rig = RigCacheUtils.GetField<VRRig>(View.Owner);
+        }
+
+        public override void OnPreLeavingRoom()
+        {
+            base.OnPreLeavingRoom();
+
+            BlockInfo.Clear();
         }
 
         public void DistributeBlock(bool isCreating, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale)
@@ -135,6 +142,7 @@ namespace GorillaCraft.Behaviours.Networking
         {
             if (Local == this)
             {
+                BlockInfo.Clear();
                 Local = null;
             }
 

@@ -2,8 +2,6 @@
 using GorillaCraft.Models;
 using GorillaCraft.Sounds;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GorillaCraft.Blocks.Solid
 {
@@ -20,7 +18,7 @@ namespace GorillaCraft.Blocks.Solid
         public Type DestroySoundType => typeof(Interaction_Default);
 
         public string BlockDefinition => "Monster Spawner";
-        public BlockForm BlockForm => BlockForm.Solid_OtherDev;
+        public BlockForm BlockForm => BlockForm.DevSpawner;
         public BlockPlacement BlockPlacement => BlockPlacement.Default;
     }
 }

@@ -3,7 +3,8 @@
     public enum BlockPlacement
     {
         Default,
-        LimitedRotation,
+        VerticalRotation_90,
+        VerticalRotation_45,
         FullRotation,
         Bouncey
     }

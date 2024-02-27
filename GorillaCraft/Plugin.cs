@@ -5,7 +5,6 @@ using GorillaCraft.Patches;
 using HarmonyLib;
 using System;
 using System.Reflection;
-using System.Threading.Tasks;
 using Utilla;
 
 namespace GorillaCraft
@@ -41,7 +40,7 @@ namespace GorillaCraft
         [ModdedGamemodeLeave]
         public async void OnLeave()
         {
-            Allowed.value = false;  
+            Allowed.value = false;
         }
     }
 }
