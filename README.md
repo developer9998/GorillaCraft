@@ -7,8 +7,10 @@
  <a href="https://discord.gg/dev9998">
  <img src="https://img.shields.io/discord/989239017511989258?label=Discord&style=flat-square"</img></a><br><br>
 </div>
+GorillaCraft is a gameplay-based mod for Gorilla Tag which simulates the general building aspect from Minecraft.
 
-GorillaCraft is a gameplay mod made for Gorilla Tag which implements behaviour used in the building aspect of Minecraft.
+## Credits
+<img src="https://raw.githubusercontent.com/developer9998/GorillaCraft/main/Marketing/credits.png">
 
 ## Disclaimer
 ***This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. © 2021 Another Axiom LLC.***
