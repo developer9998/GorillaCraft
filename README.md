@@ -9,8 +9,5 @@
 </div>
 GorillaCraft is a gameplay-based mod for Gorilla Tag which simulates the general building aspect from Minecraft.
 
-## Credits
-<img src="https://raw.githubusercontent.com/developer9998/GorillaCraft/main/Marketing/credits.png">
-
 ## Disclaimer
 ***This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. © 2021 Another Axiom LLC.***
