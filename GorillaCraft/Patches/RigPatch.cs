@@ -4,13 +4,16 @@ using HarmonyLib;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Reflection;
+using System;
 
 namespace GorillaCraft.Patches
 {
     [HarmonyPatch]
     public class RigPatch
     {
-        public static async void AddPatch(Player player, VRRig vrrig)
+        public static async void AddPatch(Player player)
         {
             PhotonView photonView = RigCacheUtils.GetField<PhotonView>(player);
 

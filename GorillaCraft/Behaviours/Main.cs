@@ -30,8 +30,8 @@ namespace GorillaCraft.Behaviours
 
             await AssetLoader.LoadAsset<GameObject>("ItemSelector");
             await AssetLoader.LoadAsset<GameObject>("GamemodeSelector");
-            await AssetLoader.LoadAsset<Sprite>("gamemode_switcher 1");
-            await AssetLoader.LoadAsset<Sprite>("gamemode_switcher 2");
+            await AssetLoader.LoadAsset<Sprite>("slot");
+            await AssetLoader.LoadAsset<Sprite>("selection");
 
             GameObject itemSelectionMenu = Instantiate(await AssetLoader.LoadAsset<GameObject>("ItemSelector"));
             itemSelectionMenu.transform.SetParent(GorillaTagger.Instance.offlineVRRig.leftHandTransform.parent);
@@ -44,8 +44,8 @@ namespace GorillaCraft.Behaviours
             modeSelectionMenu.SetActive(false); // Hide this, it's not needed right now
 
             MenuHandler_Mode = modeSelectionMenu.AddComponent<ModeMenuHandler>();
-            MenuHandler_Mode._offSprite = await AssetLoader.LoadAsset<Sprite>("gamemode_switcher 1");
-            MenuHandler_Mode._onSprite = await AssetLoader.LoadAsset<Sprite>("gamemode_switcher 2");
+            MenuHandler_Mode._offSprite = await AssetLoader.LoadAsset<Sprite>("slot");
+            MenuHandler_Mode._onSprite = await AssetLoader.LoadAsset<Sprite>("selection");
             MenuHandler_Mode._placementHelper = PlacementHelper;
         }
 

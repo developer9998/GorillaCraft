@@ -15,8 +15,8 @@ namespace GorillaCraft
     {
         public static Watchable<bool> Allowed { get; private set; }
 
-        Assembly GTAssembly => typeof(GorillaTagger).Assembly;
-        Type RigPatchType => typeof(RigPatch);
+        private static Assembly GTAssembly => typeof(GorillaTagger).Assembly;
+        private static Type RigPatchType => typeof(RigPatch);
 
         public async void Awake()
         {
