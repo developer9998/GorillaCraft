@@ -36,5 +36,11 @@ If you encounter any bugs or issues while using GorillaCraft, you can note them 
 ## <i>Maintenance: Pull Requests</i>
 If you feel like contributing to GorillaCraft, for example optimization work or fixing an issue, you're welcome to create a fork and submit a pull request there. We'll try to get to the pull request when possible.
 
+## <i>Contributors</i>
+GorillaCraft was created and programmed by [Dev](https://github.com/developer9998/). GorillaCraft has been contributed by other individuals who have helped in various ways.
+- [Staircase](https://steamcommunity.com/id/spiralingstaircases/) (Art)
+- [Axogma](https://twitter.com/axogma) (Art, Character Design)
+- [Luna](https://github.com/lunakittyyy/) (Testing, emotional support)
+
 ## <i>Disclaimer</i>
 ***This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. © 2021 Another Axiom LLC.***
