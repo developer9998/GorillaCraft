@@ -12,17 +12,17 @@
  GorillaCraft is a gameplay-based mod for Gorilla Tag which simulates the general building aspect from Minecraft.<br>
 </div>
 
-## Usage
+## <i>Usage</i>
 GorillaCraft can be used under the condition that the player is in a room under a modded gamemode. When the primary left face button is held, a gamemode menu will be visible and can be used to switch between the avaliable modes the mod has to offer.
 
-## Installation
+## <i>Installation</i>
 The process of installation can be done through ZIP and DLL files. In any form of installation, you must have the requirements downloaded and installed in addition to GorillaCraft, otherwise the mod may not function correctly.
 | File Type | Method |
 | --- | --- |
 | DLL | Place the file into your plugins folder |
 | ZIP | Extract the zip file into your Gorilla Tag folder |
 
-## Requirements
+## <i>Requirements</i>
 - Bepinject
 - Extenject
 - Utilla
@@ -30,5 +30,11 @@ The process of installation can be done through ZIP and DLL files. In any form o
 
 GorillaCraft often relies on these libraries in order to function correctely. They are all avaliable through [MonkeModManager](https://github.com/BzzzThe18th/MonkeModManager/releases/latest).
 
-## Disclaimer
+## <i>Maintenance: Issues</i>
+If you encounter any bugs or issues while using GorillaCraft, you can note them in the Issues tab of the repository. We'll try to get to the issue when possible.
+
+## <i>Maintenance: Pull Requests</i>
+If you feel like contributing to GorillaCraft, for example optimization work or fixing an issue, you're welcome to create a fork and submit a pull request there. We'll try to get to the pull request when possible.
+
+## <i>Disclaimer</i>
 ***This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. © 2021 Another Axiom LLC.***
