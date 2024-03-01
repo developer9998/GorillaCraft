@@ -9,7 +9,6 @@ namespace GorillaCraft.Behaviours.Block
         public Player Owner;
         public IBlock Block;
 
-        public IDataType footstepType;
         public BlockFace Back, Left, Front, Right, Bottom, Top;
 
         public void Destroy()

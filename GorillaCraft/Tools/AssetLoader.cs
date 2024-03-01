@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using GorillaCraft.Tools;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace GorillaCraft
             if (_loadedObjects != null && _loadedObjects.TryGetValue(name, out var _loadedObject))
                 return _loadedObject as T;
 
-            Debug.Log("LOADING: " + name);
+            Logging.Log(string.Concat("Loading asset: ", name), BepInEx.Logging.LogLevel.Info);
 
             _loadedObjects ??= new Dictionary<string, Object>();
 

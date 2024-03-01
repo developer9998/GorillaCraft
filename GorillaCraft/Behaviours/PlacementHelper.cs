@@ -111,7 +111,7 @@ namespace GorillaCraft.Behaviours
                 {
                     PlaceIndicator.SetActive(false);
                     DestroyIndicator.SetActive(true);
-                    DestroyIndicator.transform.localScale = hit.transform.GetComponent<BlockFace>().baseBlock.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(Player.scale)));
+                    DestroyIndicator.transform.localScale = hit.transform.GetComponent<BlockFace>().Block.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(Player.scale)));
                 }
                 else if (Mode == 1 && !blockExists)
                 {
@@ -120,7 +120,7 @@ namespace GorillaCraft.Behaviours
                 }
 
                 Vector3 adjustedPosition = new(hit.point.x.RoundToInt(Player.scale), hit.point.y.RoundToInt(Player.scale), hit.point.z.RoundToInt(Player.scale));
-                adjustedPosition = Mode == 1 && hit.transform.GetComponent<BlockFace>() != null ? hit.transform.GetComponent<BlockFace>().baseBlock.transform.position : adjustedPosition;
+                adjustedPosition = Mode == 1 && hit.transform.GetComponent<BlockFace>() != null ? hit.transform.GetComponent<BlockFace>().Block.transform.position : adjustedPosition;
 
                 PlaceIndicator.transform.position = adjustedPosition;
                 DestroyIndicator.transform.position = adjustedPosition;
@@ -147,9 +147,9 @@ namespace GorillaCraft.Behaviours
                         return;
                     }
 
-                    if (hit.transform.TryGetComponent(out BlockFace face) && face.baseBlock.Owner.IsLocal)
+                    if (hit.transform.TryGetComponent(out BlockFace face) && face.Block.Owner.IsLocal)
                     {
-                        BlockHandler.RemoveBlock(face.baseBlock, PhotonNetwork.LocalPlayer);
+                        BlockHandler.RemoveBlock(face.Block, PhotonNetwork.LocalPlayer);
                     }
                 }
                 IndexActivated = triggerPressed;

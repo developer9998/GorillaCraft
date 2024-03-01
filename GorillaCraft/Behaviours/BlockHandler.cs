@@ -76,8 +76,8 @@ namespace GorillaCraft.Behaviours
                 relativeFace.GetComponent<Collider>().material = _blockParent.Block.GetType() == typeof(IceBlock) ? Slippery : relativeFace.GetComponent<Collider>().material;
 
                 BlockFace blockFace = relativeFace.gameObject.AddComponent<BlockFace>();
-                blockFace.baseBlock = _blockParent;
-                blockFace.surfaceType = info.FaceSurfaceType;
+                blockFace.Block = _blockParent;
+                blockFace.SurfaceType = info.FaceSurfaceType;
 
                 GorillaSurfaceOverride surface = relativeFace.gameObject.AddComponent<GorillaSurfaceOverride>();
                 surface.overrideIndex = info.FaceSurfaceType == typeof(Surface_Snow) ? 32 : (_blockParent.Block.GetType() == typeof(IceBlock) ? 59 : 0);
@@ -92,7 +92,7 @@ namespace GorillaCraft.Behaviours
                 relativeFace.parent.gameObject.layer = 19;
 
                 BlockFace blockFace = relativeFace.gameObject.AddComponent<BlockFace>();
-                blockFace.baseBlock = blockParent;
+                blockFace.Block = blockParent;
 
                 return blockFace;
             }
@@ -185,12 +185,12 @@ namespace GorillaCraft.Behaviours
 
             if (block.BlockForm != BlockForm.Decoration)
             {
-                blockParent.Back.surfaceType = originalParent.Back.surfaceType;
-                blockParent.Left.surfaceType = originalParent.Left.surfaceType;
-                blockParent.Front.surfaceType = originalParent.Front.surfaceType;
-                blockParent.Right.surfaceType = originalParent.Right.surfaceType;
-                blockParent.Bottom.surfaceType = originalParent.Bottom.surfaceType;
-                blockParent.Top.surfaceType = originalParent.Top.surfaceType;
+                blockParent.Back.SurfaceType = originalParent.Back.SurfaceType;
+                blockParent.Left.SurfaceType = originalParent.Left.SurfaceType;
+                blockParent.Front.SurfaceType = originalParent.Front.SurfaceType;
+                blockParent.Right.SurfaceType = originalParent.Right.SurfaceType;
+                blockParent.Bottom.SurfaceType = originalParent.Bottom.SurfaceType;
+                blockParent.Top.SurfaceType = originalParent.Top.SurfaceType;
 
                 if (block.BlockForm == BlockForm.DevSpawner)
                 {

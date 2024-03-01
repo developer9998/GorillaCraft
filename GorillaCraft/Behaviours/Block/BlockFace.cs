@@ -5,7 +5,7 @@ namespace GorillaCraft.Behaviours.Block
 {
     public class BlockFace : MonoBehaviour
     {
-        public BlockParent baseBlock;
-        public Type surfaceType;
+        public BlockParent Block;
+        public Type SurfaceType;
     }
 }

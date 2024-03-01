@@ -17,7 +17,7 @@ namespace GorillaCraft.Patches
             var currentOverride = isLeftHand ? Player.Instance.leftHandSurfaceOverride : Player.Instance.rightHandSurfaceOverride;
             if (currentOverride != null && currentOverride.TryGetComponent(out _currentFace))
             {
-                Player.Instance.GetComponent<BlockHandler>().PlayTapSound(__instance, _currentFace.surfaceType, isLeftHand);
+                Player.Instance.GetComponent<BlockHandler>().PlayTapSound(__instance, _currentFace.SurfaceType, isLeftHand);
                 return false;
             }
 

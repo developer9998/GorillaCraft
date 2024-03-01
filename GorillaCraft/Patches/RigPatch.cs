@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
+using GorillaCraft.Extensions;
 
 namespace GorillaCraft.Patches
 {
@@ -15,19 +16,21 @@ namespace GorillaCraft.Patches
     {
         public static async void AddPatch(Player player)
         {
+            await Task.Delay(400);
+
             PhotonView photonView = RigCacheUtils.GetField<PhotonView>(player);
 
-            while (photonView == null)
+            while (photonView == null && PhotonNetwork.InRoom)
             {
                 photonView = RigCacheUtils.GetField<PhotonView>(player);
-                await Task.Delay(200);
-
-                if (!PhotonNetwork.InRoom)
-                {
-                    return;
-                }
+                await Task.Delay(50);
             }
-            photonView.gameObject.AddComponent<PlayerSerializer>();
+
+            if (PhotonNetwork.InRoom && player.InRoom())
+            {
+                photonView.gameObject.GetOrAddComponent<PlayerSerializer>();
+
+            }
         }
     }
 }

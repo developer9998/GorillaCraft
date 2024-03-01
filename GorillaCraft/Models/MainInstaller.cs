@@ -3,6 +3,7 @@ using GorillaCraft.Blocks.Nonsolid;
 using GorillaCraft.Blocks.Solid;
 using GorillaCraft.Factories;
 using GorillaCraft.Interfaces;
+using GorillaCraft.Tools;
 using GorillaLocomotion;
 using System;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace GorillaCraft.Models
             Container.BindFactory<Type, IDataType, BlockDataFactory_PL>().FromFactory<BlockDataFactory>();
 
             Container.BindInterfacesAndSelfTo<Main>().FromNewComponentOn(Player).AsSingle();
+            Container.BindInterfacesAndSelfTo<Logging>().AsSingle();
 
             Container.Bind<BlockHandler>().FromNewComponentOn(Player).AsSingle();
             Container.Bind<PlacementHelper>().FromNewComponentOn(Player).AsSingle();
@@ -81,10 +83,11 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<PurpleWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<MagentaWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<PinkWoolBlock>().AsSingle();
+            Container.Bind<IBlock>().To<BrownWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<BlackWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<GreyWoolBlock>().AsSingle();
-            Container.Bind<IBlock>().To<LightGreyWoolBlock>().AsSingle();
 
+            Container.Bind<IBlock>().To<LightGreyWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<WhiteWoolBlock>().AsSingle();
             Container.Bind<IBlock>().To<CoalOreBlock>().AsSingle();
             Container.Bind<IBlock>().To<IronOreBlock>().AsSingle();
@@ -93,8 +96,8 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<LapisOreBlock>().AsSingle();
             Container.Bind<IBlock>().To<EmeraldOreBlock>().AsSingle();
             Container.Bind<IBlock>().To<DiamondOreBlock>().AsSingle();
-            Container.Bind<IBlock>().To<CoalBlock>().AsSingle();
 
+            Container.Bind<IBlock>().To<CoalBlock>().AsSingle();
             Container.Bind<IBlock>().To<IronBlock>().AsSingle();
             Container.Bind<IBlock>().To<GoldBlock>().AsSingle();
             Container.Bind<IBlock>().To<RedstoneBlock>().AsSingle();
@@ -103,8 +106,9 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<DiamondBlock>().AsSingle();
             Container.Bind<IBlock>().To<CraftingBenchBlock>().AsSingle();
             Container.Bind<IBlock>().To<FurnaceBlock>().AsSingle();
-            Container.Bind<IBlock>().To<JukeboxBlock>().AsSingle();
 
+
+            Container.Bind<IBlock>().To<JukeboxBlock>().AsSingle();
             Container.Bind<IBlock>().To<MobSpawnerBlock>().AsSingle();
             Container.Bind<IBlock>().To<BookshelfBlock>().AsSingle();
             Container.Bind<IBlock>().To<TNTBlock>().AsSingle();
@@ -113,8 +117,9 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<OakSaplingBlock>().AsSingle();
             Container.Bind<IBlock>().To<SpruceSaplingBlock>().AsSingle();
             Container.Bind<IBlock>().To<BirchSaplingBlock>().AsSingle();
-            Container.Bind<IBlock>().To<JungleSaplingBlock>().AsSingle();
 
+
+            Container.Bind<IBlock>().To<JungleSaplingBlock>().AsSingle();
             Container.Bind<IBlock>().To<AcaciaSaplingBlock>().AsSingle();
             Container.Bind<IBlock>().To<DarkOakSaplingBlock>().AsSingle();
             Container.Bind<IBlock>().To<BushBlock>().AsSingle();
@@ -122,7 +127,6 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<DandelionBlock>().AsSingle();
             Container.Bind<IBlock>().To<RedMushroomBlock>().AsSingle();
             Container.Bind<IBlock>().To<BrownMushroomBlock>().AsSingle();
-            //Container.Bind<IBlock>().To<>().AsSingle();
             //Container.Bind<IBlock>().To<>().AsSingle();
         }
     }
