@@ -12,6 +12,17 @@
  GorillaCraft is a gameplay-based mod for Gorilla Tag which simulates the general building aspect from Minecraft.<br>
 </div>
 
+## Features
+### <i>The possibilities are endless!</i>
+GorillaCraft is packaged in with eighty blocks accessible to any player using the mod. These blocks can range from different forms and behaviours you can use to structure your own creators.
+
+<img src="https://github.com/developer9998/GorillaCraft/blob/main/Marketing/BlockShowcase1005.gif?raw=true" width=50%;>
+
+### <i>Multiplayer with other players!</i>
+GorillaCraft includes networking, which provides for online play with your friends or others you play with who have the mod. 
+
+<img src="https://github.com/developer9998/GorillaCraft/blob/main/Marketing/HouseBuilding1005.gif?raw=true" width=50%;>
+
 ## <i>Usage</i>
 GorillaCraft can be used under the condition that the player is in a room under a modded gamemode. When the primary left face button is held, a gamemode menu will be visible and can be used to switch between the avaliable modes the mod has to offer.
 
