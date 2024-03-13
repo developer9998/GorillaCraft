@@ -41,7 +41,7 @@ namespace GorillaCraft.Behaviours
 
             BuildMask = (int)Player.locomotionEnabledLayers;
             RemoveMask = (int)Player.locomotionEnabledLayers;
-            RemoveMask |= 1 << 19;
+            RemoveMask |= 1 << 17;
 
             Main = main;
             AssetLoader = assetLoader;
@@ -71,9 +71,9 @@ namespace GorillaCraft.Behaviours
             return BlockList[Placement];
         }
 
-        public void Update()
+        public void FixedUpdate()
         {
-            if (Player == null || PlaceIndicator == null || LineRenderer == null) return;
+            if (!Player || !PlaceIndicator || !DestroyIndicator || !LineRenderer) return;
 
             if (Mode == 2 || !Main.isActivated)
             {
@@ -106,12 +106,12 @@ namespace GorillaCraft.Behaviours
                     DestroyIndicator.SetActive(false);
                 }
 
-                bool blockExists = hit.transform.GetComponent<BlockFace>() != null;
+                bool blockExists = hit.transform.GetComponentInChildren<BlockFace>() != null;
                 if (Mode == 1 && blockExists && !DestroyIndicator.activeSelf)
                 {
                     PlaceIndicator.SetActive(false);
                     DestroyIndicator.SetActive(true);
-                    DestroyIndicator.transform.localScale = hit.transform.GetComponent<BlockFace>().Block.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(Player.scale)));
+                    DestroyIndicator.transform.localScale = hit.transform.GetComponentInChildren<BlockFace>().Block.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(Player.scale)));
                 }
                 else if (Mode == 1 && !blockExists)
                 {
@@ -120,7 +120,7 @@ namespace GorillaCraft.Behaviours
                 }
 
                 Vector3 adjustedPosition = new(hit.point.x.RoundToInt(Player.scale), hit.point.y.RoundToInt(Player.scale), hit.point.z.RoundToInt(Player.scale));
-                adjustedPosition = Mode == 1 && hit.transform.GetComponent<BlockFace>() != null ? hit.transform.GetComponent<BlockFace>().Block.transform.position : adjustedPosition;
+                adjustedPosition = Mode == 1 && hit.transform.GetComponentInChildren<BlockFace>() != null ? hit.transform.GetComponentInChildren<BlockFace>().Block.transform.position : adjustedPosition;
 
                 PlaceIndicator.transform.position = adjustedPosition;
                 DestroyIndicator.transform.position = adjustedPosition;
@@ -142,12 +142,21 @@ namespace GorillaCraft.Behaviours
                             _ => Vector3.zero,
                         };
 
-                        BlockHandler.PlaceBlock(BlockPlaceType.Local, BlockList[Placement].GetType().Name, PlaceIndicator.transform.position, eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer);
                         IndexActivated = triggerPressed;
+                        if (BlockHandler.PlacementAllowed(BlockList[Placement].GetType().Name, hit))
+                        {
+                            BlockHandler.PlaceBlock(BlockPlaceType.Local, BlockList[Placement].GetType().Name, PlaceIndicator.transform.position, BlockList[Placement].BlockForm != BlockForm.Ladder ? eulerAngles : hit.collider.transform.eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer, out BlockParent parent);
+                            if (parent && BlockList[Placement].BlockForm == BlockForm.Ladder)
+                            {
+                                parent.GuardianBlocks.Add(hit.collider.GetComponent<BlockFace>().Block);
+                                hit.collider.GetComponent<BlockFace>().Block.InflictedBlocks.Add(parent);
+                            }
+                        }
+
                         return;
                     }
 
-                    if (hit.transform.TryGetComponent(out BlockFace face) && face.Block.Owner.IsLocal)
+                    if (hit.transform.GetComponentInChildren<BlockFace>() is BlockFace face && face && face.Block.Owner.IsLocal)
                     {
                         BlockHandler.RemoveBlock(face.Block, PhotonNetwork.LocalPlayer);
                     }

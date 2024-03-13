@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("DarkOakPlanks", typeof(Surface_Wood));
         public BlockFaceInfo Back => new("DarkOakPlanks", typeof(Surface_Wood));
         public BlockFaceInfo Right => new("DarkOakPlanks", typeof(Surface_Wood));
-        public BlockFaceInfo Up => new("DarkOakPlanks", typeof(Surface_Wood));
-        public BlockFaceInfo Down => new("DarkOakPlanks", typeof(Surface_Wood));
+        public BlockFaceInfo Top => new("DarkOakPlanks", typeof(Surface_Wood));
+        public BlockFaceInfo Bottom => new("DarkOakPlanks", typeof(Surface_Wood));
 
         public Type PlaceSoundType => typeof(Interaction_Wood);
         public Type DestroySoundType => typeof(Interaction_Wood);

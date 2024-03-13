@@ -1,13 +1,10 @@
 ﻿using GorillaCraft.Behaviours.Networking;
+using GorillaCraft.Extensions;
 using GorillaCraft.Utilities;
 using HarmonyLib;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Reflection;
-using System;
-using GorillaCraft.Extensions;
 
 namespace GorillaCraft.Patches
 {
@@ -18,11 +15,11 @@ namespace GorillaCraft.Patches
         {
             await Task.Delay(400);
 
-            PhotonView photonView = RigCacheUtils.GetField<PhotonView>(player);
+            PhotonView photonView = RigCacheUtils.GetProperty<PhotonView>(player);
 
             while (photonView == null && PhotonNetwork.InRoom)
             {
-                photonView = RigCacheUtils.GetField<PhotonView>(player);
+                photonView = RigCacheUtils.GetProperty<PhotonView>(player);
                 await Task.Delay(50);
             }
 

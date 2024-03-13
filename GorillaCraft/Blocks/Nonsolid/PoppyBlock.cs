@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Nonsolid
         public BlockFaceInfo Left => new("Poppy", typeof(Surface_Grass));
         public BlockFaceInfo Back => new("Poppy", typeof(Surface_Grass));
         public BlockFaceInfo Right => new("Poppy", typeof(Surface_Grass));
-        public BlockFaceInfo Up => new("Poppy", typeof(Surface_Grass));
-        public BlockFaceInfo Down => new("Poppy", typeof(Surface_Grass));
+        public BlockFaceInfo Top => new("Poppy", typeof(Surface_Grass));
+        public BlockFaceInfo Bottom => new("Poppy", typeof(Surface_Grass));
 
         public Type PlaceSoundType => typeof(Interaction_Grass);
         public Type DestroySoundType => typeof(Interaction_Grass);

@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("PumpkinSide", typeof(Surface_Wood));
         public BlockFaceInfo Back => new("PumpkinSide", typeof(Surface_Wood));
         public BlockFaceInfo Right => new("PumpkinSide", typeof(Surface_Wood));
-        public BlockFaceInfo Up => new("PumpkinTop", typeof(Surface_Wood));
-        public BlockFaceInfo Down => new("PumpkinTop", typeof(Surface_Wood));
+        public BlockFaceInfo Top => new("PumpkinTop", typeof(Surface_Wood));
+        public BlockFaceInfo Bottom => new("PumpkinTop", typeof(Surface_Wood));
 
         public Type PlaceSoundType => typeof(Interaction_Wood);
         public Type DestroySoundType => typeof(Interaction_Wood);

@@ -2,7 +2,7 @@
 
 namespace GorillaCraft.Extensions
 {
-    public static class GameObjectExtentions
+    public static class ObjectExtentions
     {
         public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
         {

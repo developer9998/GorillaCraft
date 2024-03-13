@@ -4,6 +4,7 @@
     {
         Solid,
         DevSpawner,
-        Decoration
+        Decoration,
+        Ladder
     }
 }

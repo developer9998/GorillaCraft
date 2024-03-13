@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("BlackWool", typeof(Surface_Cloth));
         public BlockFaceInfo Back => new("BlackWool", typeof(Surface_Cloth));
         public BlockFaceInfo Right => new("BlackWool", typeof(Surface_Cloth));
-        public BlockFaceInfo Up => new("BlackWool", typeof(Surface_Cloth));
-        public BlockFaceInfo Down => new("BlackWool", typeof(Surface_Cloth));
+        public BlockFaceInfo Top => new("BlackWool", typeof(Surface_Cloth));
+        public BlockFaceInfo Bottom => new("BlackWool", typeof(Surface_Cloth));
 
         public Type PlaceSoundType => typeof(Interaction_Cloth);
         public Type DestroySoundType => typeof(Interaction_Cloth);

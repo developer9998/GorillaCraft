@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("MossyCobble", typeof(Surface_Default));
         public BlockFaceInfo Back => new("MossyCobble", typeof(Surface_Default));
         public BlockFaceInfo Right => new("MossyCobble", typeof(Surface_Default));
-        public BlockFaceInfo Up => new("MossyCobble", typeof(Surface_Default));
-        public BlockFaceInfo Down => new("MossyCobble", typeof(Surface_Default));
+        public BlockFaceInfo Top => new("MossyCobble", typeof(Surface_Default));
+        public BlockFaceInfo Bottom => new("MossyCobble", typeof(Surface_Default));
 
         public Type PlaceSoundType => typeof(Interaction_Default);
         public Type DestroySoundType => typeof(Interaction_Default);

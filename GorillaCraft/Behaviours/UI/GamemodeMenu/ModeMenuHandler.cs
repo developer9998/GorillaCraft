@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using GorillaCraft.Extensions;
+using GorillaCraft.Tools;
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -46,12 +50,19 @@ namespace GorillaCraft.Behaviours.UI.GamemodeMenu
 
         private void Redraw()
         {
-            for (int i = 0; i < _modeItemList.Count; i++)
+            try
             {
-                var currentItem = _modeItemList[i];
-                currentItem.GetComponent<Image>().sprite = _currentModeIndex == i ? _onSprite : _offSprite;
+                for (int i = 0; i < _modeItemList.Count; i++)
+                {
+                    var currentItem = _modeItemList[i];
+                    currentItem.GetComponent<Image>().sprite = _currentModeIndex == i ? _onSprite : _offSprite;
+                }
+                _modeText.text = _modeNames[_currentModeIndex];
             }
-            _modeText.text = _modeNames[_currentModeIndex];
+            catch (Exception exception)
+            {
+                Logging.Log(exception.String(), BepInEx.Logging.LogLevel.Error);
+            }
         }
 
         public void ModeItemPress(ModeItem sender)

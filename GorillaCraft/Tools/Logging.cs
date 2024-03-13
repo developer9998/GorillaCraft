@@ -1,5 +1,8 @@
 ﻿using BepInEx.Logging;
 using Bepinject;
+using GorillaCraft.Extensions;
+using System.Diagnostics;
+using System.Reflection;
 using Zenject;
 
 namespace GorillaCraft.Tools
@@ -15,15 +18,13 @@ namespace GorillaCraft.Tools
 
         public void Initialize()
         {
-            Log("Logging for GorillaCraft has been initialized successfully!", LogLevel.Info);
+            Log("i love you kaylie! -dane", LogLevel.Info);
         }
 
         public static void Log(object data, LogLevel level = LogLevel.Info)
         {
-#if DEBUG
-            LogSource ??= Logger.CreateLogSource(Constants.Name);
-            LogSource.Log(level, data);
-#endif
+            MethodBase methodInfo = new StackTrace().GetFrame(1).GetMethod();
+            LogSource.Log(level, string.Concat(methodInfo.String(), data));
         }
     }
 }

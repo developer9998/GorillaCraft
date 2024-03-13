@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("GrassSide", typeof(Surface_Gravel));
         public BlockFaceInfo Back => new("GrassSide", typeof(Surface_Gravel));
         public BlockFaceInfo Right => new("GrassSide", typeof(Surface_Gravel));
-        public BlockFaceInfo Up => new("GrassTop", typeof(Surface_Grass));
-        public BlockFaceInfo Down => new("Dirt", typeof(Surface_Gravel));
+        public BlockFaceInfo Top => new("GrassTop", typeof(Surface_Grass));
+        public BlockFaceInfo Bottom => new("Dirt", typeof(Surface_Gravel));
 
         public Type PlaceSoundType => typeof(Interaction_Grass);
         public Type DestroySoundType => typeof(Interaction_Grass);

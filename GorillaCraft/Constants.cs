@@ -5,7 +5,7 @@
         public const string
             GUID = "dev.gorillacraft",
             Name = "GorillaCraft",
-            Version = "1.0.0.6";
+            Version = "1.0.0.7";
 
         public const string BundleDirectory = "GorillaCraft.Content.devminecraft";
 
@@ -19,6 +19,7 @@
             SolidBlockName = "Block_Solid",
             NonsolidBlockName = "Block_NonSolid",
             OtherDevBlockName = "Block_TheThing",
+            LadderBlockName = "Block_Ladder",
             ParticleName = "BlockParticle";
 
         public const int GridTile = 1;

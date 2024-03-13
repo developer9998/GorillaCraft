@@ -14,12 +14,12 @@ namespace GorillaCraft.Utilities
 
         private static object CacheInstance => AccessTools.Property(RigCacheType, "Instance").GetValue(RigCacheType, null);
 
-        public static T GetField<T>(Player player)
+        public static T GetProperty<T>(Player player)
         {
             if (CacheInstance == null) return default;
 
             object[] parameters = new object[] { player, null };
-            bool method = (bool)AccessTools.Method(RigCacheType, "TryGetVrrig").Invoke(CacheInstance, parameters);
+            bool method = (bool)AccessTools.Method(RigCacheType, "TryGetVrrig", new Type[] { typeof(Player) }).Invoke(CacheInstance, parameters);
 
             if (method)
             {

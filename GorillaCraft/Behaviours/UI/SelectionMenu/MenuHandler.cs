@@ -1,5 +1,9 @@
-﻿using GorillaCraft.Interfaces;
+﻿using GorillaCraft.Extensions;
+using GorillaCraft.Interfaces;
+using GorillaCraft.Tools;
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -56,17 +60,24 @@ namespace GorillaCraft.Behaviours.UI.SelectionMenu
 
         private void Redraw()
         {
-            int currentPageCount = 10;
-            int currentPage = 0;
-            for (int i = 0; i < _blockItemList.Count; i++)
+            try
             {
-                currentPage = currentPageCount - 1 == 0 ? currentPage + 1 : currentPage;
-                currentPageCount = currentPageCount == 1 ? 9 : currentPageCount - 1;
+                int currentPageCount = 10;
+                int currentPage = 0;
+                for (int i = 0; i < _blockItemList.Count; i++)
+                {
+                    currentPage = currentPageCount - 1 == 0 ? currentPage + 1 : currentPage;
+                    currentPageCount = currentPageCount == 1 ? 9 : currentPageCount - 1;
 
-                bool pageEnabled = (_currentPage == currentPage || _currentPage + 5 > currentPage) && currentPage + 1 > _currentPage;
+                    bool pageEnabled = (_currentPage == currentPage || _currentPage + 5 > currentPage) && currentPage + 1 > _currentPage;
 
-                var currentItem = _blockItemList[i];
-                currentItem.gameObject.SetActive(pageEnabled);
+                    var currentItem = _blockItemList[i];
+                    currentItem.gameObject.SetActive(pageEnabled);
+                }
+            }
+            catch (Exception exception)
+            {
+                Logging.Log(exception.String(), BepInEx.Logging.LogLevel.Error);
             }
         }
 

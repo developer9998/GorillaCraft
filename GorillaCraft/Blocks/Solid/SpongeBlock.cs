@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("Sponge", typeof(Surface_Grass));
         public BlockFaceInfo Back => new("Sponge", typeof(Surface_Grass));
         public BlockFaceInfo Right => new("Sponge", typeof(Surface_Grass));
-        public BlockFaceInfo Up => new("Sponge", typeof(Surface_Grass));
-        public BlockFaceInfo Down => new("Sponge", typeof(Surface_Grass));
+        public BlockFaceInfo Top => new("Sponge", typeof(Surface_Grass));
+        public BlockFaceInfo Bottom => new("Sponge", typeof(Surface_Grass));
 
         public Type PlaceSoundType => typeof(Interaction_Grass);
         public Type DestroySoundType => typeof(Interaction_Grass);

@@ -11,8 +11,8 @@ namespace GorillaCraft.Interfaces
         public BlockFaceInfo Left { get; }
         public BlockFaceInfo Back { get; }
         public BlockFaceInfo Right { get; }
-        public BlockFaceInfo Up { get; }
-        public BlockFaceInfo Down { get; }
+        public BlockFaceInfo Top { get; }
+        public BlockFaceInfo Bottom { get; }
 
         public Type PlaceSoundType { get; }
         public Type DestroySoundType { get; }

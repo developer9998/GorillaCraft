@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("AcaciaLeaves", typeof(Surface_Grass));
         public BlockFaceInfo Back => new("AcaciaLeaves", typeof(Surface_Grass));
         public BlockFaceInfo Right => new("AcaciaLeaves", typeof(Surface_Grass));
-        public BlockFaceInfo Up => new("AcaciaLeaves", typeof(Surface_Grass));
-        public BlockFaceInfo Down => new("AcaciaLeaves", typeof(Surface_Grass));
+        public BlockFaceInfo Top => new("AcaciaLeaves", typeof(Surface_Grass));
+        public BlockFaceInfo Bottom => new("AcaciaLeaves", typeof(Surface_Grass));
 
         public Type PlaceSoundType => typeof(Interaction_Grass);
         public Type DestroySoundType => typeof(Interaction_Grass);

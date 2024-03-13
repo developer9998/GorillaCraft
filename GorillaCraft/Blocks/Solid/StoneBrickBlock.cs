@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("StoneBricks", typeof(Surface_Default));
         public BlockFaceInfo Back => new("StoneBricks", typeof(Surface_Default));
         public BlockFaceInfo Right => new("StoneBricks", typeof(Surface_Default));
-        public BlockFaceInfo Up => new("StoneBricks", typeof(Surface_Default));
-        public BlockFaceInfo Down => new("StoneBricks", typeof(Surface_Default));
+        public BlockFaceInfo Top => new("StoneBricks", typeof(Surface_Default));
+        public BlockFaceInfo Bottom => new("StoneBricks", typeof(Surface_Default));
 
         public Type PlaceSoundType => typeof(Interaction_Default);
         public Type DestroySoundType => typeof(Interaction_Default);

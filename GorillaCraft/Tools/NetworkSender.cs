@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace GorillaCraft.Tools
 {
-    public class MultiplayerManager
+    public class NetworkSender
     {
         public const byte BlockInteractionCode = 130;
         public const byte SurfaceTapCode = 131;

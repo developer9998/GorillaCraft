@@ -11,8 +11,8 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Left => new("Netherrack", typeof(Surface_Default));
         public BlockFaceInfo Back => new("Netherrack", typeof(Surface_Default));
         public BlockFaceInfo Right => new("Netherrack", typeof(Surface_Default));
-        public BlockFaceInfo Up => new("Netherrack", typeof(Surface_Default));
-        public BlockFaceInfo Down => new("Netherrack", typeof(Surface_Default));
+        public BlockFaceInfo Top => new("Netherrack", typeof(Surface_Default));
+        public BlockFaceInfo Bottom => new("Netherrack", typeof(Surface_Default));
 
         public Type PlaceSoundType => typeof(Interaction_Default);
         public Type DestroySoundType => typeof(Interaction_Default);
