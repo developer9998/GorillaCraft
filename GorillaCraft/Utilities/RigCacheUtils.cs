@@ -19,7 +19,7 @@ namespace GorillaCraft.Utilities
             if (CacheInstance == null) return default;
 
             object[] parameters = new object[] { player, null };
-            bool method = (bool)AccessTools.Method(RigCacheType, "TryGetVrrig", new Type[] { typeof(Player) }).Invoke(CacheInstance, parameters);
+            bool method = (bool)AccessTools.Method(RigCacheType, "TryGetVrrig", new Type[] { typeof(Player), GTAssembly.GetType("RigContainer&") }).Invoke(CacheInstance, parameters);
 
             if (method)
             {

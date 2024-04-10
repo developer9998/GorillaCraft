@@ -11,22 +11,27 @@ namespace GorillaCraft.Patches
     [HarmonyPatch]
     public class RigPatch
     {
-        public static async void AddPatch(Player player)
+        public static async void AddPatch(NetPlayer player)
         {
             await Task.Delay(400);
 
-            PhotonView photonView = RigCacheUtils.GetProperty<PhotonView>(player);
-
-            while (photonView == null && PhotonNetwork.InRoom)
+            if (player is PunNetPlayer punNetPlayer)
             {
-                photonView = RigCacheUtils.GetProperty<PhotonView>(player);
-                await Task.Delay(50);
-            }
+                Player rtPlayer = punNetPlayer.playerRef;
 
-            if (PhotonNetwork.InRoom && player.InRoom())
-            {
-                photonView.gameObject.GetOrAddComponent<PlayerSerializer>();
+                PhotonView photonView = RigCacheUtils.GetProperty<PhotonView>(rtPlayer);
 
+                while (photonView == null && PhotonNetwork.InRoom)
+                {
+                    photonView = RigCacheUtils.GetProperty<PhotonView>(rtPlayer);
+                    await Task.Delay(50);
+                }
+
+                if (PhotonNetwork.InRoom && player.InRoom())
+                {
+                    photonView.gameObject.GetOrAddComponent<PlayerSerializer>();
+
+                }
             }
         }
     }
