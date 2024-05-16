@@ -5,7 +5,7 @@ using System;
 
 namespace GorillaCraft.Blocks.Solid
 {
-    public class DarkLeavesBlock : IBlock
+    public class DarkOakLeavesBlock : IBlock
     {
         public BlockFaceInfo Front => new("DarkOakLeaves", typeof(Surface_Grass));
         public BlockFaceInfo Left => new("DarkOakLeaves", typeof(Surface_Grass));

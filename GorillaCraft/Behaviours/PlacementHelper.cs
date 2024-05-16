@@ -2,6 +2,7 @@
 using GorillaCraft.Extensions;
 using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
+using GorillaCraft.Tools;
 using GorillaLocomotion;
 using Photon.Pun;
 using System.Collections.Generic;
@@ -12,129 +13,134 @@ namespace GorillaCraft.Behaviours
 {
     public class PlacementHelper : MonoBehaviour
     {
-        private bool Initialized;
+        public static int InteractMode;
+
+        private bool _initialized;
 
         private Player Player;
 
-        private LayerMask BuildMask, RemoveMask;
+        private LayerMask _buildLayerMask, _removeLayerMask;
 
-        private Main Main;
-        private AssetLoader AssetLoader;
-        private BlockHandler BlockHandler;
+        private AssetLoader _assetLoader;
+        private BlockHandler _blockHandler;
 
-        private List<IBlock> BlockList;
+        private List<IBlock> _blockList;
 
-        private GameObject Crosshair, PlaceIndicator, DestroyIndicator;
-        private LineRenderer LineRenderer;
+        private GameObject _crosshairObject, _placeObject, _destroyObject;
+        private LineRenderer _lineRenderer;
 
-        internal int Mode, Placement;
+        private int Placement;
 
         private bool IndexActivated;
 
         [Inject]
-        public async void Construct(Main main, AssetLoader assetLoader, BlockHandler blockHandler, List<IBlock> blockList)
+        public async void Construct(AssetLoader assetLoader, BlockHandler blockHandler, List<IBlock> blockList)
         {
-            if (Initialized) return;
-            Initialized = true;
+            if (_initialized) return;
+            _initialized = true;
 
             Player = GetComponent<Player>();
 
-            BuildMask = (int)Player.locomotionEnabledLayers;
-            RemoveMask = (int)Player.locomotionEnabledLayers;
-            RemoveMask |= 1 << 17;
+            _buildLayerMask = (int)Player.locomotionEnabledLayers;
+            _removeLayerMask = (int)Player.locomotionEnabledLayers;
+            _removeLayerMask |= 1 << 17;
 
-            Main = main;
-            AssetLoader = assetLoader;
-            BlockHandler = blockHandler;
+            _assetLoader = assetLoader;
+            _blockHandler = blockHandler;
 
-            BlockList = blockList;
+            _blockList = blockList;
 
-            GameObject linePrefab = Instantiate(await AssetLoader.LoadAsset<GameObject>("lineRendererExample"));
+            GameObject linePrefab = Instantiate(await _assetLoader.LoadAsset<GameObject>("lineRendererExample"));
             linePrefab.transform.localPosition = Vector3.zero;
-            LineRenderer = linePrefab.GetComponent<LineRenderer>();
+            _lineRenderer = linePrefab.GetComponent<LineRenderer>();
 
-            Crosshair = Instantiate(await AssetLoader.LoadAsset<GameObject>("Crosshair"));
-            Crosshair.transform.localPosition = Vector3.zero;
-            Crosshair.SetActive(false);
+            _crosshairObject = Instantiate(await _assetLoader.LoadAsset<GameObject>("Crosshair"));
+            _crosshairObject.transform.localPosition = Vector3.zero;
+            _crosshairObject.SetActive(false);
 
-            PlaceIndicator = Instantiate(await AssetLoader.LoadAsset<GameObject>("BlockIndicator"));
-            PlaceIndicator.transform.localPosition = Vector3.zero;
+            _placeObject = Instantiate(await _assetLoader.LoadAsset<GameObject>("BlockIndicator"));
+            _placeObject.transform.localPosition = Vector3.zero;
 
-            DestroyIndicator = Instantiate(await AssetLoader.LoadAsset<GameObject>("BlockRemovalIndicator"));
-            DestroyIndicator.SetActive(false);
-            DestroyIndicator.transform.localPosition = Vector3.zero;
+            _destroyObject = Instantiate(await _assetLoader.LoadAsset<GameObject>("BlockRemovalIndicator"));
+            _destroyObject.SetActive(false);
+            _destroyObject.transform.localPosition = Vector3.zero;
         }
 
         public IBlock SetBlock(int blockIndex)
         {
-            Placement = BlockList.Count - 1 < blockIndex ? 0 : blockIndex;
-            return BlockList[Placement];
+            Placement = _blockList.Count - 1 < blockIndex ? 0 : blockIndex;
+            return _blockList[Placement];
+        }
+
+        public IBlock GetBlock()
+        {
+            return _blockList[Placement];
         }
 
         public void FixedUpdate()
         {
-            if (!Player || !PlaceIndicator || !DestroyIndicator || !LineRenderer) return;
+            if (!Player || !_placeObject || !_destroyObject || !_lineRenderer) return;
 
-            if (Mode == 2 || !Main.isActivated)
+            if (!Main.InModdedRoom || (MenuHandler.IsViewingMenuList && InteractMode == 0) || InteractMode == 2)
             {
-                if (PlaceIndicator.activeSelf || DestroyIndicator.activeSelf || Crosshair.activeSelf)
+                if (_placeObject.activeSelf || _destroyObject.activeSelf || _crosshairObject.activeSelf)
                 {
-                    PlaceIndicator.SetActive(false);
-                    DestroyIndicator.SetActive(false);
-                    Crosshair.SetActive(false);
+                    _placeObject.SetActive(false);
+                    _destroyObject.SetActive(false);
+                    _crosshairObject.SetActive(false);
                 }
-                LineRenderer.enabled = false;
+                _lineRenderer.enabled = false;
                 return;
             }
 
-            LineRenderer.SetPosition(0, Player.rightControllerTransform.position);
+            _lineRenderer.SetPosition(0, Player.rightControllerTransform.position);
 
             // Adjust the scale for the preview objects based on the player's scale
-            PlaceIndicator.transform.localScale = Vector3.one * Mathf.Clamp01(Player.scale);
-            Crosshair.transform.localScale = Vector3.one * 0.04458661f * Mathf.Clamp01(Player.scale);
-            LineRenderer.startWidth = 0.007f * Mathf.Clamp01(Player.scale);
-            LineRenderer.endWidth = 0.007f * Mathf.Clamp01(Player.scale);
+            _placeObject.transform.localScale = Vector3.one * Mathf.Clamp01(Player.scale);
+            _crosshairObject.transform.localScale = Vector3.one * 0.04458661f * Mathf.Clamp01(Player.scale);
+            _lineRenderer.startWidth = 0.007f * Mathf.Clamp01(Player.scale);
+            _lineRenderer.endWidth = 0.007f * Mathf.Clamp01(Player.scale);
 
-            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 24 * Mathf.Clamp01(Player.scale), Mode == 0 ? BuildMask : RemoveMask, QueryTriggerInteraction.UseGlobal))
+            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 24 * Mathf.Clamp01(Player.scale), InteractMode == 0 ? _buildLayerMask : _removeLayerMask, QueryTriggerInteraction.UseGlobal))
             {
-                LineRenderer.enabled = true;
-                if (!Crosshair.activeSelf) Crosshair.SetActive(true);
+                _lineRenderer.enabled = true;
+                if (!_crosshairObject.activeSelf) _crosshairObject.SetActive(true);
 
-                if (!PlaceIndicator.activeSelf && Mode == 0)
+                if (!_placeObject.activeSelf && InteractMode == 0)
                 {
-                    PlaceIndicator.SetActive(true);
-                    DestroyIndicator.SetActive(false);
+                    _placeObject.SetActive(true);
+                    _destroyObject.SetActive(false);
                 }
 
                 bool blockExists = hit.transform.GetComponentInChildren<BlockFace>() != null;
-                if (Mode == 1 && blockExists && !DestroyIndicator.activeSelf)
+                if (InteractMode == 1 && blockExists && !_destroyObject.activeSelf)
                 {
-                    PlaceIndicator.SetActive(false);
-                    DestroyIndicator.SetActive(true);
-                    DestroyIndicator.transform.localScale = hit.transform.GetComponentInChildren<BlockFace>().Block.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(Player.scale)));
+                    _placeObject.SetActive(false);
+                    _destroyObject.SetActive(true);
+                    _destroyObject.transform.localScale = hit.transform.GetComponentInChildren<BlockFace>().Root.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(Player.scale)));
                 }
-                else if (Mode == 1 && !blockExists)
+                else if (InteractMode == 1 && !blockExists)
                 {
-                    PlaceIndicator.SetActive(false);
-                    DestroyIndicator.SetActive(false);
+                    _placeObject.SetActive(false);
+                    _destroyObject.SetActive(false);
                 }
 
                 Vector3 adjustedPosition = new(hit.point.x.RoundToInt(Player.scale), hit.point.y.RoundToInt(Player.scale), hit.point.z.RoundToInt(Player.scale));
-                adjustedPosition = Mode == 1 && hit.transform.GetComponentInChildren<BlockFace>() != null ? hit.transform.GetComponentInChildren<BlockFace>().Block.transform.position : adjustedPosition;
+                adjustedPosition = InteractMode == 1 && hit.transform.GetComponentInChildren<BlockFace>() != null ? hit.transform.GetComponentInChildren<BlockFace>().Root.transform.position : adjustedPosition;
 
-                PlaceIndicator.transform.position = adjustedPosition;
-                DestroyIndicator.transform.position = adjustedPosition;
+                _placeObject.transform.position = adjustedPosition;
+                _destroyObject.transform.position = adjustedPosition;
 
-                LineRenderer.SetPosition(1, hit.point);
-                Crosshair.transform.position = hit.point;
-                Crosshair.transform.up = hit.normal;
+                _lineRenderer.SetPosition(1, hit.point);
+                _crosshairObject.transform.position = hit.point;
+                _crosshairObject.transform.up = hit.normal;
 
                 bool triggerPressed = ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f;
                 if (triggerPressed && triggerPressed != IndexActivated)
                 {
-                    if (Mode == 0)
+                    if (InteractMode == 0)
                     {
-                        Vector3 eulerAngles = BlockList[Placement].BlockPlacement switch
+                        Vector3 eulerAngles = _blockList[Placement].BlockPlacement switch
                         {
                             BlockPlacement.VerticalRotation_90 => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90) - 90 : 0, 0f),
                             BlockPlacement.VerticalRotation_45 => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 45f) * 45f) - 90 : 0, 0f),
@@ -143,32 +149,32 @@ namespace GorillaCraft.Behaviours
                         };
 
                         IndexActivated = triggerPressed;
-                        if (BlockHandler.PlacementAllowed(BlockList[Placement].GetType().Name, hit))
+                        if (_blockHandler.PlacementAllowed(_blockList[Placement].GetType().Name, hit))
                         {
-                            BlockHandler.PlaceBlock(BlockPlaceType.Local, BlockList[Placement].GetType().Name, PlaceIndicator.transform.position, BlockList[Placement].BlockForm != BlockForm.Ladder ? eulerAngles : hit.collider.transform.eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer, out BlockParent parent);
-                            if (parent && BlockList[Placement].BlockForm == BlockForm.Ladder)
+                            _blockHandler.PlaceBlock(BlockPlaceType.Local, _blockList[Placement].GetType().Name, _placeObject.transform.position, _blockList[Placement].BlockForm != BlockForm.Ladder ? eulerAngles : hit.collider.transform.eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer, out BlockObject parent, BlockInclusions.Audio);
+                            if (parent && _blockList[Placement].BlockForm == BlockForm.Ladder)
                             {
-                                parent.GuardianBlocks.Add(hit.collider.GetComponent<BlockFace>().Block);
-                                hit.collider.GetComponent<BlockFace>().Block.InflictedBlocks.Add(parent);
+                                parent.ParentalBlocks.Add(hit.collider.GetComponent<BlockFace>().Root);
+                                hit.collider.GetComponent<BlockFace>().Root.ChildrenBlocks.Add(parent);
                             }
                         }
 
                         return;
                     }
 
-                    if (hit.transform.GetComponentInChildren<BlockFace>() is BlockFace face && face && face.Block.Owner.IsLocal)
+                    if (hit.transform.GetComponentInChildren<BlockFace>() is BlockFace face && face && face.Root.Owner.IsLocal)
                     {
-                        BlockHandler.RemoveBlock(face.Block, PhotonNetwork.LocalPlayer);
+                        _blockHandler.RemoveBlock(face.Root, PhotonNetwork.LocalPlayer);
                     }
                 }
                 IndexActivated = triggerPressed;
                 return;
             }
 
-            PlaceIndicator.SetActive(false);
-            DestroyIndicator.SetActive(false);
-            Crosshair.SetActive(false);
-            LineRenderer.enabled = false;
+            _placeObject.SetActive(false);
+            _destroyObject.SetActive(false);
+            _crosshairObject.SetActive(false);
+            _lineRenderer.enabled = false;
         }
     }
 }

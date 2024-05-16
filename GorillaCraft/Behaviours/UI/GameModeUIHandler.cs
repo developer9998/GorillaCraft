@@ -1,23 +1,23 @@
-﻿using GorillaCraft.Extensions;
+﻿using BepInEx.Logging;
+using GorillaCraft.Extensions;
 using GorillaCraft.Tools;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GorillaCraft.Behaviours.UI.GamemodeMenu
+namespace GorillaCraft.Behaviours.UI
 {
-    public class ModeMenuHandler : MonoBehaviour
+    public class GameModeUIHandler : MonoBehaviour
     {
         public PlacementHelper _placementHelper;
         public Sprite _offSprite, _onSprite;
 
         private int _currentModeIndex;
-        private List<ModeItem> _modeItemList;
-        private Dictionary<ModeItem, int> _modeItemCollection;
+        private List<Button_GameMode> _modeItemList;
+        private Dictionary<Button_GameMode, int> _modeItemCollection;
 
-        private readonly string[] _modeNames = new string[3] { "Build Mode", "Destroy Mode", "Play Mode" };
+        private readonly string[] _modeNames = ["Build Mode", "Pickaxe Mode", "Play Mode"];
         private Text _modeText;
 
         public Vector3
@@ -26,8 +26,8 @@ namespace GorillaCraft.Behaviours.UI.GamemodeMenu
 
         public void Start()
         {
-            _modeItemList = new List<ModeItem>();
-            _modeItemCollection = new Dictionary<ModeItem, int>();
+            _modeItemList = [];
+            _modeItemCollection = [];
 
             transform.localPosition = LeftPosition;
             transform.localEulerAngles = LeftEuler;
@@ -37,7 +37,7 @@ namespace GorillaCraft.Behaviours.UI.GamemodeMenu
             for (int i = 0; i < modePageParent.childCount; i++)
             {
                 var modePageObject = modePageParent.GetChild(i);
-                ModeItem menuPageItem = modePageObject.gameObject.AddComponent<ModeItem>();
+                Button_GameMode menuPageItem = modePageObject.gameObject.AddComponent<Button_GameMode>();
 
                 menuPageItem.menuParent = this;
                 _modeItemList.Add(menuPageItem);
@@ -61,17 +61,17 @@ namespace GorillaCraft.Behaviours.UI.GamemodeMenu
             }
             catch (Exception exception)
             {
-                Logging.Log(exception.String(), BepInEx.Logging.LogLevel.Error);
+                Logging.Log(exception.String(), LogLevel.Error);
             }
         }
 
-        public void ModeItemPress(ModeItem sender)
+        public void ModeItemPress(Button_GameMode sender)
         {
             AudioSource source = GetComponent<AudioSource>();
             source.PlayOneShot(source.clip);
 
             _currentModeIndex = _modeItemCollection[sender];
-            _placementHelper.Mode = _currentModeIndex;
+            PlacementHelper.InteractMode = _currentModeIndex;
             Redraw();
         }
     }

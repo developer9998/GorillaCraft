@@ -14,11 +14,13 @@ namespace GorillaCraft.Behaviours.Networking
     public class PlayerSerializer : MonoBehaviourPunCallbacks, IPhotonViewCallback
     {
         public static PlayerSerializer Local;
-        public readonly List<BlockGeneralInfo> BlockInfo = new();
+        public static GameObject Nametag;
+
+        public readonly List<BlockData> BlockInfo = [];
 
         private PhotonView View;
 
-        public new void OnEnable()
+        public void Awake()
         {
             try
             {
@@ -56,17 +58,17 @@ namespace GorillaCraft.Behaviours.Networking
 
                 if (isCreating)
                 {
-                    BlockInfo.Add(new BlockGeneralInfo()
+                    BlockInfo.Add(new BlockData()
                     {
                         Name = block.GetType().Name,
-                        Position = blockPosition,
-                        Euler = blockEuler,
-                        Scale = blockScale
+                        Position = (BlockPosition)blockPosition,
+                        Euler = (BlockPosition)blockEuler,
+                        Scale = (BlockPosition)blockScale
                     });
                 }
                 else
                 {
-                    BlockGeneralInfo info = BlockInfo.FirstOrDefault(info => info.Position == blockPosition);
+                    BlockData info = BlockInfo.FirstOrDefault(info => info.Position == blockPosition);
                     if (info != null)
                     {
                         BlockInfo.Remove(info);

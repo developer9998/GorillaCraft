@@ -4,10 +4,13 @@ namespace GorillaCraft.Behaviours.UI
 {
     public abstract class MenuButton : MonoBehaviour
     {
-        private float pressTime;
-        public float pressDebounce = 0.125f;
+        private const float Debounce = 0.125f;
 
-        public void Start()
+        private float _pressTime;
+
+        private GorillaTriggerColliderHandIndicator _current;
+
+        private void Awake()
         {
             gameObject.layer = 18;
             GetComponent<Collider>().isTrigger = true;
@@ -15,13 +18,25 @@ namespace GorillaCraft.Behaviours.UI
 
         public void OnTriggerEnter(Collider other)
         {
-            if (!other.TryGetComponent(out GorillaTriggerColliderHandIndicator indicator) || pressTime > Time.unscaledTime || indicator != null && indicator.isLeftHand) return;
-            pressTime = Time.unscaledTime + pressDebounce;
+            if (other.TryGetComponent(out GorillaTriggerColliderHandIndicator indicator) && _current != indicator && !indicator.isLeftHand && Time.realtimeSinceStartup > _pressTime)
+            {
+                _current = indicator;
+                _pressTime = Time.realtimeSinceStartup + Debounce;
 
-            GorillaTagger.Instance.StartVibration(indicator.isLeftHand, 0.3f, 0.04f);
-            OnPress();
+                GorillaTagger.Instance.StartVibration(indicator.isLeftHand, 0.3f, 0.04f);
+                OnButtonActivation(true);
+            }
         }
 
-        public abstract void OnPress();
+        public void OnTriggerExit(Collider other)
+        {
+            if (other.TryGetComponent(out GorillaTriggerColliderHandIndicator indicator) && _current == indicator)
+            {
+                _current = null;
+                OnButtonActivation(false);
+            }
+        }
+
+        public abstract void OnButtonActivation(bool select);
     }
 }

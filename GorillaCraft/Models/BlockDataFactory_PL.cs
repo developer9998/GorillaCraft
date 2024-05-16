@@ -2,7 +2,7 @@
 using System;
 using Zenject;
 
-namespace GorillaCraft.Factories
+namespace GorillaCraft.Models
 {
     public class BlockDataFactory_PL : PlaceholderFactory<Type, IDataType>
     {

@@ -2,7 +2,6 @@
 using GorillaCraft.Behaviours.Networking;
 using GorillaCraft.Blocks.Solid;
 using GorillaCraft.Extensions;
-using GorillaCraft.Factories;
 using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
 using GorillaCraft.Sounds;
@@ -20,91 +19,96 @@ using Zenject;
 
 namespace GorillaCraft.Behaviours
 {
+    /// <summary>
+    /// BlockHandler is a component which operates the behaviour given to the initialization, calculations, creation, and removal of blocks.
+    /// </summary>
     public class BlockHandler : MonoBehaviourPunCallbacks
     {
-        private bool Initialized;
+        private bool _initialized;
 
-        private AssetLoader AssetLoader;
-        private BlockDataFactory_PL Factory;
+        private AssetLoader _assetLoader;
+        private BlockDataFactory_PL _blockDataFactory;
+        private Configuration _configuration;
 
-        private List<IBlock> BlockList;
+        private List<IBlock> _blockList;
 
-        private Dictionary<IBlock, GameObject> BlockDictionary;
-        private GameObject SolidTemplate, NonsolidTemplate, OtherDevTemplate, ParticleTemplate, LadderTemplate;
+        private Dictionary<IBlock, GameObject> _blockCollection;
+        private GameObject _solidBlockObject, _decorBlockObject, _spawnerBlockObject, _particleObject, _ladderObject;
 
-        private Dictionary<Type, IDataType> FootstepSound_Cache, InteractionSound_Cache;
+        private Dictionary<Type, IDataType> _footstepCache, _interactionCache;
 
-        private PhysicMaterial Slippery;
+        private PhysicMaterial _slipperyPhysicMaterial;
 
-        private Dictionary<Vector3, BlockParent> BlockLocations;
+        private Dictionary<Vector3, BlockObject> _blockLocationCollection;
 
         [Inject]
-        public async void Construct(AssetLoader assetLoader, List<IBlock> blockList, BlockDataFactory_PL factory)
+        public async void Construct(AssetLoader assetLoader, List<IBlock> blockList, BlockDataFactory_PL factory, Configuration config)
         {
-            if (Initialized) return;
-            Initialized = true;
+            if (_initialized) return;
+            _initialized = true;
 
-            AssetLoader = assetLoader;
-            Factory = factory;
+            _assetLoader = assetLoader;
+            _blockDataFactory = factory;
+            _configuration = config;
 
-            BlockList = blockList;
+            _blockList = blockList;
 
-            Slippery = new PhysicMaterial
+            _slipperyPhysicMaterial = new PhysicMaterial
             {
-                dynamicFriction = 0,
-                staticFriction = 0,
+                dynamicFriction = -0,
+                staticFriction = -0,
                 bounciness = 0,
                 frictionCombine = PhysicMaterialCombine.Minimum,
                 bounceCombine = PhysicMaterialCombine.Minimum
             };
 
             // Define lists, dictionaries, etc.
-            BlockLocations = new();
-            FootstepSound_Cache = new Dictionary<Type, IDataType>();
-            InteractionSound_Cache = new Dictionary<Type, IDataType>();
-            BlockDictionary = new Dictionary<IBlock, GameObject>();
+            _blockLocationCollection = [];
+            _footstepCache = [];
+            _interactionCache = [];
+            _blockCollection = [];
 
-            SolidTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.SolidBlockName);
-            NonsolidTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.NonsolidBlockName);
-            OtherDevTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.OtherDevBlockName);
-            LadderTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.LadderBlockName);
-            ParticleTemplate = await AssetLoader.LoadAsset<GameObject>(Constants.ParticleName);
+            _solidBlockObject = await _assetLoader.LoadAsset<GameObject>(Constants.SolidBlockName);
+            _decorBlockObject = await _assetLoader.LoadAsset<GameObject>(Constants.NonsolidBlockName);
+            _spawnerBlockObject = await _assetLoader.LoadAsset<GameObject>(Constants.OtherDevBlockName);
+            _ladderObject = await _assetLoader.LoadAsset<GameObject>(Constants.LadderBlockName);
+            _particleObject = await _assetLoader.LoadAsset<GameObject>(Constants.ParticleName);
 
-            async Task<BlockFace> Solid_PrepareSurface(GameObject currentObject, Material[] materialArray, string name, int materialIndex, BlockFaceInfo info, BlockParent _blockParent)
+            async Task<BlockFace> Solid_PrepareSurface(GameObject currentObject, Material[] materialArray, string name, int materialIndex, BlockFaceInfo info, BlockObject _blockParent)
             {
-                materialArray[materialIndex] = await AssetLoader.LoadAsset<Material>(info.FaceName);
+                materialArray[materialIndex] = await _assetLoader.LoadAsset<Material>(info.FaceName);
 
                 Transform relativeFace = currentObject.transform.Find("Collider/" + name);
-                relativeFace.GetComponent<Collider>().material = _blockParent.Block.GetType() == typeof(IceBlock) ? Slippery : relativeFace.GetComponent<Collider>().material;
+                relativeFace.GetComponent<Collider>().material = (_blockParent.BlockType.GetType() == typeof(IceBlock) || _blockParent.BlockType.GetType() == typeof(PackedIceBlock)) ? _slipperyPhysicMaterial : relativeFace.GetComponent<Collider>().material;
 
                 BlockFace blockFace = relativeFace.gameObject.AddComponent<BlockFace>();
-                blockFace.Block = _blockParent;
+                blockFace.Root = _blockParent;
                 blockFace.SurfaceType = info.FaceSurfaceType;
 
                 GorillaSurfaceOverride surface = relativeFace.gameObject.AddComponent<GorillaSurfaceOverride>();
-                surface.overrideIndex = info.FaceSurfaceType == typeof(Surface_Snow) ? 32 : (_blockParent.Block.GetType() == typeof(IceBlock) ? 59 : 0);
+                surface.overrideIndex = info.FaceSurfaceType == typeof(Surface_Snow) ? 32 : ((_blockParent.BlockType.GetType() == typeof(IceBlock) || _blockParent.BlockType.GetType() == typeof(PackedIceBlock)) ? 59 : 0);
 
                 return blockFace;
             }
 
-            BlockFace NonSolid_PrepareSurface(GameObject currentObject, string name, BlockParent blockParent, BlockFaceInfo info)
+            BlockFace NonSolid_PrepareSurface(GameObject currentObject, string name, BlockObject blockParent, BlockFaceInfo info)
             {
                 Transform relativeFace = currentObject.transform.Find("Collider/" + name);
 
-                if (blockParent.Block.BlockForm != BlockForm.Ladder)
+                if (blockParent.BlockType.BlockForm != BlockForm.Ladder)
                 {
                     relativeFace.gameObject.layer = 17;
                     relativeFace.parent.gameObject.layer = 17;
                 }
 
                 BlockFace blockFace = relativeFace.gameObject.AddComponent<BlockFace>();
-                blockFace.Block = blockParent;
+                blockFace.Root = blockParent;
                 blockFace.SurfaceType = info.FaceSurfaceType;
 
                 return blockFace;
             }
 
-            foreach (IBlock _currentBlock in BlockList)
+            foreach (IBlock _currentBlock in _blockList)
             {
                 GameObject _currentObject = null;
 
@@ -114,8 +118,8 @@ namespace GorillaCraft.Behaviours
                     {
                         _currentObject = Instantiate(_currentBlock.BlockForm switch
                         {
-                            BlockForm.DevSpawner => OtherDevTemplate,
-                            _ => SolidTemplate
+                            BlockForm.DevSpawner => _spawnerBlockObject,
+                            _ => _solidBlockObject
                         });
 
                         _currentObject.name = _currentBlock.BlockDefinition;
@@ -124,8 +128,8 @@ namespace GorillaCraft.Behaviours
                         MeshRenderer _rendererObject = _currentObject.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
                         Material[] _materialArray = _rendererObject.materials;
 
-                        BlockParent _blockParent = _currentObject.AddComponent<BlockParent>();
-                        _blockParent.Block = _currentBlock;
+                        BlockObject _blockParent = _currentObject.AddComponent<BlockObject>();
+                        _blockParent.BlockType = _currentBlock;
                         _blockParent.Back = await Solid_PrepareSurface(_currentObject, _materialArray, "Back", 0, _currentBlock.Back, _blockParent);
                         _blockParent.Left = await Solid_PrepareSurface(_currentObject, _materialArray, "Left", 1, _currentBlock.Left, _blockParent);
                         _blockParent.Front = await Solid_PrepareSurface(_currentObject, _materialArray, "Front", 2, _currentBlock.Front, _blockParent);
@@ -139,17 +143,17 @@ namespace GorillaCraft.Behaviours
                     {
                         _currentObject = Instantiate(_currentBlock.BlockForm switch
                         {
-                            BlockForm.Ladder => LadderTemplate,
-                            _ => NonsolidTemplate
+                            BlockForm.Ladder => _ladderObject,
+                            _ => _decorBlockObject
                         });
 
                         _currentObject.name = _currentBlock.BlockDefinition;
                         _currentObject.transform.localPosition = Vector3.zero;
 
-                        _currentObject.GetComponentInChildren<MeshRenderer>(true).material = await AssetLoader.LoadAsset<Material>(_currentBlock.Front.FaceName);
+                        _currentObject.GetComponentInChildren<MeshRenderer>(true).material = await _assetLoader.LoadAsset<Material>(_currentBlock.Front.FaceName);
 
-                        BlockParent _blockParent = _currentObject.AddComponent<BlockParent>();
-                        _blockParent.Block = _currentBlock;
+                        BlockObject _blockParent = _currentObject.AddComponent<BlockObject>();
+                        _blockParent.BlockType = _currentBlock;
                         _blockParent.Back = NonSolid_PrepareSurface(_currentObject, "Back", _blockParent, _currentBlock.Back);
 
                         if (_currentBlock.BlockForm != BlockForm.Ladder)
@@ -171,12 +175,12 @@ namespace GorillaCraft.Behaviours
                     Logging.Log(exception.String(), BepInEx.Logging.LogLevel.Error);
                 }
 
-                BlockDictionary.Add(_currentBlock, _currentObject);
+                _blockCollection.Add(_currentBlock, _currentObject);
                 _currentObject.SetActive(false);
             }
         }
 
-        public bool PlacementAllowed(string block, RaycastHit hit) => PlacementAllowed(BlockList.First(a => a.GetType().Name == block), hit);
+        public bool PlacementAllowed(string block, RaycastHit hit) => PlacementAllowed(_blockList.First(a => a.GetType().Name == block), hit);
 
         public bool PlacementAllowed(IBlock block, RaycastHit hit)
         {
@@ -184,17 +188,17 @@ namespace GorillaCraft.Behaviours
             {
                 if (hit.collider.TryGetComponent(out BlockFace face))
                 {
-                    BlockParent parent = face.Block;
-                    return parent.Block.BlockForm != BlockForm.Ladder && (parent.Left == face || parent.Front == face || parent.Right == face || parent.Back == face);
+                    BlockObject parent = face.Root;
+                    return parent.BlockType.BlockForm != BlockForm.Ladder && (parent.Left == face || parent.Front == face || parent.Right == face || parent.Back == face);
                 }
                 return false;
             }
             return true;
         }
 
-        public bool PlaceBlock(BlockPlaceType placeType, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, Player player, out BlockParent blockParent) => PlaceBlock(placeType, BlockList.First(a => a.GetType().Name == block), blockPosition, blockEuler, blockScale, player, out blockParent);
+        public bool PlaceBlock(BlockPlaceType placeType, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, Player player, out BlockObject blockParent, BlockInclusions inclusions) => PlaceBlock(placeType, _blockList.First(a => a.GetType().Name == block), blockPosition, blockEuler, blockScale, player, out blockParent, inclusions);
 
-        private bool PlaceBlock(BlockPlaceType placeType, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, Player player, out BlockParent blockParent)
+        private bool PlaceBlock(BlockPlaceType placeType, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, Player player, out BlockObject blockParent, BlockInclusions inclusions = BlockInclusions.Audio)
         {
             // Run a check if any player with the mod would be suffocated / trapped by this block
             if (placeType == BlockPlaceType.Local)
@@ -213,19 +217,19 @@ namespace GorillaCraft.Behaviours
             }
 
             // Run a check if there is already an existing block at this point
-            if (BlockLocations.ContainsKey(blockPosition))
+            if (_blockLocationCollection.ContainsKey(blockPosition))
             {
                 blockParent = null;
                 return false;
             }
 
             // Run a check if a "base-block" exists for this block type / interface
-            if (!BlockDictionary.TryGetValue(block, out GameObject baseBlock))
+            if (!_blockCollection.TryGetValue(block, out GameObject baseBlock))
             {
                 blockParent = null;
                 return false;
             }
-            BlockParent originalParent = baseBlock.GetComponent<BlockParent>();
+            BlockObject originalParent = baseBlock.GetComponent<BlockObject>();
 
             GameObject newBlock = Instantiate(baseBlock);
             newBlock.SetActive(true);
@@ -233,11 +237,11 @@ namespace GorillaCraft.Behaviours
             newBlock.transform.eulerAngles = blockEuler;
             newBlock.transform.localScale = blockScale;
 
-            if (placeType != BlockPlaceType.Recovery) BlockAudioUtils.PlaySound(AssetLoader, newBlock, GetInteractionType(block.PlaceSoundType));
+            if (inclusions.HasFlag(BlockInclusions.Audio)) BlockAudioUtils.PlaySound(_assetLoader, newBlock, GetInteractionType(block.PlaceSoundType), _configuration.PlaceBreakVolume.Value / 100f);
 
-            blockParent = newBlock.GetOrAddComponent<BlockParent>();
+            blockParent = newBlock.GetOrAddComponent<BlockObject>();
             blockParent.Owner = player;
-            blockParent.Block = block;
+            blockParent.BlockType = block;
 
             if (block.BlockForm != BlockForm.Decoration)
             {
@@ -254,13 +258,11 @@ namespace GorillaCraft.Behaviours
 
                 if (block.BlockForm == BlockForm.DevSpawner)
                 {
-                    RngObject randomAnim = new(1, 7);
-                    randomAnim.Out(value => newBlock.transform.Find("Other Dev Container/metarig").GetComponent<Animator>().Play(string.Concat("Other Dev ", value)));
-                    randomAnim.Dispose();
+
                 }
             }
 
-            BlockLocations.Add(blockPosition, blockParent);
+            _blockLocationCollection.Add(blockPosition, blockParent);
             if (placeType == BlockPlaceType.Local)
             {
                 PlayerSerializer.Local?.DistributeBlock(true, block, blockPosition, blockEuler, blockScale);
@@ -271,47 +273,56 @@ namespace GorillaCraft.Behaviours
 
         public void RemoveBlock(Vector3 position, Player sender)
         {
-            if (BlockLocations.ContainsKey(position))
+            if (_blockLocationCollection.ContainsKey(position))
             {
-                RemoveBlock(BlockLocations[position], sender);
+                RemoveBlock(_blockLocationCollection[position], sender);
             }
         }
 
-        public void RemoveBlock(BlockParent parent, Player sender)
+        public void RemoveBlock(BlockObject parent, Player sender, BlockInclusions inclusions = BlockInclusions.Audio | BlockInclusions.Particles)
         {
             if (parent == null || parent.Owner.UserId != sender.UserId) return;
 
-            BlockLocations.Remove(parent.transform.position);
+            _blockLocationCollection.Remove(parent.transform.position);
 
-            if (sender.IsLocal)
+            if (sender.IsLocal) // only network the removal of this block if it's local to our client
             {
                 PlayerSerializer.Local?.DistributeBlock(false, null, parent.transform.position, Vector3.zero, Vector3.zero);
-                if (parent.InflictedBlocks.Count > 0)
-                {
-                    List<BlockParent> inflictedBlocks = new(parent.InflictedBlocks);
-                    inflictedBlocks.Do(block => RemoveBlock(block, block.Owner));
-                }
             }
 
-            BlockAudioUtils.PlaySound(AssetLoader, parent.gameObject, GetInteractionType(parent.Block.DestroySoundType));
+            if (parent.ChildrenBlocks.Any()) // remove any children connected to this block, local client or not
+            {
+                List<BlockObject> list = new(parent.ChildrenBlocks);
+                list.ForEach(child =>
+                {
+                    Logging.Log($"Remove child attempt at [{child.transform.position.x}, {child.transform.position.y}, {child.transform.position.z}");
+                    RemoveBlock(child, child.Owner);
+                });
+            }
 
-            if (parent.Block.BlockForm != BlockForm.Decoration && parent.Block.BlockForm != BlockForm.Ladder)
+            if (inclusions.HasFlag(BlockInclusions.Audio))
+            {
+                BlockAudioUtils.PlaySound(_assetLoader, parent.gameObject, GetInteractionType(parent.BlockType.DestroySoundType), _configuration.PlaceBreakVolume.Value / 100f);
+            }
+
+            if (inclusions.HasFlag(BlockInclusions.Particles) && parent.BlockType.BlockForm != BlockForm.Decoration && parent.BlockType.BlockForm != BlockForm.Ladder)
             {
                 MeshRenderer _rendererObject = parent.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
                 Material[] _materialArray = _rendererObject.materials;
 
-                GameObject particles = Instantiate(ParticleTemplate);
+                GameObject particles = Instantiate(_particleObject);
                 particles.transform.position = parent.transform.position;
 
                 for (int i = 0; i < _materialArray.Length; i++)
                 {
-                    Material particleMaterial = new(_materialArray[i])
-                    {
-                        mainTextureOffset = new Vector2(UnityEngine.Random.value, UnityEngine.Random.value),
-                        mainTextureScale = Vector2.one / 6f
-                    };
+                    Material particleMaterial = new(_materialArray[i]);
+                    particleMaterial.SetVector("_TileOffset", new Vector4(1f / 6f, 1f / 6f, UnityEngine.Random.value, UnityEngine.Random.value));
 
                     Transform particleObj = particles.transform.Find($"Particle ({i + 1})");
+
+                    ParticleSystem.MainModule main = particleObj.GetComponent<ParticleSystem>().main;
+                    main.gravityModifierMultiplier *= parent.transform.localScale.y;
+                    particleObj.transform.localScale *= parent.transform.localScale.y;
 
                     ParticleSystemRenderer particleSystem = particleObj.GetComponent<ParticleSystemRenderer>();
                     particleSystem.material = particleMaterial;
@@ -321,22 +332,23 @@ namespace GorillaCraft.Behaviours
 
                 Destroy(particles, 3);
             }
-            else
+            else if (inclusions.HasFlag(BlockInclusions.Particles))
             {
-                Material baseMat = parent.transform.Find(parent.Block.BlockForm != BlockForm.Ladder ? "MinecraftDecorSample" : "LadderSurface").GetComponent<MeshRenderer>().material;
+                Material baseMat = parent.transform.Find(parent.BlockType.BlockForm != BlockForm.Ladder ? "MinecraftDecorSample" : "LadderSurface").GetComponent<MeshRenderer>().material;
 
-                GameObject particles = Instantiate(ParticleTemplate);
+                GameObject particles = Instantiate(_particleObject);
                 particles.transform.position = parent.transform.position;
 
                 for (int i = 0; i < 6; i++)
                 {
-                    Material particleMaterial = new(baseMat)
-                    {
-                        mainTextureOffset = new Vector2(UnityEngine.Random.value, UnityEngine.Random.value),
-                        mainTextureScale = Vector2.one / 6f
-                    };
+                    Material particleMaterial = new(baseMat);
+                    particleMaterial.SetVector("_TileOffset", new Vector4(1f / 6f, 1f / 6f, UnityEngine.Random.value, UnityEngine.Random.value));
 
                     Transform particleObj = particles.transform.Find($"Particle ({i + 1})");
+
+                    ParticleSystem.MainModule main = particleObj.GetComponent<ParticleSystem>().main;
+                    main.gravityModifierMultiplier *= parent.transform.localScale.y;
+                    particleObj.transform.localScale *= parent.transform.localScale.y;
 
                     ParticleSystemRenderer particleSystem = particleObj.GetComponent<ParticleSystemRenderer>();
                     particleSystem.material = particleMaterial;
@@ -346,7 +358,6 @@ namespace GorillaCraft.Behaviours
 
                 Destroy(particles, 3);
             }
-
 
             parent.Destroy();
         }
@@ -357,29 +368,29 @@ namespace GorillaCraft.Behaviours
             string currentSound = string.Concat("Step_", currentFootType.Name, UnityEngine.Random.Range(1, currentFootType.MaxRange));
             var currentSource = isLeftHand ? referenceRig.leftHandPlayer : referenceRig.rightHandPlayer;
 
-            currentSource.volume = currentFootType.Volume;
+            currentSource.volume = currentFootType.Volume * (_configuration.FootstepVolume.Value / 100f);
             currentSource.pitch = currentFootType.Pitch;
-            currentSource.clip = await AssetLoader.LoadAsset<AudioClip>(currentSound);
+            currentSource.clip = await _assetLoader.LoadAsset<AudioClip>(currentSound);
             currentSource.PlayOneShot(currentSource.clip);
         }
 
         IDataType GetFootstepType(Type footstepType)
         {
             // Check to see if we already have a tap sound under this type
-            if (FootstepSound_Cache.TryGetValue(footstepType, out IDataType cachedType)) return cachedType;
+            if (_footstepCache.TryGetValue(footstepType, out IDataType cachedType)) return cachedType;
 
-            var newStepType = Factory.Create(footstepType);
-            FootstepSound_Cache.Add(footstepType, newStepType);
+            var newStepType = _blockDataFactory.Create(footstepType);
+            _footstepCache.Add(footstepType, newStepType);
             return newStepType;
         }
 
         IDataType GetInteractionType(Type placeType)
         {
             // Check to see if we already have a place/remove sound under this type
-            if (InteractionSound_Cache.TryGetValue(placeType, out var cachedType)) return cachedType;
+            if (_interactionCache.TryGetValue(placeType, out var cachedType)) return cachedType;
 
-            var newStepType = Factory.Create(placeType);
-            InteractionSound_Cache.Add(placeType, newStepType);
+            var newStepType = _blockDataFactory.Create(placeType);
+            _interactionCache.Add(placeType, newStepType);
             return newStepType;
         }
 
@@ -387,16 +398,30 @@ namespace GorillaCraft.Behaviours
         {
             base.OnLeftRoom();
 
-            BlockLocations.Where(data => data.Value != null).Do(data => data.Value.Destroy());
-            BlockLocations.Clear();
+            _blockLocationCollection.Where(data => data.Value != null).Do(data => DestroyImmediate(data.Value.gameObject));
+            _blockLocationCollection.Clear();
         }
 
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
             base.OnPlayerLeftRoom(otherPlayer);
 
-            BlockLocations.Where(data => data.Value.Owner == otherPlayer && data.Value.InflictedBlocks.Count == 0).Do(data => data.Value.Destroy());
-            BlockLocations = BlockLocations.Except(BlockLocations.Where(data => data.Value.Owner == otherPlayer && data.Value.InflictedBlocks.Count == 0)).ToDictionary(x => x.Key, x => x.Value);
+            var affectedBlocks = _blockLocationCollection.Where(data => data.Value.Owner == otherPlayer);
+            var looseBlocks = _blockLocationCollection.Except(affectedBlocks).Where(data => data.Value.ParentalBlocks.Any() && data.Value.ParentalBlocks.Count == 1 && data.Value.ParentalBlocks.First().Owner == otherPlayer);
+
+            _blockLocationCollection = _blockLocationCollection.Except(affectedBlocks.Concat(looseBlocks)).ToDictionary(x => x.Key, x => x.Value);
+            affectedBlocks.Do(data => DestroyImmediate(data.Value.gameObject));
+            looseBlocks.Do(data =>
+            {
+                if (data.Value.IsLocal)
+                {
+                    RemoveBlock(data.Value, data.Value.Owner, BlockInclusions.None);
+                }
+                else
+                {
+                    data.Value.Destroy();
+                }
+            });
         }
     }
 }

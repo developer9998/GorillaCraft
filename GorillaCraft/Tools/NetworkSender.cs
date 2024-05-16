@@ -7,14 +7,14 @@ namespace GorillaCraft.Tools
 {
     public class NetworkSender
     {
-        public const byte BlockInteractionCode = 130;
+        public const byte BlockInteractionCode = 135;
         public const byte SurfaceTapCode = 131;
-        public const byte RequestBlocksCode = 132;
-        public const byte SendBlocksCode = 133;
+        public const byte RequestBlocksCode = 137;
+        public const byte SendBlocksCode = 138;
 
         public static void BlockInteraction(bool isCreating, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale)
         {
-            object[] content = new object[] { isCreating, block, blockPosition, blockEuler, blockScale };
+            object[] content = [isCreating, block, blockPosition, blockEuler, blockScale];
             RaiseEventOptions raiseEventOptions = new()
             {
                 Receivers = ReceiverGroup.Others
@@ -24,7 +24,7 @@ namespace GorillaCraft.Tools
 
         public static void SurfaceTap(string typeName, bool isLeftHand)
         {
-            object[] content = new object[] { typeName, isLeftHand };
+            object[] content = [typeName, isLeftHand];
             RaiseEventOptions raiseEventOptions = new()
             {
                 Receivers = ReceiverGroup.Others
@@ -34,20 +34,20 @@ namespace GorillaCraft.Tools
 
         public static void RequestBlocks(Player targetPlayer)
         {
-            object[] content = new object[] { PhotonNetwork.LocalPlayer };
+            object[] content = [PhotonNetwork.LocalPlayer];
             RaiseEventOptions raiseEventOptions = new()
             {
-                TargetActors = new int[] { targetPlayer.ActorNumber }
+                TargetActors = [targetPlayer.ActorNumber]
             };
             PhotonNetwork.RaiseEvent(RequestBlocksCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
         public static void SendBlocks(string[] blocks, Player targetPlayer)
         {
-            object[] content = new object[] { blocks };
+            object[] content = [blocks];
             RaiseEventOptions raiseEventOptions = new()
             {
-                TargetActors = new int[] { targetPlayer.ActorNumber }
+                TargetActors = [targetPlayer.ActorNumber]
             };
             PhotonNetwork.RaiseEvent(SendBlocksCode, content, raiseEventOptions, SendOptions.SendReliable);
         }

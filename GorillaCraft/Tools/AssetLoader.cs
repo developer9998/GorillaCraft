@@ -1,12 +1,11 @@
-﻿using GorillaCraft.Tools;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace GorillaCraft
+namespace GorillaCraft.Tools
 {
     public class AssetLoader
     {
@@ -45,7 +44,7 @@ namespace GorillaCraft
 
             Logging.Log(string.Concat("Loading asset: ", name), BepInEx.Logging.LogLevel.Info);
 
-            _loadedObjects ??= new Dictionary<string, Object>();
+            _loadedObjects ??= [];
 
             var _bundleLoadRequest = _assetBundle.LoadAssetAsync<T>(name);
             var _completionSource = new TaskCompletionSource<T>();
