@@ -10,7 +10,7 @@ namespace GorillaCraft.Behaviours.UI
         public ButtonOptionData<float> OptionData
         {
             get => _optionData;
-            set 
+            set
             {
                 _optionData = value;
                 value.OnOptionSet?.Invoke(SliderData.GetValue(value.Value));

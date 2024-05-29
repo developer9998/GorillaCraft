@@ -9,7 +9,7 @@ using UnityEngine.XR;
 namespace GorillaCraft.Patches
 {
     [HarmonyPatch(typeof(Player), "EndClimbing")]
-    public class PlayerClimbPatch
+    public class EndClimbPatch
     {
         public static bool Prefix(Player __instance, GorillaHandClimber hand, bool startingNewClimb, bool doDontReclimb, ref GorillaHandClimber ___currentClimber, ref GorillaClimbable ___currentClimbable)
         {

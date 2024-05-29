@@ -1,6 +1,6 @@
-﻿using System;
+﻿using GorillaCraft.Sounds;
+using System;
 using UnityEngine;
-using GorillaCraft.Sounds;
 
 namespace GorillaCraft.Behaviours.Block
 {

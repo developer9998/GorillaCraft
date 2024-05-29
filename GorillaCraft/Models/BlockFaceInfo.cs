@@ -1,5 +1,5 @@
-﻿using System;
-using GorillaCraft.Sounds;
+﻿using GorillaCraft.Sounds;
+using System;
 
 namespace GorillaCraft.Models
 {

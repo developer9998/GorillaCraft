@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace GorillaCraft.Patches
 {
     [HarmonyPatch]
-    public class RigPatch
+    public class AddPlayerPatch
     {
         public static async void AddPatch(NetPlayer player)
         {

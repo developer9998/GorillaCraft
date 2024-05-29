@@ -11,13 +11,17 @@
         public const string ItemSelectorName = "ItemSelector";
         public const string CurrentItemImage = "UI Parent/Current Item/Image";
         public const string CurrentItemName = "UI Parent/Item Name/Text";
-        public const string PageGridName = "UI Parent/Pages/Main Page";
+        public const string ItemGridName = "UI Parent/Pages/Main Page";
+        public const string ItemScrollBar = "Scroll Bar";
+        public const string PageLeftButton = "Previous Page";
+        public const string PageRightButton = "Next Page";
 
         public const string SolidBlockName = "Block_Solid";
         public const string NonsolidBlockName = "Block_NonSolid";
         public const string OtherDevBlockName = "Block_TheThing";
         public const string LadderBlockName = "Block_Ladder";
         public const string ParticleName = "BlockParticle";
+        public const string StaircaseName = "Block_Staircase";
 
         public const int GridTile = 1;
 

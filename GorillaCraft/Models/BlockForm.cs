@@ -20,6 +20,7 @@
         /// <summary>
         /// The block is a vertically-angled climbable. 
         /// </summary>
-        Ladder
+        Ladder,
+        StairsTest
     }
 }

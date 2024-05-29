@@ -6,7 +6,7 @@ using HarmonyLib;
 namespace GorillaCraft.Patches
 {
     [HarmonyPatch(typeof(VRRig), "PlayHandTapLocal")]
-    public class TapSoundPatch
+    public class LocalHandTapRPC
     {
         private static BlockFace _currentFace;
 
@@ -14,8 +14,8 @@ namespace GorillaCraft.Patches
         {
             if (!__instance.isOfflineVRRig) return true;
 
-            var currentOverride = isLeftHand ? Player.Instance.leftHandSurfaceOverride : Player.Instance.rightHandSurfaceOverride;
-            if (currentOverride != null && currentOverride.TryGetComponent(out _currentFace))
+            GorillaSurfaceOverride currentOverride = isLeftHand ? Player.Instance.leftHandSurfaceOverride : Player.Instance.rightHandSurfaceOverride;
+            if (currentOverride && currentOverride.TryGetComponent(out _currentFace))
             {
                 Player.Instance.GetComponent<BlockHandler>().PlayTapSound(__instance, _currentFace.SurfaceType, isLeftHand);
                 return false;

@@ -28,7 +28,7 @@ namespace GorillaCraft.Behaviours
         private MenuHandler _menuHandler;
         private GameModeUIHandler _gamemodeHandler;
 
-        private bool ModeBindActivated;
+        private bool _currentModeBinding;
 
         [Inject]
         public void Construct(PlacementHelper placementHelper, AssetLoader assetLoader, Configuration configuration)
@@ -40,7 +40,7 @@ namespace GorillaCraft.Behaviours
 
         public async void Initialize()
         {
-            Plugin.Allowed.AddCallback(OnRoomEntered);
+            Plugin.Allowed.AddCallback(AllowStateChanged);
 
             GameObject itemSelectionMenu = Instantiate(await _assetLoader.LoadAsset<GameObject>("ItemSelector"));
             itemSelectionMenu.transform.SetParent(GorillaTagger.Instance.offlineVRRig.leftHandTransform.parent);
@@ -59,8 +59,6 @@ namespace GorillaCraft.Behaviours
             _gamemodeHandler._onSprite = await _assetLoader.LoadAsset<Sprite>("selection");
             _gamemodeHandler._placementHelper = _placementHelper;
 
-            PlayerSerializer.Nametag = await _assetLoader.LoadAsset<GameObject>("Nametag");
-
             PhotonNetwork.LocalPlayer.SetCustomProperties(new() { { "GC", Constants.Version } });
         }
 
@@ -76,20 +74,20 @@ namespace GorillaCraft.Behaviours
             }
 
             bool buttonHeld = ControllerInputPoller.instance.leftControllerPrimaryButton;
-            if (buttonHeld && buttonHeld != ModeBindActivated)
+            if (buttonHeld && buttonHeld != _currentModeBinding)
             {
                 _gamemodeHandler.gameObject.SetActive(true);
                 _menuHandler.gameObject.SetActive(false);
             }
-            else if (!buttonHeld && buttonHeld != ModeBindActivated)
+            else if (!buttonHeld && buttonHeld != _currentModeBinding)
             {
                 _gamemodeHandler.gameObject.SetActive(false);
                 _menuHandler.gameObject.SetActive(PlacementHelper.InteractMode == 0);
             }
-            ModeBindActivated = buttonHeld;
+            _currentModeBinding = buttonHeld;
         }
 
-        private void OnRoomEntered(bool state)
+        private void AllowStateChanged(bool state)
         {
             InModdedRoom = state;
             if (InModdedRoom)
@@ -181,7 +179,7 @@ namespace GorillaCraft.Behaviours
                                 string json = JsonConvert.SerializeObject(block, Formatting.None);
                                 blocks.Add(json);
                             }
-                            catch(Exception e)
+                            catch (Exception e)
                             {
                                 Logging.Log(string.Format("Error when serializing block {0}: {1}", block.ToString(), e.String()));
                             }
@@ -219,11 +217,11 @@ namespace GorillaCraft.Behaviours
                             Logging.Log(string.Format("Received block from {0}:\n{1}", sender.ToString(), block));
 
                             BlockData blockInfo = JsonConvert.DeserializeObject<BlockData>(block);
-                            
+
                             GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, blockInfo.Name, blockInfo.Position, blockInfo.Euler, blockInfo.Scale, sender, out _, BlockInclusions.None);
                         }
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Logging.Log(string.Format("Error when processing SendBlocksCode - {0}", e.String()), BepInEx.Logging.LogLevel.Error);
                     }

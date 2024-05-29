@@ -16,7 +16,7 @@ namespace GorillaCraft
         public static Watchable<bool> Allowed { get; private set; }
 
         private static Assembly GTAssembly => typeof(GorillaTagger).Assembly;
-        private static Type RigPatchType => typeof(RigPatch);
+        private static Type RigPatchType => typeof(AddPlayerPatch);
 
         public async void Awake()
         {
@@ -28,7 +28,7 @@ namespace GorillaCraft
             harmony.PatchAll(typeof(Plugin).Assembly);
 
             Type rigCacheType = GTAssembly.GetType("VRRigCache");
-            harmony.Patch(AccessTools.Method(rigCacheType, "AddRigToGorillaParent"), postfix: new HarmonyMethod(RigPatchType, nameof(RigPatch.AddPatch)));
+            harmony.Patch(AccessTools.Method(rigCacheType, "AddRigToGorillaParent"), postfix: new HarmonyMethod(RigPatchType, nameof(AddPlayerPatch.AddPatch)));
         }
 
         [ModdedGamemodeJoin]

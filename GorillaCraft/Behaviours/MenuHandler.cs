@@ -19,8 +19,8 @@ namespace GorillaCraft.Behaviours
         public PlacementHelper Placement;
         public Configuration Config;
 
-        public Transform UIParent;
-        public Transform ModelParent;
+        private Transform _uiParent, _modelParent;
+        private Vector3 _leftMenuPosition = new(-0.0929f, 0.1055f, 0.0141f), _leftMenuAngle = new(-10.992f, 85.797f, 74.78f);
 
         private Text _currentItemText;
         private Image _currentItemImage;
@@ -28,31 +28,30 @@ namespace GorillaCraft.Behaviours
         private Dictionary<Button_Item, int> _blockItemCollection;
 
         private MenuObject _mainMenuObject;
-        private Input_Slider _blockSlider;
-        private Button_Page _leftButton, _rightButton;
         private List<MenuObject> _menuObjectList;
         private int _currentItemIndex = 0, _currentMenuIndex = 0;
 
-        public Vector3 LeftPosition = new(-0.0929f, 0.1055f, 0.0141f), LeftEuler = new(-10.992f, 85.797f, 74.78f);
+        private Input_Slider _blockSlider;
+        private Button_Page _leftButton, _rightButton;
 
         public void Start()
         {
-            transform.localPosition = LeftPosition;
-            transform.localEulerAngles = LeftEuler;
+            transform.localPosition = _leftMenuPosition;
+            transform.localEulerAngles = _leftMenuAngle;
             transform.localScale = Vector3.one * 1.146174f;
 
-            UIParent = transform.Find("UI Parent");
-            ModelParent = transform.Find("Menu Parent");
+            _uiParent = transform.Find("UI Parent");
+            _modelParent = transform.Find("Menu Parent");
 
-            _leftButton = transform.Find("UI Parent/Next Page").AddComponent<Button_Page>();
+            _leftButton = _uiParent.Find(Constants.PageLeftButton).AddComponent<Button_Page>();
             _leftButton.menuParent = this;
             _leftButton.buttonType = Button_Page.ButtonType.Left;
 
-            _rightButton = transform.Find("UI Parent/Previous Page").AddComponent<Button_Page>();
+            _rightButton = _uiParent.Find(Constants.PageRightButton).AddComponent<Button_Page>();
             _rightButton.menuParent = this;
             _rightButton.buttonType = Button_Page.ButtonType.Right;
 
-            _blockSlider = transform.Find("UI Parent/Scroll Bar").AddComponent<Input_Slider>();
+            _blockSlider = _uiParent.Find(Constants.ItemScrollBar).AddComponent<Input_Slider>();
             _blockSlider.MenuParent = this;
             _blockSlider.Split = 14;
             _blockSlider.SliderData = new ButtonSliderData()
@@ -62,7 +61,7 @@ namespace GorillaCraft.Behaviours
             };
             _blockSlider.OptionData = new ButtonOptionData<float>();
 
-            Button_Page settingsButton = transform.Find("UI Parent/Settings Button").AddComponent<Button_Page>();
+            Button_Page settingsButton = _uiParent.Find("Settings Button").AddComponent<Button_Page>();
             settingsButton.menuParent = this;
             settingsButton.buttonType = Button_Page.ButtonType.SettingToggle;
 
@@ -71,7 +70,7 @@ namespace GorillaCraft.Behaviours
             _blockItemList = [];
             _blockItemCollection = [];
 
-            Transform blockPageParent = transform.Find(Constants.PageGridName);
+            Transform blockPageParent = transform.Find(Constants.ItemGridName);
             for (int i = 0; i < blockPageParent.childCount; i++)
             {
                 var blockPageObject = blockPageParent.GetChild(i);
@@ -118,7 +117,7 @@ namespace GorillaCraft.Behaviours
 
             #endregion
 
-            Input_Checkbox darkModeButton = transform.Find("UI Parent/Pages/Settings Page/DarkMode").AddComponent<Input_Checkbox>();
+            Input_Checkbox darkModeButton = _uiParent.Find("Pages/Settings Page/DarkMode").AddComponent<Input_Checkbox>();
             darkModeButton.MenuParent = this;
             darkModeButton.OptionData = new ButtonOptionData<bool>()
             {
@@ -131,7 +130,7 @@ namespace GorillaCraft.Behaviours
                 }
             };
 
-            Input_Slider slider_BlockResource = transform.Find("UI Parent/Pages/Settings Page/BlockResourceSlider").AddComponent<Input_Slider>();
+            Input_Slider slider_BlockResource = _uiParent.Find("Pages/Settings Page/BlockResourceSlider").AddComponent<Input_Slider>();
             slider_BlockResource.MenuParent = this;
             slider_BlockResource.Split = 2;
             slider_BlockResource.SliderData = new ButtonSliderData()
@@ -141,7 +140,7 @@ namespace GorillaCraft.Behaviours
             };
             slider_BlockResource.SliderContentOverride = new Dictionary<float, string>()
             {
-                { 0, "Vanilla" }, { 1, "Classic" }, { 2, "Faithful"}
+                { 0, "Current" }, { 1, "Legacy" }, { 2, "Faithful"}
             };
             slider_BlockResource.OptionData = new ButtonOptionData<float>()
             {
@@ -153,7 +152,7 @@ namespace GorillaCraft.Behaviours
                 }
             };
 
-            Input_Slider placeButton = transform.Find("UI Parent/Pages/Settings Page/PlaceBreak Volume").AddComponent<Input_Slider>();
+            Input_Slider placeButton = _uiParent.Find("Pages/Settings Page/PlaceBreak Volume").AddComponent<Input_Slider>();
             placeButton.MenuParent = this;
             placeButton.Split = 25;
             placeButton.SliderData = new ButtonSliderData()
@@ -172,7 +171,7 @@ namespace GorillaCraft.Behaviours
                 }
             };
 
-            Input_Slider stepButton = transform.Find("UI Parent/Pages/Settings Page/Footstep Volume").AddComponent<Input_Slider>();
+            Input_Slider stepButton = _uiParent.Find("Pages/Settings Page/Footstep Volume").AddComponent<Input_Slider>();
             stepButton.MenuParent = this;
             stepButton.Split = 25;
             stepButton.SliderData = new ButtonSliderData()
@@ -196,15 +195,18 @@ namespace GorillaCraft.Behaviours
         {
             try
             {
-                int w = 8, h = 5, t = -w * _currentItemIndex;
+                int menuWidth = 8, menuHeight = 5, visibilityIndex = -menuWidth * _currentItemIndex;
 
                 for (int i = 0; i < _blockItemList.Count; i++)
                 {
-                    t++;
-                    bool e = t <= w * h && t >= (_currentItemIndex == 0 ? 0 : 1);
+                    visibilityIndex++;
+
                     Button_Item currentItem = _blockItemList[i];
 
-                    currentItem.gameObject.SetActive(e);
+                    int minimumIndex = _currentItemIndex == 0 ? 0 : 1;
+                    bool itemEnabled = visibilityIndex <= menuWidth * menuHeight && visibilityIndex >= minimumIndex;
+
+                    currentItem.gameObject.SetActive(itemEnabled);
                 }
             }
             catch (Exception exception)
@@ -255,7 +257,7 @@ namespace GorillaCraft.Behaviours
 
                 source.PlayOneShot(source.clip);
 
-                int increment = sender.buttonType == Button_Page.ButtonType.Right ? -1 : 1;
+                int increment = sender.buttonType == Button_Page.ButtonType.Right ? 1 : -1;
                 _currentMenuIndex = Mathf.Clamp(_currentMenuIndex + increment, 0, _menuObjectList.Count - 1);
 
                 RedrawMenus();

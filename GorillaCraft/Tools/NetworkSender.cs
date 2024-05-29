@@ -12,6 +12,7 @@ namespace GorillaCraft.Tools
         public const byte RequestBlocksCode = 137;
         public const byte SendBlocksCode = 138;
 
+        // TODO: replace strings and vectors with byte arrays
         public static void BlockInteraction(bool isCreating, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale)
         {
             object[] content = [isCreating, block, blockPosition, blockEuler, blockScale];

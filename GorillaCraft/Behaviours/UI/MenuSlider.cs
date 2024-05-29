@@ -37,12 +37,6 @@ namespace GorillaCraft.Behaviours.UI
         {
             if (other.TryGetComponent(out GorillaTriggerColliderHandIndicator component) && !component.isLeftHand && (Current == null || Current == component))
             {
-                if (Current == null)
-                {
-                    Current = component;
-                    GorillaTagger.Instance.StartVibration(component.isLeftHand, 0.3f, 0.04f);
-                }
-
                 Vector3 local = transform.InverseTransformPoint(component.transform.position);
                 float tbaValue = Mathf.RoundToInt(Mathf.Clamp01((local.x - min.localPosition.x) / (max.localPosition.x * 2f)) * Split) / (float)Split;
                 slider.transform.localPosition = Vector3.Lerp(min.localPosition, max.localPosition, tbaValue);
@@ -51,6 +45,14 @@ namespace GorillaCraft.Behaviours.UI
                 {
                     Value = tbaValue;
                     OnSliderAdjust(true);
+
+                    if (Current != null) GorillaTagger.Instance.StartVibration(component.isLeftHand, 0.1f, 0.015f);
+                }
+
+                if (Current == null)
+                {
+                    Current = component;
+                    GorillaTagger.Instance.StartVibration(component.isLeftHand, 0.25f, 0.05f);
                 }
             }
         }

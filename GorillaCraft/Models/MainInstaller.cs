@@ -197,6 +197,8 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<PurpleStainedGlass>().AsSingle();
             Container.Bind<IBlock>().To<MagentaStainedGlass>().AsSingle();
             Container.Bind<IBlock>().To<PinkStainedGlass>().AsSingle();
+
+            Container.Bind<IBlock>().To<OakStairsBlock>().AsSingle();
         }
     }
 }

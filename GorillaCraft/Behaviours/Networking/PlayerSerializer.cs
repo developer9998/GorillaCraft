@@ -10,11 +10,12 @@ using UnityEngine;
 
 namespace GorillaCraft.Behaviours.Networking
 {
+    // TODO: relocate into one component, not attached to any photonviews
+
     [RequireComponent(typeof(PhotonView)), DisallowMultipleComponent]
     public class PlayerSerializer : MonoBehaviourPunCallbacks, IPhotonViewCallback
     {
         public static PlayerSerializer Local;
-        public static GameObject Nametag;
 
         public readonly List<BlockData> BlockInfo = [];
 

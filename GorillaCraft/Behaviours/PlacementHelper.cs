@@ -101,7 +101,7 @@ namespace GorillaCraft.Behaviours
             _lineRenderer.startWidth = 0.007f * Mathf.Clamp01(Player.scale);
             _lineRenderer.endWidth = 0.007f * Mathf.Clamp01(Player.scale);
 
-            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 24 * Mathf.Clamp01(Player.scale), InteractMode == 0 ? _buildLayerMask : _removeLayerMask, QueryTriggerInteraction.UseGlobal))
+            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 25 * Mathf.Clamp01(Player.scale), InteractMode == 0 ? _buildLayerMask : _removeLayerMask, QueryTriggerInteraction.UseGlobal))
             {
                 _lineRenderer.enabled = true;
                 if (!_crosshairObject.activeSelf) _crosshairObject.SetActive(true);
