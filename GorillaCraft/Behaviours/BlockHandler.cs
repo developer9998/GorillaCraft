@@ -236,16 +236,13 @@ namespace GorillaCraft.Behaviours
             // Run a check if any player with the mod would be suffocated / trapped by this block
             if (placeType == BlockPlaceType.Local)
             {
-                Bounds bounds = new(blockPosition, blockScale);
-
-                VRRig LocalRig = GorillaTagger.Instance.offlineVRRig;
-                SphereCollider headCollider = LocalRig.headMesh.transform.Find("SpeakerHeadCollider").GetComponent<SphereCollider>();
-                CapsuleCollider bodyCollider = LocalRig.headMesh.transform.parent.Find("BodyTrigger").GetComponent<CapsuleCollider>();
-
-                if (bounds.Intersects(headCollider.bounds) || bounds.Intersects(bodyCollider.bounds))
+                foreach (RaycastHit hit in Physics.SphereCastAll(blockPosition, blockScale.x, blockPosition, 0.01f))
                 {
-                    blockParent = null;
-                    return false;
+                    if (hit.collider.name == "SpeakerHeadCollider" || hit.collider.name == "BodyTrigger")
+                    {
+                        blockParent = null;
+                        return false;
+                    }
                 }
             }
 
