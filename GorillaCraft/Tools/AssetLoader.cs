@@ -15,6 +15,8 @@ namespace GorillaCraft.Tools
 
         private Dictionary<string, Object> _loadedObjects;
 
+        private GameObject _instantiateParent;
+
         private async Task LoadBundle()
         {
             Stream _bundleStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(Constants.BundleDirectory);
@@ -63,6 +65,17 @@ namespace GorillaCraft.Tools
             var _finishedTask = await _completionSource.Task;
             _loadedObjects.Add(name, _finishedTask);
             return _finishedTask;
+        }
+
+        public GameObject SetObjectParent(GameObject gameObject)
+        {
+            if (_instantiateParent == null)
+            {
+                _instantiateParent = new GameObject("GorillaCraft Objects");
+            }
+
+            gameObject.transform.SetParent(_instantiateParent.transform, true);
+            return gameObject;
         }
     }
 }

@@ -125,6 +125,8 @@ namespace GorillaCraft.Behaviours
                             _ => _solidBlockObject
                         });
 
+                        _assetLoader.SetObjectParent(_currentObject);
+
                         _currentObject.name = _currentBlock.BlockDefinition;
                         _currentObject.transform.localPosition = Vector3.zero;
 
@@ -145,6 +147,8 @@ namespace GorillaCraft.Behaviours
                     else if (_currentBlock.BlockForm == BlockForm.StairsTest)
                     {
                         _currentObject = Instantiate(_stairObject);
+
+                        _assetLoader.SetObjectParent(_currentObject);
 
                         _currentObject.name = _currentBlock.BlockDefinition;
                         _currentObject.transform.localPosition = Vector3.zero;
@@ -179,6 +183,8 @@ namespace GorillaCraft.Behaviours
                             BlockForm.Ladder => _ladderObject,
                             _ => _decorBlockObject
                         });
+
+                        _assetLoader.SetObjectParent(_currentObject);
 
                         _currentObject.name = _currentBlock.BlockDefinition;
                         _currentObject.transform.localPosition = Vector3.zero;
@@ -236,7 +242,19 @@ namespace GorillaCraft.Behaviours
             // Run a check if any player with the mod would be suffocated / trapped by this block
             if (placeType == BlockPlaceType.Local)
             {
-                foreach (RaycastHit hit in Physics.SphereCastAll(blockPosition, blockScale.x, blockPosition, 0.01f))
+                Bounds bounds = new(blockPosition, blockScale);
+
+                VRRig LocalRig = GorillaTagger.Instance.offlineVRRig;
+                SphereCollider headCollider = LocalRig.headMesh.transform.Find("SpeakerHeadCollider").GetComponent<SphereCollider>();
+                CapsuleCollider bodyCollider = LocalRig.headMesh.transform.parent.Find("BodyTrigger").GetComponent<CapsuleCollider>();
+
+                if (bounds.Intersects(headCollider.bounds) || bounds.Intersects(bodyCollider.bounds))
+                {
+                    blockParent = null;
+                    return false;
+                }
+
+                foreach (RaycastHit hit in Physics.SphereCastAll(blockPosition, blockScale.x, blockPosition, 0f))
                 {
                     if (hit.collider.name == "SpeakerHeadCollider" || hit.collider.name == "BodyTrigger")
                     {
@@ -321,7 +339,9 @@ namespace GorillaCraft.Behaviours
 
         public void RemoveBlock(BlockObject parent, Player sender, BlockInclusions inclusions = BlockInclusions.Audio | BlockInclusions.Particles)
         {
-            if (parent == null || parent.Owner.UserId != sender.UserId) return;
+            //bool networkBreakFactor = parent.Owner.UserId == sender.UserId;
+            bool networkBreakFactor = true;
+            if (parent == null || !networkBreakFactor) return;
 
             _blockLocationCollection.Remove(parent.transform.position);
 

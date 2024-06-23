@@ -162,9 +162,14 @@ namespace GorillaCraft.Behaviours
                         return;
                     }
 
-                    if (hit.transform.GetComponentInChildren<BlockFace>() is BlockFace face && face && face.Root.Owner.IsLocal)
+                    if (hit.transform.GetComponentInChildren<BlockFace>() is BlockFace face && face)
                     {
-                        _blockHandler.RemoveBlock(face.Root, PhotonNetwork.LocalPlayer);
+                        //bool networkBreakFactor = face.Root.Owner.IsLocal;
+                        bool networkBreakFactor = true;
+                        if (networkBreakFactor)
+                        {
+                            _blockHandler.RemoveBlock(face.Root, PhotonNetwork.LocalPlayer);
+                        }
                     }
                 }
                 IndexActivated = triggerPressed;

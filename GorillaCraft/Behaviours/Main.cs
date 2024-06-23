@@ -73,7 +73,7 @@ namespace GorillaCraft.Behaviours
                 return;
             }
 
-            bool buttonHeld = ControllerInputPoller.instance.leftControllerPrimaryButton;
+            bool buttonHeld = ControllerInputPoller.instance.leftControllerSecondaryButton;
             if (buttonHeld && buttonHeld != _currentModeBinding)
             {
                 _gamemodeHandler.gameObject.SetActive(true);
