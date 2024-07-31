@@ -5,7 +5,7 @@ using HarmonyLib;
 
 namespace GorillaCraft.Patches
 {
-    [HarmonyPatch(typeof(VRRig), "PlayHandTapLocal")]
+    [HarmonyPatch(typeof(VRRig), "OnHandTap")]
     public class LocalHandTapRPC
     {
         private static BlockFace _currentFace;

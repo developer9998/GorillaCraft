@@ -164,8 +164,8 @@ namespace GorillaCraft.Behaviours
 
                     if (hit.transform.GetComponentInChildren<BlockFace>() is BlockFace face && face)
                     {
-                        //bool networkBreakFactor = face.Root.Owner.IsLocal;
-                        bool networkBreakFactor = true;
+                        bool networkBreakFactor = face.Root.Owner.IsLocal;
+                        // bool networkBreakFactor = true;
                         if (networkBreakFactor)
                         {
                             _blockHandler.RemoveBlock(face.Root, PhotonNetwork.LocalPlayer);

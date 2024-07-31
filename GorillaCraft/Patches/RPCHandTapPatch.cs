@@ -13,7 +13,7 @@ namespace GorillaCraft.Patches
 
         public static bool Prefix(string methodName, PhotonView __instance, params object[] parameters)
         {
-            if (methodName == "PlayHandTap" && __instance.IsMine)
+            if (methodName == "OnHandTapRPC" && __instance.IsMine)
             {
                 bool isLeftHand = (bool)parameters[1];
 

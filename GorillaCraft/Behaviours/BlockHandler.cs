@@ -339,8 +339,8 @@ namespace GorillaCraft.Behaviours
 
         public void RemoveBlock(BlockObject parent, Player sender, BlockInclusions inclusions = BlockInclusions.Audio | BlockInclusions.Particles)
         {
-            //bool networkBreakFactor = parent.Owner.UserId == sender.UserId;
-            bool networkBreakFactor = true;
+            bool networkBreakFactor = parent.Owner.UserId == sender.UserId;
+            // bool networkBreakFactor = true;
             if (parent == null || !networkBreakFactor) return;
 
             _blockLocationCollection.Remove(parent.transform.position);
