@@ -115,14 +115,14 @@ namespace GorillaCraft.Behaviours
 
         public async void OnEvent(EventData data)
         {
-            if (data.Code != NetworkSender.BlockInteractionCode && data.Code != NetworkSender.SurfaceTapCode && data.Code != NetworkSender.RequestBlocksCode && data.Code != NetworkSender.SendBlocksCode) return;
+            if (data.Code != (int)GorillaCraftNetworkType.BlockInteractionCode && data.Code != (int)GorillaCraftNetworkType.SurfaceTapCode && data.Code != (int)GorillaCraftNetworkType.RequestBlocksCode && data.Code != (int)GorillaCraftNetworkType.SendBlocksCode) return;
 
             Player sender = PhotonNetwork.CurrentRoom.GetPlayer(data.Sender);
             object[] eventData = (object[])data.CustomData;
 
-            if (data.Code == NetworkSender.BlockInteractionCode)
+            if (data.Code == (int)GorillaCraftNetworkType.BlockInteractionCode)
             {
-                PhotonView photonView = RigCacheUtils.GetProperty<PhotonView>(sender);
+                PhotonView photonView = RigCacheUtils.GetRigContainer(sender).netView.GetView;
                 if (photonView)
                 {
                     if ((bool)eventData[0])
@@ -139,21 +139,21 @@ namespace GorillaCraft.Behaviours
                     Logging.Log(string.Concat(data.String(), "- This event is void"));
                 }
             }
-            else if (data.Code == NetworkSender.SurfaceTapCode)
+            else if (data.Code == (int)GorillaCraftNetworkType.SurfaceTapCode)
             {
-                PhotonView photonView = RigCacheUtils.GetProperty<PhotonView>(sender);
+                PhotonView photonView = RigCacheUtils.GetRigContainer(sender).netView.GetView;
                 if (photonView)
                 {
 
                     Type surfaceType = typeof(Plugin).Assembly.GetTypes().First(type => type.Name == (string)eventData[0]);
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlayTapSound(RigCacheUtils.GetProperty<VRRig>(sender), surfaceType, (bool)eventData[1]);
+                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlayTapSound(RigCacheUtils.GetRigContainer(sender).Rig, surfaceType, (bool)eventData[1]);
                 }
                 else
                 {
                     Logging.Log(string.Concat(data.String(), "- This event is void"));
                 }
             }
-            else if (data.Code == NetworkSender.RequestBlocksCode)
+            else if (data.Code == (int)GorillaCraftNetworkType.RequestBlocksCode)
             {
                 if (!sender.IsLocal)
                 {
@@ -169,7 +169,7 @@ namespace GorillaCraft.Behaviours
                             if (blocks.Count >= 10)
                             {
                                 Logging.Log(string.Format("Sending current list of blocks of count {0}", blocks.Count));
-                                NetworkSender.SendBlocks([.. blocks], player);
+                                NetworkUtils.SendBlocks([.. blocks], player);
                                 blocks.Clear();
                                 await Task.Delay(50);
                             }
@@ -190,7 +190,7 @@ namespace GorillaCraft.Behaviours
                             await Task.Delay(50);
 
                             Logging.Log("Sending remaining blocks");
-                            NetworkSender.SendBlocks([.. blocks], player);
+                            NetworkUtils.SendBlocks([.. blocks], player);
                         }
                     }
                     catch (Exception e)
@@ -203,7 +203,7 @@ namespace GorillaCraft.Behaviours
                     Logging.Log(string.Concat(data.String(), "- rq This event is void"));
                 }
             }
-            else if (data.Code == NetworkSender.SendBlocksCode)
+            else if (data.Code == (int)GorillaCraftNetworkType.SendBlocksCode)
             {
                 if (!sender.IsLocal)
                 {

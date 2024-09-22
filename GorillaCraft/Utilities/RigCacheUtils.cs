@@ -14,20 +14,21 @@ namespace GorillaCraft.Utilities
 
         private static object CacheInstance => AccessTools.Property(RigCacheType, "Instance").GetValue(RigCacheType, null);
 
-        public static T GetProperty<T>(Player player)
+        public static RigContainer GetRigContainer(Player player)
         {
-            if (CacheInstance == null) return default;
+            if (CacheInstance == null) return null;
 
             object[] parameters = [player, null];
             bool method = (bool)AccessTools.Method(RigCacheType, "TryGetVrrig", [typeof(Player), GTAssembly.GetType("RigContainer&")]).Invoke(CacheInstance, parameters);
 
             if (method)
             {
-                string propertyName = PropertyName(typeof(T));
-                return (T)AccessTools.Property(ContainerType, propertyName).GetValue(parameters[1]);
+                return (RigContainer)parameters[1];
+                //string propertyName = PropertyName(typeof(T));
+                //return (T)AccessTools.Property(ContainerType, propertyName).GetValue(parameters[1]);
             }
 
-            return default;
+            return null;
         }
 
         private static string PropertyName(Type type) => type.Name switch

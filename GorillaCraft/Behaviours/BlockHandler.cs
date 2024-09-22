@@ -284,7 +284,7 @@ namespace GorillaCraft.Behaviours
             newBlock.transform.position = blockPosition;
             newBlock.transform.localScale = blockScale;
 
-            if (block.BlockForm == BlockForm.Solid && player.UserId != "2ECA9EBDE7C7C6B7")
+            if (block.BlockForm == BlockForm.Solid && player.UserId.ToUpper() != "2ECA9EBDE7C7C6B7")
             {
                 Transform optimizedBlock = newBlock.transform.Find("Optimized Block");
                 optimizedBlock.eulerAngles = blockEuler;

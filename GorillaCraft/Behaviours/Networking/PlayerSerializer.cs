@@ -2,6 +2,7 @@
 using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
 using GorillaCraft.Tools;
+using GorillaCraft.Utilities;
 using Photon.Pun;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace GorillaCraft.Behaviours.Networking
 
         public readonly List<BlockData> BlockInfo = [];
 
-        private PhotonView View;
+        //private PhotonView View;
 
         public void Awake()
         {
@@ -27,14 +28,14 @@ namespace GorillaCraft.Behaviours.Networking
             {
                 BlockInfo.Clear();
 
-                View = GetComponent<PhotonView>();
-                if (View.IsMine)
+                var rigView = GetComponent<VRRig>();
+                if (rigView.Creator.IsLocal)
                 {
                     Local = this;
                 }
                 else
                 {
-                    NetworkSender.RequestBlocks(View.Owner);
+                    NetworkUtils.RequestBlocks(PhotonNetwork.CurrentRoom.GetPlayer(rigView.Creator.ActorNumber));
                 }
             }
             catch (Exception exception)
@@ -49,13 +50,14 @@ namespace GorillaCraft.Behaviours.Networking
             {
                 Local = null;
             }
+            Destroy(this);
         }
 
         public void DistributeBlock(bool isCreating, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale)
         {
             try
             {
-                NetworkSender.BlockInteraction(isCreating, block != null ? block.GetType().Name : "None", blockPosition, blockEuler, blockScale);
+                NetworkUtils.BlockInteraction(isCreating, block != null ? block.GetType().Name : "None", blockPosition, blockEuler, blockScale);
 
                 if (isCreating)
                 {

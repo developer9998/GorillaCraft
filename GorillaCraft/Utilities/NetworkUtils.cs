@@ -1,16 +1,15 @@
 ﻿using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections.Generic;
 using UnityEngine;
+using GorillaCraft.Models;
 
-namespace GorillaCraft.Tools
+namespace GorillaCraft.Utilities
 {
-    public class NetworkSender
+    public class NetworkUtils
     {
-        public const byte BlockInteractionCode = 135;
-        public const byte SurfaceTapCode = 131;
-        public const byte RequestBlocksCode = 137;
-        public const byte SendBlocksCode = 138;
+        public static List<int> RequestingPlayers;
 
         // TODO: replace strings and vectors with byte arrays
         public static void BlockInteraction(bool isCreating, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale)
@@ -20,7 +19,7 @@ namespace GorillaCraft.Tools
             {
                 Receivers = ReceiverGroup.Others
             };
-            PhotonNetwork.RaiseEvent(BlockInteractionCode, content, raiseEventOptions, SendOptions.SendReliable);
+            PhotonNetwork.RaiseEvent((int)GorillaCraftNetworkType.BlockInteractionCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
         public static void SurfaceTap(string typeName, bool isLeftHand)
@@ -30,7 +29,7 @@ namespace GorillaCraft.Tools
             {
                 Receivers = ReceiverGroup.Others
             };
-            PhotonNetwork.RaiseEvent(SurfaceTapCode, content, raiseEventOptions, SendOptions.SendReliable);
+            PhotonNetwork.RaiseEvent((int)GorillaCraftNetworkType.SurfaceTapCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
         public static void RequestBlocks(Player targetPlayer)
@@ -40,7 +39,7 @@ namespace GorillaCraft.Tools
             {
                 TargetActors = [targetPlayer.ActorNumber]
             };
-            PhotonNetwork.RaiseEvent(RequestBlocksCode, content, raiseEventOptions, SendOptions.SendReliable);
+            PhotonNetwork.RaiseEvent((int)GorillaCraftNetworkType.RequestBlocksCode, content, raiseEventOptions, SendOptions.SendReliable);
         }
 
         public static void SendBlocks(string[] blocks, Player targetPlayer)
@@ -50,7 +49,14 @@ namespace GorillaCraft.Tools
             {
                 TargetActors = [targetPlayer.ActorNumber]
             };
-            PhotonNetwork.RaiseEvent(SendBlocksCode, content, raiseEventOptions, SendOptions.SendReliable);
+            PhotonNetwork.RaiseEvent((int)GorillaCraftNetworkType.SendBlocksCode, content, raiseEventOptions, SendOptions.SendReliable);
+        }
+
+        public static bool IsBlockRequestValid(Player player)
+        {
+            if (RequestingPlayers.Contains(player.ActorNumber) || player.IsLocal) return false;
+            RequestingPlayers.Add(player.ActorNumber);
+            return true;
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using GorillaCraft.Behaviours.Block;
-using GorillaCraft.Tools;
+using GorillaCraft.Utilities;
 using GorillaLocomotion;
 using HarmonyLib;
 using Photon.Pun;
@@ -20,7 +20,7 @@ namespace GorillaCraft.Patches
                 GorillaSurfaceOverride currentOverride = isLeftHand ? Player.Instance.leftHandSurfaceOverride : Player.Instance.rightHandSurfaceOverride;
                 if (currentOverride && currentOverride.TryGetComponent(out _currentFace))
                 {
-                    NetworkSender.SurfaceTap(_currentFace.SurfaceType.Name, isLeftHand);
+                    NetworkUtils.SurfaceTap(_currentFace.SurfaceType.Name, isLeftHand);
                     return false;
                 }
             }
