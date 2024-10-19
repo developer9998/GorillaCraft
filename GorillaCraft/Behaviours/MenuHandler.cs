@@ -211,7 +211,7 @@ namespace GorillaCraft.Behaviours
             }
             catch (Exception exception)
             {
-                Logging.Log(exception.String(), BepInEx.Logging.LogLevel.Error);
+                Logging.Error(exception);
             }
         }
 

@@ -39,7 +39,7 @@ namespace GorillaCraft.Behaviours.Networking
             {
                 Local = this;
             }
-            else
+            else if (hasGorillaCraft)
             {
                 NetworkUtils.RequestBlocks(PhotonNetwork.CurrentRoom.GetPlayer(Creator.ActorNumber));
             }
@@ -92,7 +92,7 @@ namespace GorillaCraft.Behaviours.Networking
             }
             catch (Exception exception)
             {
-                Logging.Log(exception.String(), BepInEx.Logging.LogLevel.Error);
+                Logging.Error(exception);
             }
         }
     }

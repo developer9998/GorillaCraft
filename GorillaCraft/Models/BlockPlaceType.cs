@@ -16,6 +16,6 @@
         /// <summary>
         /// The block was placed through a request made to gather the block data of a player in the current room on joining.
         /// </summary>
-        Recovery
+        Sent
     }
 }

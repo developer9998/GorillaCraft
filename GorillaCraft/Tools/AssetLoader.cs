@@ -44,7 +44,7 @@ namespace GorillaCraft.Tools
             if (_loadedObjects != null && _loadedObjects.TryGetValue(name, out var _loadedObject))
                 return _loadedObject as T;
 
-            Logging.Log(string.Concat("Loading asset: ", name), BepInEx.Logging.LogLevel.Info);
+            Logging.Info(string.Concat("Loading asset: ", name));
 
             _loadedObjects ??= [];
 

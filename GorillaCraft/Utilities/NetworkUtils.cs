@@ -39,7 +39,7 @@ namespace GorillaCraft.Utilities
 
         public static void SendBlocks(object[] blocks, Player targetPlayer)
         {
-            object[] content = [blocks];
+            object[] content = blocks;
             RaiseEventOptions raiseEventOptions = new()
             {
                 TargetActors = [targetPlayer.ActorNumber]

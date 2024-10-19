@@ -68,7 +68,7 @@ namespace GorillaCraft.Behaviours.Block
             }
             catch (Exception ex)
             {
-                Logging.Log(ex, BepInEx.Logging.LogLevel.Error);
+                Logging.Error(ex);
             }
 
             if (useDestroyEffects)

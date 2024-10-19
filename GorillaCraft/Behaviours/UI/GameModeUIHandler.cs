@@ -61,7 +61,7 @@ namespace GorillaCraft.Behaviours.UI
             }
             catch (Exception exception)
             {
-                Logging.Log(exception.String(), LogLevel.Error);
+                Logging.Error(exception);
             }
         }
 

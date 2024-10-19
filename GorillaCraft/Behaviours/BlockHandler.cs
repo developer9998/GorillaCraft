@@ -204,7 +204,7 @@ namespace GorillaCraft.Behaviours
                 }
                 catch (Exception exception)
                 {
-                    Logging.Log(exception.String(), BepInEx.Logging.LogLevel.Error);
+                    Logging.Info(exception);
                 }
 
                 _blockCollection.Add(_currentBlock, _currentObject);
@@ -233,35 +233,33 @@ namespace GorillaCraft.Behaviours
         private bool PlaceBlock(BlockPlaceType placeType, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, NetPlayer player, out BlockObject blockParent, BlockInclusions inclusions = BlockInclusions.Audio)
         {
             // Run a check if any player with the mod would be suffocated / trapped by this block
-            if (placeType == BlockPlaceType.Local)
+            Bounds bounds = new(blockPosition, blockScale);
+
+            VRRig LocalRig = GorillaTagger.Instance.offlineVRRig;
+            SphereCollider headCollider = LocalRig.headMesh.transform.Find("SpeakerHeadCollider").GetComponent<SphereCollider>();
+            CapsuleCollider bodyCollider = LocalRig.headMesh.transform.parent.Find("BodyTrigger").GetComponent<CapsuleCollider>();
+            bool intersects = bounds.Intersects(headCollider.bounds) || bounds.Intersects(bodyCollider.bounds);
+
+            if (intersects && placeType == BlockPlaceType.Local)
             {
-                Bounds bounds = new(blockPosition, blockScale);
-
-                VRRig LocalRig = GorillaTagger.Instance.offlineVRRig;
-                SphereCollider headCollider = LocalRig.headMesh.transform.Find("SpeakerHeadCollider").GetComponent<SphereCollider>();
-                CapsuleCollider bodyCollider = LocalRig.headMesh.transform.parent.Find("BodyTrigger").GetComponent<CapsuleCollider>();
-
-                if (bounds.Intersects(headCollider.bounds) || bounds.Intersects(bodyCollider.bounds))
-                {
-                    blockParent = null;
-                    return false;
-                }
-
-                foreach (RaycastHit hit in Physics.SphereCastAll(blockPosition, blockScale.x, blockPosition, 0f))
-                {
-                    if (hit.collider.name == "SpeakerHeadCollider" || hit.collider.name == "BodyTrigger")
-                    {
-                        blockParent = null;
-                        return false;
-                    }
-                }
+                blockParent = null;
+                return false;
+            }
+            else if (intersects)
+            {
+                Vector3 playerPosition = GorillaLocomotion.Player.Instance.transform.position;
+                Vector3 destination = Vector3.MoveTowards(playerPosition, blockPosition, -1.2f * blockScale.y);
+                Vector3 offset = playerPosition - destination;
+                offset.y = -offset.y;
+                destination = offset + playerPosition + (Vector3.up * blockScale.y);
+                GorillaLocomotion.Player.Instance.TeleportTo(destination, GorillaLocomotion.Player.Instance.transform.rotation);
             }
 
             VRRig rig = GorillaGameManager.StaticFindRigForPlayer(player);
 
             if (!rig || !rig.TryGetComponent(out GorillaCrafter crafter))
             {
-                Logging.Log($"Player {player.NickName} is missing their Crafter title");
+                Logging.Warning($"Player {player.NickName} is missing their Crafter title");
                 blockParent = null;
                 return false;
             }
@@ -336,7 +334,7 @@ namespace GorillaCraft.Behaviours
 
             if (!rig || !rig.TryGetComponent(out GorillaCrafter crafter))
             {
-                Logging.Log($"Player {sender.NickName} is missing their Crafter title");
+                Logging.Warning($"Player {sender.NickName} is missing their Crafter title");
                 return;
             }
 
@@ -345,7 +343,8 @@ namespace GorillaCraft.Behaviours
                 RemoveBlock(value, sender);
                 return;
             }
-            Logging.Log("mone");
+
+            Logging.Warning("Tried to remove block that doesn't exist at specified position");
         }
 
         public void RemoveBlock(BlockObject parent, NetPlayer sender, BlockInclusions inclusions = BlockInclusions.Audio | BlockInclusions.Particles)
@@ -358,7 +357,7 @@ namespace GorillaCraft.Behaviours
 
             if (!rig || !rig.TryGetComponent(out GorillaCrafter crafter))
             {
-                Logging.Log($"Player {sender.NickName} is missing their Crafter title");
+                Logging.Warning($"Player {sender.NickName} is missing their Crafter title");
                 return;
             }
 
@@ -369,7 +368,7 @@ namespace GorillaCraft.Behaviours
                 List<BlockObject> list = new(parent.ChildrenBlocks);
                 list.ForEach(child =>
                 {
-                    Logging.Log($"Remove child attempt at [{child.transform.position.x}, {child.transform.position.y}, {child.transform.position.z}");
+                    Logging.Warning($"Remove child attempt at [{child.transform.position.x}, {child.transform.position.y}, {child.transform.position.z}");
                     RemoveBlock(child, child.Owner);
                 });
             }

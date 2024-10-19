@@ -120,25 +120,19 @@ namespace GorillaCraft.Behaviours
             Player sender = PhotonNetwork.CurrentRoom.GetPlayer(data.Sender);
             object[] eventData = (object[])data.CustomData;
 
-            Logging.Log($"{sender.NickName} ({string.Join(", ", eventData)})");
+            Logging.Info($"{sender.NickName} ({string.Join(", ", eventData)})");
 
             if (data.Code == (int)GorillaCraftNetworkType.BlockInteractionCode)
             {
-                try
-                {
-                    bool build = (bool)eventData[0];
-                    if (build)
-                    {
-                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], Utils.UnpackVector3FromLong((long)eventData[2]), Utils.UnpackVector3FromLong((long)eventData[3]), Utils.UnpackVector3FromLong((long)eventData[4]), sender, out _, BlockInclusions.Audio);
-                        return;
-                    }
+                bool build = (bool)eventData[0];
 
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1], sender);
-                }
-                catch(Exception ex)
+                if (build)
                 {
-                    Logging.Log(ex, BepInEx.Logging.LogLevel.Error);
+                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], Utils.UnpackVector3FromLong((long)eventData[2]), Utils.UnpackVector3FromLong((long)eventData[3]), Utils.UnpackVector3FromLong((long)eventData[4]), sender, out _, BlockInclusions.Audio);
+                    return;
                 }
+
+                GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1], sender);
                 return;
             }
 
@@ -157,58 +151,95 @@ namespace GorillaCraft.Behaviours
                 if (sender.IsLocal) return;
 
                 Player player = (Player)eventData[0];
-                List<object[]> blocks = [];
+                List<object> blocks = [];
 
                 foreach (var block in GorillaCrafter.Local.Blocks.Values)
                 {
-                    if (blocks.Count >= 10)
+                    if (Mathf.FloorToInt(blocks.Count / 4f) >= 10)
                     {
-                        Logging.Log(string.Format("Sending current list of blocks of count {0}", blocks.Count));
+                        Logging.Info(string.Format("Sending current list of blocks of count {0}", blocks.Count));
                         NetworkUtils.SendBlocks([.. blocks], player);
                         blocks.Clear();
-                        await Task.Delay(50);
+                        await Task.Delay(60);
                     }
 
-                    blocks.Add([block.BlockType.GetType().Name, Utils.PackVector3ToLong(block.transform.position), Utils.PackVector3ToLong(block.transform.eulerAngles), Utils.PackVector3ToLong(block.transform.localScale)]);
+                    blocks.Add(block.BlockType.GetType().Name);
+                    blocks.Add(Utils.PackVector3ToLong(block.Position));
+                    blocks.Add(Utils.PackVector3ToLong(block.EulerAngles));
+                    blocks.Add(Utils.PackVector3ToLong(block.Size));
                 }
 
                 if (blocks.Count > 0)
                 {
-                    await Task.Delay(50);
+                    await Task.Delay(60);
                     NetworkUtils.SendBlocks([.. blocks], player);
                 }
 
                 return;
             }
-            else if (data.Code == (int)GorillaCraftNetworkType.SendBlocksCode)
+
+            if (data.Code == (int)GorillaCraftNetworkType.SendBlocksCode)
             {
                 if (sender.IsLocal) return;
 
-                object[][] blocks;
+                object[] blocks;
 
                 try
                 {
-                    blocks = (object[][])eventData[0];
+                    blocks = eventData;
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Logging.Error(ex);
                     return;
                 }
 
+                Logging.Info($"{Mathf.FloorToInt(blocks.Length / 4f)} blocks");
+
+                string blkName = "";
+                long blkPos = 0u, blkAngle = 0u, blkSize = 0u;
+
                 for (int i = 0; i < blocks.Length; i++)
                 {
-                    var block = blocks[i];
+                    object blkData = blocks[i];
+
+                    Logging.Info(blkData);
+                    int blkDataIndex = i % 4;
 
                     try
                     {
-                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, (string)block[0], Utils.UnpackVector3FromLong((long)block[1]), Utils.UnpackVector3FromLong((long)block[2]), Utils.UnpackVector3FromLong((long)block[3]), sender, out _, BlockInclusions.None);
+                        switch (blkDataIndex)
+                        {
+                            case 0:
+                                Logging.Info("cast as string");
+                                blkName = (string)blkData;
+                                break;
+                            case 1:
+                                Logging.Info("cast as packed long");
+                                blkPos = (long)blkData;
+                                break;
+                            case 2:
+                                Logging.Info("cast as packed long");
+                                blkAngle = (long)blkData;
+                                break;
+                            case 3:
+                                Logging.Info("cast as packed long");
+                                blkSize = (long)blkData;
+                                GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Sent, blkName, Utils.UnpackVector3FromLong(blkPos), Utils.UnpackVector3FromLong(blkAngle), Utils.UnpackVector3FromLong(blkSize), sender, out _, BlockInclusions.None);
+                                break;
+                        }
                     }
-                    catch
+                    catch(Exception ex)
                     {
+                        Logging.Error(ex);
+                        i += 4 - blkDataIndex; // skip this block
                         continue;
                     }
                 }
+                return;
             }
+
+            Logging.Warning("this shouldnt happen");
         }
     }
 }
