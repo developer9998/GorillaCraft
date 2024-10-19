@@ -67,7 +67,7 @@ namespace GorillaCraft.Behaviours.Networking
         {
             try
             {
-                long blockPosition = Utils.PackVector3ToLong(block.transform.position);
+                long blockPosition = Utils.PackVector3ToLong(block.Position);
 
                 if (isCreating)
                 {
@@ -75,8 +75,8 @@ namespace GorillaCraft.Behaviours.Networking
 
                     if (Creator.IsLocal)
                     {
-                        long blockEulerAngles = Utils.PackVector3ToLong(block.transform.eulerAngles);
-                        long blockScale = Utils.PackVector3ToLong(block.transform.localScale);
+                        long blockEulerAngles = Utils.PackVector3ToLong(block.EulerAngles);
+                        long blockScale = Utils.PackVector3ToLong(block.Size);
                         NetworkUtils.BlockInteraction(true, block.BlockType.GetType().Name, blockPosition, blockEulerAngles, blockScale);
                     }
 

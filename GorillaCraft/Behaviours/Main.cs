@@ -124,13 +124,21 @@ namespace GorillaCraft.Behaviours
 
             if (data.Code == (int)GorillaCraftNetworkType.BlockInteractionCode)
             {
-                if ((bool)eventData[0])
+                try
                 {
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], Utils.UnpackVector3FromLong((long)eventData[2]), Utils.UnpackVector3FromLong((long)eventData[3]), Utils.UnpackVector3FromLong((long)eventData[4]), photonView.Owner, out _, BlockInclusions.Audio);
-                    return;
-                }
+                    bool build = (bool)eventData[0];
+                    if (build)
+                    {
+                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], Utils.UnpackVector3FromLong((long)eventData[2]), Utils.UnpackVector3FromLong((long)eventData[3]), Utils.UnpackVector3FromLong((long)eventData[4]), sender, out _, BlockInclusions.Audio);
+                        return;
+                    }
 
-                GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1], sender);
+                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1], sender);
+                }
+                catch(Exception ex)
+                {
+                    Logging.Log(ex, BepInEx.Logging.LogLevel.Error);
+                }
                 return;
             }
 

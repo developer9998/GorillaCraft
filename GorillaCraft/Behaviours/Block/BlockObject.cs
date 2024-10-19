@@ -41,6 +41,8 @@ namespace GorillaCraft.Behaviours.Block
 
         private bool isDestroy;
 
+        public Vector3 Position, EulerAngles, Size;
+
         /// <summary>
         /// When read, IsLocal will return whether this BlockObject is owned by the local player.
         /// </summary>
@@ -56,7 +58,7 @@ namespace GorillaCraft.Behaviours.Block
                 // this goes through, we're a parent to one or more children blocks
                 if (ChildrenBlocks.Any()) ChildrenBlocks
                         // all children should pass the null check, and should destroy alongside this block
-                        .DoIf(block => !block.IsNull(), block => block.Destroy());
+                        .DoIf(block => !block.IsNull(), block => block.Destroy(useDestroyEffects));
                 // this goes through, we're a child to preferably a single parent
                 else if (ParentalBlocks.Any()) ParentalBlocks
                         // all parents should pass the null & connection check..

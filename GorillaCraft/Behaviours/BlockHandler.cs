@@ -302,6 +302,9 @@ namespace GorillaCraft.Behaviours
             blockParent = newBlock.GetOrAddComponent<BlockObject>();
             blockParent.Owner = player;
             blockParent.BlockType = block;
+            blockParent.Position = blockPosition;
+            blockParent.EulerAngles = blockEuler;
+            blockParent.Size = blockScale;
 
             if (block.BlockForm != BlockForm.Decoration)
             {
