@@ -20,7 +20,7 @@ namespace GorillaCraft.Patches
                 GorillaSurfaceOverride currentOverride = isLeftHand ? Player.Instance.leftHandSurfaceOverride : Player.Instance.rightHandSurfaceOverride;
                 if (currentOverride && currentOverride.TryGetComponent(out _currentFace))
                 {
-                    NetworkUtils.SurfaceTap(_currentFace.SurfaceType.Name, isLeftHand);
+                    NetworkUtils.SurfaceTap(_currentFace.SurfaceType.FullName, isLeftHand);
                     return false;
                 }
             }

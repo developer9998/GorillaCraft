@@ -1,7 +1,8 @@
 ﻿using GorillaCraft.Interfaces;
+using GorillaCraft.Tools;
 using GorillaExtensions;
 using HarmonyLib;
-using Photon.Realtime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace GorillaCraft.Behaviours.Block
         /// <summary>
         /// The owner who is currently in possession of the block.
         /// </summary>
-        public Player Owner;
+        public NetPlayer Owner;
 
         /// <summary>
         /// The type of IBlock this block identifies with.
@@ -45,7 +46,7 @@ namespace GorillaCraft.Behaviours.Block
         /// </summary>
         public bool IsLocal => Owner != null && Owner.IsLocal;
 
-        public void Destroy()
+        public void Destroy(bool useDestroyEffects = true)
         {
             if (isDestroy) return;
             isDestroy = true;
@@ -63,17 +64,22 @@ namespace GorillaCraft.Behaviours.Block
                         // ..and should properly cut ties with this block
                         .Do(block => block.ChildrenBlocks.Remove(this));
             }
-            catch
+            catch (Exception ex)
             {
-
+                Logging.Log(ex, BepInEx.Logging.LogLevel.Error);
             }
 
-            for (int i = 0; i < transform.childCount; i++)
+            if (useDestroyEffects)
             {
-                transform.GetChild(i).gameObject.SetActive(false);
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    transform.GetChild(i).gameObject.SetActive(false);
+                }
+                UnityEngine.Object.Destroy(gameObject, 5f);
+                return;
             }
 
-            Destroy(gameObject, 5f);
+            UnityEngine.Object.Destroy(gameObject);
         }
     }
 }

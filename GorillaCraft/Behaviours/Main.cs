@@ -1,16 +1,13 @@
 ﻿using ExitGames.Client.Photon;
 using GorillaCraft.Behaviours.Networking;
 using GorillaCraft.Behaviours.UI;
-using GorillaCraft.Extensions;
 using GorillaCraft.Models;
 using GorillaCraft.Tools;
 using GorillaCraft.Utilities;
-using Newtonsoft.Json;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -84,6 +81,7 @@ namespace GorillaCraft.Behaviours
                 _gamemodeHandler.gameObject.SetActive(false);
                 _menuHandler.gameObject.SetActive(PlacementHelper.InteractMode == 0);
             }
+
             _currentModeBinding = buttonHeld;
         }
 
@@ -105,12 +103,14 @@ namespace GorillaCraft.Behaviours
         {
             base.OnJoinedRoom();
             PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
+            GorillaTagger.Instance.offlineVRRig.gameObject.AddComponent<GorillaCrafter>();
         }
 
         public override void OnLeftRoom()
         {
             base.OnLeftRoom();
             PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+            Destroy(GorillaTagger.Instance.offlineVRRig.gameObject.GetComponent<GorillaCrafter>());
         }
 
         public async void OnEvent(EventData data)
@@ -120,115 +120,85 @@ namespace GorillaCraft.Behaviours
             Player sender = PhotonNetwork.CurrentRoom.GetPlayer(data.Sender);
             object[] eventData = (object[])data.CustomData;
 
+            Logging.Log($"{sender.NickName} ({string.Join(", ", eventData)})");
+
             if (data.Code == (int)GorillaCraftNetworkType.BlockInteractionCode)
             {
-                PhotonView photonView = RigCacheUtils.GetRigContainer(sender).netView.GetView;
-                if (photonView)
+                if ((bool)eventData[0])
                 {
-                    if ((bool)eventData[0])
-                    {
-                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], (Vector3)eventData[2], (Vector3)eventData[3], (Vector3)eventData[4], photonView.Owner, out _, BlockInclusions.Audio);
-                    }
-                    else
-                    {
-                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock((Vector3)eventData[2], photonView.Owner);
-                    }
+                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], Utils.UnpackVector3FromLong((long)eventData[2]), Utils.UnpackVector3FromLong((long)eventData[3]), Utils.UnpackVector3FromLong((long)eventData[4]), photonView.Owner, out _, BlockInclusions.Audio);
+                    return;
                 }
-                else
-                {
-                    Logging.Log(string.Concat(data.String(), "- This event is void"));
-                }
-            }
-            else if (data.Code == (int)GorillaCraftNetworkType.SurfaceTapCode)
-            {
-                PhotonView photonView = RigCacheUtils.GetRigContainer(sender).netView.GetView;
-                if (photonView)
-                {
 
-                    Type surfaceType = typeof(Plugin).Assembly.GetTypes().First(type => type.Name == (string)eventData[0]);
+                GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1], sender);
+                return;
+            }
+
+            if (data.Code == (int)GorillaCraftNetworkType.SurfaceTapCode)
+            {
+                Type surfaceType = typeof(Plugin).Assembly.GetType((string)eventData[0]);
+                if (surfaceType != null)
+                {
                     GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlayTapSound(RigCacheUtils.GetRigContainer(sender).Rig, surfaceType, (bool)eventData[1]);
                 }
-                else
-                {
-                    Logging.Log(string.Concat(data.String(), "- This event is void"));
-                }
+                return;
             }
-            else if (data.Code == (int)GorillaCraftNetworkType.RequestBlocksCode)
+
+            if (data.Code == (int)GorillaCraftNetworkType.RequestBlocksCode)
             {
-                if (!sender.IsLocal)
+                if (sender.IsLocal) return;
+
+                Player player = (Player)eventData[0];
+                List<object[]> blocks = [];
+
+                foreach (var block in GorillaCrafter.Local.Blocks.Values)
                 {
-                    Logging.Log(string.Concat(data.String(), "- rq This event is validated"));
-
-                    try
+                    if (blocks.Count >= 10)
                     {
-                        Player player = (Player)eventData[0];
-                        List<string> blocks = [];
-
-                        foreach (var block in PlayerSerializer.Local.BlockInfo)
-                        {
-                            if (blocks.Count >= 10)
-                            {
-                                Logging.Log(string.Format("Sending current list of blocks of count {0}", blocks.Count));
-                                NetworkUtils.SendBlocks([.. blocks], player);
-                                blocks.Clear();
-                                await Task.Delay(50);
-                            }
-
-                            try
-                            {
-                                string json = JsonConvert.SerializeObject(block, Formatting.None);
-                                blocks.Add(json);
-                            }
-                            catch (Exception e)
-                            {
-                                Logging.Log(string.Format("Error when serializing block {0}: {1}", block.ToString(), e.String()));
-                            }
-                        }
-
-                        if (blocks.Count > 0)
-                        {
-                            await Task.Delay(50);
-
-                            Logging.Log("Sending remaining blocks");
-                            NetworkUtils.SendBlocks([.. blocks], player);
-                        }
+                        Logging.Log(string.Format("Sending current list of blocks of count {0}", blocks.Count));
+                        NetworkUtils.SendBlocks([.. blocks], player);
+                        blocks.Clear();
+                        await Task.Delay(50);
                     }
-                    catch (Exception e)
-                    {
-                        Logging.Log(string.Format("Error when processing SendBlocksCode - {0}", e.String()), BepInEx.Logging.LogLevel.Error);
-                    }
+
+                    blocks.Add([block.BlockType.GetType().Name, Utils.PackVector3ToLong(block.transform.position), Utils.PackVector3ToLong(block.transform.eulerAngles), Utils.PackVector3ToLong(block.transform.localScale)]);
                 }
-                else
+
+                if (blocks.Count > 0)
                 {
-                    Logging.Log(string.Concat(data.String(), "- rq This event is void"));
+                    await Task.Delay(50);
+                    NetworkUtils.SendBlocks([.. blocks], player);
                 }
+
+                return;
             }
             else if (data.Code == (int)GorillaCraftNetworkType.SendBlocksCode)
             {
-                if (!sender.IsLocal)
+                if (sender.IsLocal) return;
+
+                object[][] blocks;
+
+                try
                 {
+                    blocks = (object[][])eventData[0];
+                }
+                catch
+                {
+                    return;
+                }
+
+                for (int i = 0; i < blocks.Length; i++)
+                {
+                    var block = blocks[i];
+
                     try
                     {
-                        Logging.Log(string.Concat(data.String(), "- sd This event is validated"));
-
-                        string[] blocks = (string[])eventData[0];
-                        foreach (string block in blocks)
-                        {
-                            Logging.Log(string.Format("Received block from {0}:\n{1}", sender.ToString(), block));
-
-                            BlockData blockInfo = JsonConvert.DeserializeObject<BlockData>(block);
-
-                            GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, blockInfo.Name, blockInfo.Position, blockInfo.Euler, blockInfo.Scale, sender, out _, BlockInclusions.None);
-                        }
+                        GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Recovery, (string)block[0], Utils.UnpackVector3FromLong((long)block[1]), Utils.UnpackVector3FromLong((long)block[2]), Utils.UnpackVector3FromLong((long)block[3]), sender, out _, BlockInclusions.None);
                     }
-                    catch (Exception e)
+                    catch
                     {
-                        Logging.Log(string.Format("Error when processing SendBlocksCode - {0}", e.String()), BepInEx.Logging.LogLevel.Error);
+                        continue;
                     }
-                }
-                else
-                {
-                    Logging.Log(string.Concat(data.String(), "- sd This event is void"));
                 }
             }
         }

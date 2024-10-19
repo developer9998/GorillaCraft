@@ -7,9 +7,7 @@ using GorillaCraft.Models;
 using GorillaCraft.Sounds;
 using GorillaCraft.Tools;
 using GorillaCraft.Utilities;
-using HarmonyLib;
 using Photon.Pun;
-using Photon.Realtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,15 +37,11 @@ namespace GorillaCraft.Behaviours
 
         private PhysicMaterial _slipperyPhysicMaterial;
 
-        private Dictionary<Vector3, BlockObject> _blockLocationCollection;
-
         [Inject]
         public async void Construct(AssetLoader assetLoader, List<IBlock> blockList, BlockDataFactory_PL factory, Configuration config)
         {
             if (_initialized) return;
             _initialized = true;
-
-            Plugin.Allowed.AddCallback(AllowStateChanged);
 
             _assetLoader = assetLoader;
             _blockDataFactory = factory;
@@ -65,7 +59,6 @@ namespace GorillaCraft.Behaviours
             };
 
             // Define lists, dictionaries, etc.
-            _blockLocationCollection = [];
             _footstepCache = [];
             _interactionCache = [];
             _blockCollection = [];
@@ -235,9 +228,9 @@ namespace GorillaCraft.Behaviours
             return true;
         }
 
-        public bool PlaceBlock(BlockPlaceType placeType, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, Player player, out BlockObject blockParent, BlockInclusions inclusions) => PlaceBlock(placeType, _blockList.First(a => a.GetType().Name == block), blockPosition, blockEuler, blockScale, player, out blockParent, inclusions);
+        public bool PlaceBlock(BlockPlaceType placeType, string block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, NetPlayer player, out BlockObject blockParent, BlockInclusions inclusions) => PlaceBlock(placeType, _blockList.First(a => a.GetType().Name == block), blockPosition, blockEuler, blockScale, player, out blockParent, inclusions);
 
-        private bool PlaceBlock(BlockPlaceType placeType, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, Player player, out BlockObject blockParent, BlockInclusions inclusions = BlockInclusions.Audio)
+        private bool PlaceBlock(BlockPlaceType placeType, IBlock block, Vector3 blockPosition, Vector3 blockEuler, Vector3 blockScale, NetPlayer player, out BlockObject blockParent, BlockInclusions inclusions = BlockInclusions.Audio)
         {
             // Run a check if any player with the mod would be suffocated / trapped by this block
             if (placeType == BlockPlaceType.Local)
@@ -264,8 +257,17 @@ namespace GorillaCraft.Behaviours
                 }
             }
 
+            VRRig rig = GorillaGameManager.StaticFindRigForPlayer(player);
+
+            if (!rig || !rig.TryGetComponent(out GorillaCrafter crafter))
+            {
+                Logging.Log($"Player {player.NickName} is missing their Crafter title");
+                blockParent = null;
+                return false;
+            }
+
             // Run a check if there is already an existing block at this point
-            if (_blockLocationCollection.ContainsKey(blockPosition))
+            if (crafter.Blocks.ContainsKey(Utils.PackVector3ToLong(blockPosition)))
             {
                 blockParent = null;
                 return false;
@@ -320,35 +322,44 @@ namespace GorillaCraft.Behaviours
                 }
             }
 
-            _blockLocationCollection.Add(blockPosition, blockParent);
-            if (placeType == BlockPlaceType.Local)
-            {
-                PlayerSerializer.Local?.DistributeBlock(true, block, blockPosition, blockEuler, blockScale);
-            }
+            crafter.DistributeBlock(true, blockParent);
 
             return true;
         }
 
-        public void RemoveBlock(Vector3 position, Player sender)
+        public void RemoveBlock(long position, NetPlayer sender)
         {
-            if (_blockLocationCollection.ContainsKey(position))
+            VRRig rig = GorillaGameManager.StaticFindRigForPlayer(sender);
+
+            if (!rig || !rig.TryGetComponent(out GorillaCrafter crafter))
             {
-                RemoveBlock(_blockLocationCollection[position], sender);
+                Logging.Log($"Player {sender.NickName} is missing their Crafter title");
+                return;
             }
+
+            if (crafter.Blocks.TryGetValue(position, out var value))
+            {
+                RemoveBlock(value, sender);
+                return;
+            }
+            Logging.Log("mone");
         }
 
-        public void RemoveBlock(BlockObject parent, Player sender, BlockInclusions inclusions = BlockInclusions.Audio | BlockInclusions.Particles)
+        public void RemoveBlock(BlockObject parent, NetPlayer sender, BlockInclusions inclusions = BlockInclusions.Audio | BlockInclusions.Particles)
         {
-            bool networkBreakFactor = parent.Owner.UserId == sender.UserId;
+            bool networkBreakFactor = parent.Owner.ActorNumber == sender.ActorNumber;
             // bool networkBreakFactor = true;
             if (parent == null || !networkBreakFactor) return;
 
-            _blockLocationCollection.Remove(parent.transform.position);
+            VRRig rig = GorillaGameManager.StaticFindRigForPlayer(sender);
 
-            if (sender.IsLocal) // only network the removal of this block if it's local to our client
+            if (!rig || !rig.TryGetComponent(out GorillaCrafter crafter))
             {
-                PlayerSerializer.Local?.DistributeBlock(false, null, parent.transform.position, Vector3.zero, Vector3.zero);
+                Logging.Log($"Player {sender.NickName} is missing their Crafter title");
+                return;
             }
+
+            crafter.DistributeBlock(false, parent);
 
             if (parent.ChildrenBlocks.Any()) // remove any children connected to this block, local client or not
             {
@@ -452,41 +463,6 @@ namespace GorillaCraft.Behaviours
             var newStepType = _blockDataFactory.Create(placeType);
             _interactionCache.Add(placeType, newStepType);
             return newStepType;
-        }
-
-        private void AllowStateChanged(bool state)
-        {
-            if (!state && NetworkSystem.Instance.InRoom) OnLeftRoom();
-        }
-
-        public override void OnLeftRoom()
-        {
-            base.OnLeftRoom();
-
-            _blockLocationCollection.Where(data => data.Value != null).Do(data => DestroyImmediate(data.Value.gameObject));
-            _blockLocationCollection.Clear();
-        }
-
-        public override void OnPlayerLeftRoom(Player otherPlayer)
-        {
-            base.OnPlayerLeftRoom(otherPlayer);
-
-            var affectedBlocks = _blockLocationCollection.Where(data => data.Value.Owner == otherPlayer);
-            var looseBlocks = _blockLocationCollection.Except(affectedBlocks).Where(data => data.Value.ParentalBlocks.Any() && data.Value.ParentalBlocks.Count == 1 && data.Value.ParentalBlocks.First().Owner == otherPlayer);
-
-            _blockLocationCollection = _blockLocationCollection.Except(affectedBlocks.Concat(looseBlocks)).ToDictionary(x => x.Key, x => x.Value);
-            affectedBlocks.Do(data => DestroyImmediate(data.Value.gameObject));
-            looseBlocks.Do(data =>
-            {
-                if (data.Value.IsLocal)
-                {
-                    RemoveBlock(data.Value, data.Value.Owner, BlockInclusions.None);
-                }
-                else
-                {
-                    data.Value.Destroy();
-                }
-            });
         }
     }
 }

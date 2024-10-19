@@ -19,26 +19,8 @@ namespace GorillaCraft.Utilities
             if (CacheInstance == null) return null;
 
             object[] parameters = [player, null];
-            bool method = (bool)AccessTools.Method(RigCacheType, "TryGetVrrig", [typeof(Player), GTAssembly.GetType("RigContainer&")]).Invoke(CacheInstance, parameters);
-
-            if (method)
-            {
-                return (RigContainer)parameters[1];
-                //string propertyName = PropertyName(typeof(T));
-                //return (T)AccessTools.Property(ContainerType, propertyName).GetValue(parameters[1]);
-            }
-
-            return null;
+            AccessTools.Method(RigCacheType, "TryGetVrrig", [typeof(Player), GTAssembly.GetType("RigContainer&")]).Invoke(CacheInstance, parameters);
+            return (RigContainer)parameters[1] ?? null;
         }
-
-        private static string PropertyName(Type type) => type.Name switch
-        {
-            "VRRig" => "Rig",
-            "PhotonVoiceView" => "Voice",
-            "PhotonView" => "photonView",
-            "Boolean" => "Muted",
-            "bool" => "Muted",
-            _ => throw new IndexOutOfRangeException(type.FullName)
-        };
     }
 }

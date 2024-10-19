@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GorillaCraft.Models
+﻿namespace GorillaCraft.Models
 {
     public enum GorillaCraftNetworkType
     {
-        BlockInteractionCode = 135,
-        SurfaceTapCode = 131,
-        RequestBlocksCode = 137,
-        SendBlocksCode = 138
+        BlockInteractionCode = 141, //135,
+        SurfaceTapCode = 136, //131,
+        RequestBlocksCode = 139, //137,
+        SendBlocksCode = 140 //138
     }
 }

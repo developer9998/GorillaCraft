@@ -132,11 +132,11 @@ namespace GorillaCraft.Behaviours
 
             Input_Slider slider_BlockResource = _uiParent.Find("Pages/Settings Page/BlockResourceSlider").AddComponent<Input_Slider>();
             slider_BlockResource.MenuParent = this;
-            slider_BlockResource.Split = 2;
+            slider_BlockResource.Split = 1;
             slider_BlockResource.SliderData = new ButtonSliderData()
             {
                 Least = 0f,
-                Greatest = 2f
+                Greatest = 1f
             };
             slider_BlockResource.SliderContentOverride = new Dictionary<float, string>()
             {

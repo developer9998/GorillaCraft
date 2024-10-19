@@ -43,7 +43,7 @@ namespace GorillaCraft.Patches
                     if (gorillaVelocityTracker.GetAverageVelocity(false, 0.2f, true).sqrMagnitude > 1.3f)
                     {
                         Player.Instance.GetComponent<BlockHandler>().PlayTapSound(GorillaTagger.Instance.offlineVRRig, ladder.GetComponent<BlockFace>().SurfaceType, ___currentClimber.xrNode == XRNode.LeftHand);
-                        // NetworkUtils.SurfaceTap(ladder.GetComponent<BlockFace>().SurfaceType.Name, ___currentClimber.xrNode == XRNode.LeftHand);
+                        NetworkUtils.SurfaceTap(ladder.GetComponent<BlockFace>().SurfaceType.FullName, ___currentClimber.xrNode == XRNode.LeftHand);
                     }
                 }
 
