@@ -149,7 +149,7 @@ namespace GorillaCraft.Behaviours
                         };
 
                         IndexActivated = triggerPressed;
-                        if (_blockHandler.PlacementAllowed(_blockList[Placement].GetType().Name, hit))
+                        if (_blockHandler.PlacementAllowed(_blockList[Placement].GetType().FullName, hit))
                         {
                             _blockHandler.PlaceBlock(BlockPlaceType.Local, _blockList[Placement].GetType().Name, _placeObject.transform.position, _blockList[Placement].BlockForm != BlockForm.Ladder ? eulerAngles : hit.collider.transform.eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer, out BlockObject parent, BlockInclusions.Audio);
                             if (parent && _blockList[Placement].BlockForm == BlockForm.Ladder)

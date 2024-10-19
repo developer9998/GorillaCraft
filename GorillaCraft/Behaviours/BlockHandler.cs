@@ -212,7 +212,7 @@ namespace GorillaCraft.Behaviours
             }
         }
 
-        public bool PlacementAllowed(string block, RaycastHit hit) => PlacementAllowed(_blockList.First(a => a.GetType().Name == block), hit);
+        public bool PlacementAllowed(string fullName, RaycastHit hit) => PlacementAllowed(_blockList.First(a => a.GetType().FullName == fullName), hit);
 
         public bool PlacementAllowed(IBlock block, RaycastHit hit)
         {
