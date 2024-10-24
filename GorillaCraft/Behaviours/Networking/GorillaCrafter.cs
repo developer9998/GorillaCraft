@@ -1,5 +1,4 @@
 ﻿using GorillaCraft.Behaviours.Block;
-using GorillaCraft.Extensions;
 using GorillaCraft.Tools;
 using GorillaCraft.Utilities;
 using Photon.Pun;
@@ -17,29 +16,41 @@ namespace GorillaCraft.Behaviours.Networking
         public static GorillaCrafter Local;
 
         public NetPlayer Creator => rigContainer.Creator;
+        public bool HasGorillaCraft => Creator.GetPlayerRef().CustomProperties.ContainsKey("GC");
 
         public readonly Dictionary<long, BlockObject> Blocks = [];
 
-        private bool hasGorillaCraft;
-
         private RigContainer rigContainer;
 
-        public void Start()
+        public void Awake()
         {
             rigContainer = GetComponent<RigContainer>();
+
             if (!rigContainer)
             {
                 Destroy(this);
                 return;
             }
+        }
 
-            hasGorillaCraft = Creator.GetPlayerRef().CustomProperties.ContainsKey("GC");
+        public void Start()
+        {
+            //                                   Nickname              IsLocal               HasGorillaCraft
+            Logging.Info($"GorillaCrafter Start (N: {Creator.NickName} IL: {Creator.IsLocal} HGC: {HasGorillaCraft}");
 
-            if (Creator.IsLocal)
+            if (Local == null && Creator.IsLocal)
             {
                 Local = this;
+                return;
             }
-            else if (hasGorillaCraft)
+            else if (Local != this && Creator.IsLocal)
+            {
+                Destroy(Local);
+                Local = this;
+                return;
+            }
+
+            if (HasGorillaCraft)
             {
                 NetworkUtils.RequestBlocks(PhotonNetwork.CurrentRoom.GetPlayer(Creator.ActorNumber));
             }
@@ -90,9 +101,9 @@ namespace GorillaCraft.Behaviours.Networking
                     }
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                Logging.Error(exception);
+                Logging.Error($"{nameof(DistributeBlock)} threw an exception {ex}");
             }
         }
     }

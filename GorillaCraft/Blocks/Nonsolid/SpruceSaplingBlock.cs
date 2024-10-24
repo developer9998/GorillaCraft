@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Nonsolid
         public BlockFaceInfo Top => new("SpurceSapling", typeof(Surface_Grass));
         public BlockFaceInfo Bottom => new("SpurceSapling", typeof(Surface_Grass));
 
-        public Type PlaceSoundType => typeof(Interaction_Grass);
-        public Type DestroySoundType => typeof(Interaction_Grass);
+        public Type PlaceSound => typeof(Interaction_Grass);
+        public Type BreakSound => typeof(Interaction_Grass);
 
-        public string BlockDefinition => "Spruce Sapling";
-        public BlockForm BlockForm => BlockForm.Decoration;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Spruce Sapling";
+        public BlockForm Form => BlockForm.Decoration;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

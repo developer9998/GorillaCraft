@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("Spawner", typeof(Surface_Default));
         public BlockFaceInfo Bottom => new("Spawner", typeof(Surface_Default));
 
-        public Type PlaceSoundType => typeof(Interaction_Default);
-        public Type DestroySoundType => typeof(Interaction_Default);
+        public Type PlaceSound => typeof(Interaction_Default);
+        public Type BreakSound => typeof(Interaction_Default);
 
-        public string BlockDefinition => "Monster Spawner";
-        public BlockForm BlockForm => BlockForm.DevSpawner;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Monster Spawner";
+        public BlockForm Form => BlockForm.DevSpawner;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

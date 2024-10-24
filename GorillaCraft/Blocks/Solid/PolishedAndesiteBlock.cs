@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("Polished Andesite", typeof(Surface_Default));
         public BlockFaceInfo Bottom => new("Polished Andesite", typeof(Surface_Default));
 
-        public Type PlaceSoundType => typeof(Interaction_Default);
-        public Type DestroySoundType => typeof(Interaction_Default);
+        public Type PlaceSound => typeof(Interaction_Default);
+        public Type BreakSound => typeof(Interaction_Default);
 
-        public string BlockDefinition => "Polished Andesite";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Polished Andesite";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

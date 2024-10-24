@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("SoulSand", typeof(Surface_Sand));
         public BlockFaceInfo Bottom => new("SoulSand", typeof(Surface_Sand));
 
-        public Type PlaceSoundType => typeof(Interaction_Sand);
-        public Type DestroySoundType => typeof(Interaction_Sand);
+        public Type PlaceSound => typeof(Interaction_Sand);
+        public Type BreakSound => typeof(Interaction_Sand);
 
-        public string BlockDefinition => "Soul Sand";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Soul Sand";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

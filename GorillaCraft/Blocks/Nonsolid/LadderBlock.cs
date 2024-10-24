@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Nonsolid
         public BlockFaceInfo Top => new("Ladder", typeof(Surface_Ladder));
         public BlockFaceInfo Bottom => new("Ladder", typeof(Surface_Ladder));
 
-        public Type PlaceSoundType => typeof(Interaction_Wood);
-        public Type DestroySoundType => typeof(Interaction_Wood);
+        public Type PlaceSound => typeof(Interaction_Wood);
+        public Type BreakSound => typeof(Interaction_Wood);
 
-        public string BlockDefinition => "Ladder";
-        public BlockForm BlockForm => BlockForm.Ladder;
-        public BlockPlacement BlockPlacement => BlockPlacement.VerticalRotation_90;
+        public string Definition => "Ladder";
+        public BlockForm Form => BlockForm.Ladder;
+        public BlockPlacement Placement => BlockPlacement.VerticalRotation_90;
     }
 }

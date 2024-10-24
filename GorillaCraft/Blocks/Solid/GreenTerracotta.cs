@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("GreenTerracotta", typeof(Surface_Default));
         public BlockFaceInfo Bottom => new("GreenTerracotta", typeof(Surface_Default));
 
-        public Type PlaceSoundType => typeof(Interaction_Default);
-        public Type DestroySoundType => typeof(Interaction_Default);
+        public Type PlaceSound => typeof(Interaction_Default);
+        public Type BreakSound => typeof(Interaction_Default);
 
-        public string BlockDefinition => "Green Terracotta";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Green Terracotta";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

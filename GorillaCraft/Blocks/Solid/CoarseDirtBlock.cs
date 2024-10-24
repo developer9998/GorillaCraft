@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("CoarseDirt", typeof(Surface_Gravel));
         public BlockFaceInfo Bottom => new("CoarseDirt", typeof(Surface_Gravel));
 
-        public Type PlaceSoundType => typeof(Interaction_Gravel);
-        public Type DestroySoundType => typeof(Interaction_Gravel);
+        public Type PlaceSound => typeof(Interaction_Gravel);
+        public Type BreakSound => typeof(Interaction_Gravel);
 
-        public string BlockDefinition => "Coarse Dirt";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Coarse Dirt";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

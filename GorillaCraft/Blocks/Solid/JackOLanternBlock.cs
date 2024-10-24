@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("PumpkinTop", typeof(Surface_Wood));
         public BlockFaceInfo Bottom => new("PumpkinTop", typeof(Surface_Wood));
 
-        public Type PlaceSoundType => typeof(Interaction_Wood);
-        public Type DestroySoundType => typeof(Interaction_Wood);
+        public Type PlaceSound => typeof(Interaction_Wood);
+        public Type BreakSound => typeof(Interaction_Wood);
 
-        public string BlockDefinition => "Jack o'Lantern";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.VerticalRotation_90;
+        public string Definition => "Jack o'Lantern";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.VerticalRotation_90;
     }
 }

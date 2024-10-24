@@ -66,18 +66,18 @@ namespace GorillaCraft.Behaviours
             _destroyObject.transform.localPosition = Vector3.zero;
         }
 
+        public IBlock Block
+        {
+            get => _blockList[Placement];
+        }
+
         public IBlock SetBlock(int blockIndex)
         {
             Placement = _blockList.Count - 1 < blockIndex ? 0 : blockIndex;
             return _blockList[Placement];
         }
 
-        public IBlock GetBlock()
-        {
-            return _blockList[Placement];
-        }
-
-        public void FixedUpdate()
+        public void LateUpdate()
         {
             if (!Player || !_placeObject || !_destroyObject || !_lineRenderer) return;
 
@@ -140,7 +140,7 @@ namespace GorillaCraft.Behaviours
                 {
                     if (InteractMode == 0)
                     {
-                        Vector3 eulerAngles = _blockList[Placement].BlockPlacement switch
+                        Vector3 eulerAngles = _blockList[Placement].Placement switch
                         {
                             BlockPlacement.VerticalRotation_90 => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90) - 90 : 0, 0f),
                             BlockPlacement.VerticalRotation_45 => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 45f) * 45f) - 90 : 0, 0f),
@@ -151,8 +151,8 @@ namespace GorillaCraft.Behaviours
                         IndexActivated = triggerPressed;
                         if (_blockHandler.PlacementAllowed(_blockList[Placement].GetType().FullName, hit))
                         {
-                            _blockHandler.PlaceBlock(BlockPlaceType.Local, _blockList[Placement].GetType().Name, _placeObject.transform.position, _blockList[Placement].BlockForm != BlockForm.Ladder ? eulerAngles : hit.collider.transform.eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer, out BlockObject parent, BlockInclusions.Audio);
-                            if (parent && _blockList[Placement].BlockForm == BlockForm.Ladder)
+                            _blockHandler.PlaceBlock(BlockPlaceType.Local, _blockList[Placement].GetType().Name, _placeObject.transform.position, _blockList[Placement].Form != BlockForm.Ladder ? eulerAngles : hit.collider.transform.eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer, out BlockObject parent, BlockInclusions.Audio);
+                            if (parent && _blockList[Placement].Form == BlockForm.Ladder)
                             {
                                 parent.ParentalBlocks.Add(hit.collider.GetComponent<BlockFace>().Root);
                                 hit.collider.GetComponent<BlockFace>().Root.ChildrenBlocks.Add(parent);

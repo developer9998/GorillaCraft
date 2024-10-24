@@ -8,6 +8,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -182,26 +183,23 @@ namespace GorillaCraft.Behaviours
             {
                 if (sender.IsLocal) return;
 
-                object[] blocks;
-
-                try
+                int minActorNum = NetworkSystem.Instance.AllNetPlayers.Select(netPlayer => netPlayer.ActorNumber).Min();
+                int baseActorNum = sender.ActorNumber - minActorNum;
+                if (baseActorNum > 0)
                 {
-                    blocks = eventData;
-                }
-                catch(Exception ex)
-                {
-                    Logging.Error(ex);
-                    return;
+                    int delay = baseActorNum * 6;
+                    Logging.Info($"Construction delay by {delay} milliseconds ({minActorNum}, {baseActorNum})");
+                    await Task.Delay(delay);
                 }
 
-                Logging.Info($"{Mathf.FloorToInt(blocks.Length / 4f)} blocks");
+                Logging.Info($"Constructing {Mathf.Floor(eventData.Length / 4f)} blocks");
 
                 string blkName = "";
-                long blkPos = 0u, blkAngle = 0u, blkSize = 0u;
+                long blkPos = 0u, blkAngle = 0u, blkSize;
 
-                for (int i = 0; i < blocks.Length; i++)
+                for (int i = 0; i < eventData.Length; i++)
                 {
-                    object blkData = blocks[i];
+                    object blkData = eventData[i];
 
                     Logging.Info(blkData);
                     int blkDataIndex = i % 4;
@@ -211,35 +209,36 @@ namespace GorillaCraft.Behaviours
                         switch (blkDataIndex)
                         {
                             case 0:
-                                Logging.Info("cast as string");
                                 blkName = (string)blkData;
                                 break;
                             case 1:
-                                Logging.Info("cast as packed long");
                                 blkPos = (long)blkData;
                                 break;
                             case 2:
-                                Logging.Info("cast as packed long");
                                 blkAngle = (long)blkData;
                                 break;
                             case 3:
-                                Logging.Info("cast as packed long");
                                 blkSize = (long)blkData;
                                 GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Sent, blkName, Utils.UnpackVector3FromLong(blkPos), Utils.UnpackVector3FromLong(blkAngle), Utils.UnpackVector3FromLong(blkSize), sender, out _, BlockInclusions.None);
+                                Logging.Info("Block placed");
                                 break;
                         }
+
+                        float progress = Mathf.Round((blkDataIndex + 1) / 4f * 100f);
+                        Logging.Info($"Block construction at {progress}%");
                     }
                     catch(Exception ex)
                     {
-                        Logging.Error(ex);
+                        Logging.Error($"Block constructon threw an exception: {ex}");
                         i += 4 - blkDataIndex; // skip this block
+                        Logging.Warning("Construction skipped");
                         continue;
                     }
                 }
                 return;
             }
 
-            Logging.Warning("this shouldnt happen");
+            Logging.Warning("Howdy! I am your worst enemy.");
         }
     }
 }

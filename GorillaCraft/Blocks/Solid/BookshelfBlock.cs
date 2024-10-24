@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("OakPlanks", typeof(Surface_Wood));
         public BlockFaceInfo Bottom => new("OakPlanks", typeof(Surface_Wood));
 
-        public Type PlaceSoundType => typeof(Interaction_Wood);
-        public Type DestroySoundType => typeof(Interaction_Wood);
+        public Type PlaceSound => typeof(Interaction_Wood);
+        public Type BreakSound => typeof(Interaction_Wood);
 
-        public string BlockDefinition => "Bookshelf";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Bookshelf";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

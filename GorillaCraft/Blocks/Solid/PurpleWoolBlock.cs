@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("PurpleWool", typeof(Surface_Cloth));
         public BlockFaceInfo Bottom => new("PurpleWool", typeof(Surface_Cloth));
 
-        public Type PlaceSoundType => typeof(Interaction_Cloth);
-        public Type DestroySoundType => typeof(Interaction_Cloth);
+        public Type PlaceSound => typeof(Interaction_Cloth);
+        public Type BreakSound => typeof(Interaction_Cloth);
 
-        public string BlockDefinition => "Purple Wool";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Purple Wool";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

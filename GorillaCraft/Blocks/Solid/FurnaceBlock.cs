@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("FurnaceTop", typeof(Surface_Default));
         public BlockFaceInfo Bottom => new("FurnaceTop", typeof(Surface_Default));
 
-        public Type PlaceSoundType => typeof(Interaction_Default);
-        public Type DestroySoundType => typeof(Interaction_Default);
+        public Type PlaceSound => typeof(Interaction_Default);
+        public Type BreakSound => typeof(Interaction_Default);
 
-        public string BlockDefinition => "Furnace";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.VerticalRotation_90;
+        public string Definition => "Furnace";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.VerticalRotation_90;
     }
 }

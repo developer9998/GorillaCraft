@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("WhiteSG", typeof(Surface_Default));
         public BlockFaceInfo Bottom => new("WhiteSG", typeof(Surface_Default));
 
-        public Type PlaceSoundType => typeof(Interaction_Default);
-        public Type DestroySoundType => typeof(Interaction_BreakingGlass);
+        public Type PlaceSound => typeof(Interaction_Default);
+        public Type BreakSound => typeof(Interaction_BreakingGlass);
 
-        public string BlockDefinition => "White Stained Glass";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "White Stained Glass";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("OakLeaves", typeof(Surface_Grass));
         public BlockFaceInfo Bottom => new("OakLeaves", typeof(Surface_Grass));
 
-        public Type PlaceSoundType => typeof(Interaction_Grass);
-        public Type DestroySoundType => typeof(Interaction_Grass);
+        public Type PlaceSound => typeof(Interaction_Grass);
+        public Type BreakSound => typeof(Interaction_Grass);
 
-        public string BlockDefinition => "Oak Leaves";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Oak Leaves";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Nonsolid
         public BlockFaceInfo Top => new("BrownMush", typeof(Surface_Grass));
         public BlockFaceInfo Bottom => new("BrownMush", typeof(Surface_Grass));
 
-        public Type PlaceSoundType => typeof(Interaction_Grass);
-        public Type DestroySoundType => typeof(Interaction_Grass);
+        public Type PlaceSound => typeof(Interaction_Grass);
+        public Type BreakSound => typeof(Interaction_Grass);
 
-        public string BlockDefinition => "Brown Mushroom";
-        public BlockForm BlockForm => BlockForm.Decoration;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Brown Mushroom";
+        public BlockForm Form => BlockForm.Decoration;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }

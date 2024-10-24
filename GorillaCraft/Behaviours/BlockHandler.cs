@@ -91,7 +91,7 @@ namespace GorillaCraft.Behaviours
             {
                 Transform relativeFace = currentObject.transform.Find("Collider/" + name);
 
-                if (blockParent.BlockType.BlockForm != BlockForm.Ladder)
+                if (blockParent.BlockType.Form != BlockForm.Ladder)
                 {
                     relativeFace.gameObject.layer = 17;
                     relativeFace.parent.gameObject.layer = 17;
@@ -110,9 +110,9 @@ namespace GorillaCraft.Behaviours
 
                 try
                 {
-                    if (_currentBlock.BlockForm != BlockForm.Decoration && _currentBlock.BlockForm != BlockForm.Ladder && _currentBlock.BlockForm != BlockForm.StairsTest)
+                    if (_currentBlock.Form != BlockForm.Decoration && _currentBlock.Form != BlockForm.Ladder && _currentBlock.Form != BlockForm.StairsTest)
                     {
-                        _currentObject = Instantiate(_currentBlock.BlockForm switch
+                        _currentObject = Instantiate(_currentBlock.Form switch
                         {
                             BlockForm.DevSpawner => _spawnerBlockObject,
                             _ => _solidBlockObject
@@ -120,7 +120,7 @@ namespace GorillaCraft.Behaviours
 
                         _assetLoader.SetObjectParent(_currentObject);
 
-                        _currentObject.name = _currentBlock.BlockDefinition;
+                        _currentObject.name = _currentBlock.Definition;
                         _currentObject.transform.localPosition = Vector3.zero;
 
                         MeshRenderer _rendererObject = _currentObject.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
@@ -137,13 +137,13 @@ namespace GorillaCraft.Behaviours
 
                         _rendererObject.materials = _materialArray;
                     }
-                    else if (_currentBlock.BlockForm == BlockForm.StairsTest)
+                    else if (_currentBlock.Form == BlockForm.StairsTest)
                     {
                         _currentObject = Instantiate(_stairObject);
 
                         _assetLoader.SetObjectParent(_currentObject);
 
-                        _currentObject.name = _currentBlock.BlockDefinition;
+                        _currentObject.name = _currentBlock.Definition;
                         _currentObject.transform.localPosition = Vector3.zero;
 
                         MeshRenderer _rendererObject = _currentObject.transform.Find("StairBlock").GetComponent<MeshRenderer>();
@@ -171,7 +171,7 @@ namespace GorillaCraft.Behaviours
                     }
                     else
                     {
-                        _currentObject = Instantiate(_currentBlock.BlockForm switch
+                        _currentObject = Instantiate(_currentBlock.Form switch
                         {
                             BlockForm.Ladder => _ladderObject,
                             _ => _decorBlockObject
@@ -179,7 +179,7 @@ namespace GorillaCraft.Behaviours
 
                         _assetLoader.SetObjectParent(_currentObject);
 
-                        _currentObject.name = _currentBlock.BlockDefinition;
+                        _currentObject.name = _currentBlock.Definition;
                         _currentObject.transform.localPosition = Vector3.zero;
 
                         _currentObject.GetComponentInChildren<MeshRenderer>(true).material = await _assetLoader.LoadAsset<Material>(_currentBlock.Front.FaceName);
@@ -188,7 +188,7 @@ namespace GorillaCraft.Behaviours
                         _blockParent.BlockType = _currentBlock;
                         _blockParent.Back = NonSolid_PrepareSurface(_currentObject, "Back", _blockParent, _currentBlock.Back);
 
-                        if (_currentBlock.BlockForm != BlockForm.Ladder)
+                        if (_currentBlock.Form != BlockForm.Ladder)
                         {
                             _blockParent.Left = NonSolid_PrepareSurface(_currentObject, "Left", _blockParent, _currentBlock.Left);
                             _blockParent.Front = NonSolid_PrepareSurface(_currentObject, "Front", _blockParent, _currentBlock.Front);
@@ -216,12 +216,12 @@ namespace GorillaCraft.Behaviours
 
         public bool PlacementAllowed(IBlock block, RaycastHit hit)
         {
-            if (block.BlockForm == BlockForm.Ladder && hit.collider)
+            if (block.Form == BlockForm.Ladder && hit.collider)
             {
                 if (hit.collider.TryGetComponent(out BlockFace face))
                 {
                     BlockObject parent = face.Root;
-                    return parent.BlockType.BlockForm != BlockForm.Ladder && parent.BlockType.BlockForm != BlockForm.StairsTest && (parent.Left == face || parent.Front == face || parent.Right == face || parent.Back == face);
+                    return parent.BlockType.Form != BlockForm.Ladder && parent.BlockType.Form != BlockForm.StairsTest && (parent.Left == face || parent.Front == face || parent.Right == face || parent.Back == face);
                 }
                 return false;
             }
@@ -284,7 +284,7 @@ namespace GorillaCraft.Behaviours
             newBlock.transform.position = blockPosition;
             newBlock.transform.localScale = blockScale;
 
-            if (block.BlockForm == BlockForm.Solid && player.UserId.ToUpper() != "2ECA9EBDE7C7C6B7")
+            if (block.Form == BlockForm.Solid && player.UserId.ToUpper() != "2ECA9EBDE7C7C6B7")
             {
                 Transform optimizedBlock = newBlock.transform.Find("Optimized Block");
                 optimizedBlock.eulerAngles = blockEuler;
@@ -295,7 +295,7 @@ namespace GorillaCraft.Behaviours
                 newBlock.transform.eulerAngles = blockEuler;
             }
 
-            if (inclusions.HasFlag(BlockInclusions.Audio)) BlockAudioUtils.PlaySound(_assetLoader, newBlock, GetInteractionType(block.PlaceSoundType), _configuration.PlaceBreakVolume.Value / 100f);
+            if (inclusions.HasFlag(BlockInclusions.Audio)) BlockAudioUtils.PlaySound(_assetLoader, newBlock, GetInteractionType(block.PlaceSound), _configuration.PlaceBreakVolume.Value / 100f);
 
             blockParent = newBlock.GetOrAddComponent<BlockObject>();
             blockParent.Owner = player;
@@ -304,11 +304,11 @@ namespace GorillaCraft.Behaviours
             blockParent.EulerAngles = blockEuler;
             blockParent.Size = blockScale;
 
-            if (block.BlockForm != BlockForm.Decoration)
+            if (block.Form != BlockForm.Decoration)
             {
                 blockParent.Back.SurfaceType = originalParent.Back.SurfaceType;
 
-                if (block.BlockForm != BlockForm.Ladder)
+                if (block.Form != BlockForm.Ladder)
                 {
                     blockParent.Left.SurfaceType = originalParent.Left.SurfaceType;
                     blockParent.Front.SurfaceType = originalParent.Front.SurfaceType;
@@ -317,7 +317,7 @@ namespace GorillaCraft.Behaviours
                     blockParent.Top.SurfaceType = originalParent.Top.SurfaceType;
                 }
 
-                if (block.BlockForm == BlockForm.DevSpawner)
+                if (block.Form == BlockForm.DevSpawner)
                 {
 
                 }
@@ -375,10 +375,10 @@ namespace GorillaCraft.Behaviours
 
             if (inclusions.HasFlag(BlockInclusions.Audio))
             {
-                BlockAudioUtils.PlaySound(_assetLoader, parent.gameObject, GetInteractionType(parent.BlockType.DestroySoundType), _configuration.PlaceBreakVolume.Value / 100f);
+                BlockAudioUtils.PlaySound(_assetLoader, parent.gameObject, GetInteractionType(parent.BlockType.BreakSound), _configuration.PlaceBreakVolume.Value / 100f);
             }
 
-            if (inclusions.HasFlag(BlockInclusions.Particles) && parent.BlockType.BlockForm != BlockForm.Decoration && parent.BlockType.BlockForm != BlockForm.Ladder)
+            if (inclusions.HasFlag(BlockInclusions.Particles) && parent.BlockType.Form != BlockForm.Decoration && parent.BlockType.Form != BlockForm.Ladder)
             {
                 MeshRenderer _rendererObject = parent.transform.Find("Optimized Block").GetComponent<MeshRenderer>();
                 Material[] _materialArray = _rendererObject.materials;
@@ -407,7 +407,7 @@ namespace GorillaCraft.Behaviours
             }
             else if (inclusions.HasFlag(BlockInclusions.Particles))
             {
-                Material baseMat = parent.transform.Find(parent.BlockType.BlockForm != BlockForm.Ladder ? "MinecraftDecorSample" : "LadderSurface").GetComponent<MeshRenderer>().material;
+                Material baseMat = parent.transform.Find(parent.BlockType.Form != BlockForm.Ladder ? "MinecraftDecorSample" : "LadderSurface").GetComponent<MeshRenderer>().material;
 
                 GameObject particles = Instantiate(_particleObject);
                 particles.transform.position = parent.transform.position;

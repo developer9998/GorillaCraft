@@ -19,7 +19,7 @@ namespace GorillaCraft.Behaviours
         public PlacementHelper Placement;
         public Configuration Config;
 
-        private Transform _uiParent, _modelParent;
+        private Transform _uiParent;
         private Vector3 _leftMenuPosition = new(-0.0929f, 0.1055f, 0.0141f), _leftMenuAngle = new(-10.992f, 85.797f, 74.78f);
 
         private Text _currentItemText;
@@ -41,7 +41,6 @@ namespace GorillaCraft.Behaviours
             transform.localScale = Vector3.one * 1.146174f;
 
             _uiParent = transform.Find("UI Parent");
-            _modelParent = transform.Find("Menu Parent");
 
             _leftButton = _uiParent.Find(Constants.PageLeftButton).AddComponent<Button_Page>();
             _leftButton.menuParent = this;
@@ -233,7 +232,7 @@ namespace GorillaCraft.Behaviours
             _rightButton.gameObject.SetActive(IsViewingMenuList);
             _blockSlider.gameObject.SetActive(!IsViewingMenuList);
             _currentItemImage.transform.parent.gameObject.SetActive(!IsViewingMenuList);
-            _currentItemText.text = IsViewingMenuList ? currentMenu.Alias : Placement.GetBlock().BlockDefinition;
+            _currentItemText.text = IsViewingMenuList ? currentMenu.Alias : Placement.Block.Definition;
         }
 
         public void BlockItemPress(Button_Item sender)
@@ -244,7 +243,7 @@ namespace GorillaCraft.Behaviours
 
             IBlock _newBlock = Placement.SetBlock(_blockItemCollection[sender]);
 
-            _currentItemText.text = _newBlock.BlockDefinition;
+            _currentItemText.text = _newBlock.Definition;
             _currentItemImage.sprite = sender.GetComponent<Image>().sprite;
             _currentItemImage.color = sender.GetComponent<Image>().color;
         }

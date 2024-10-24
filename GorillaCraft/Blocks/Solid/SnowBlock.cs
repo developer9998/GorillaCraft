@@ -14,11 +14,11 @@ namespace GorillaCraft.Blocks.Solid
         public BlockFaceInfo Top => new("Snow", typeof(Surface_Snow));
         public BlockFaceInfo Bottom => new("Snow", typeof(Surface_Snow));
 
-        public Type PlaceSoundType => typeof(Interaction_Snow);
-        public Type DestroySoundType => typeof(Interaction_Snow);
+        public Type PlaceSound => typeof(Interaction_Snow);
+        public Type BreakSound => typeof(Interaction_Snow);
 
-        public string BlockDefinition => "Snow Block";
-        public BlockForm BlockForm => BlockForm.Solid;
-        public BlockPlacement BlockPlacement => BlockPlacement.Default;
+        public string Definition => "Snow Block";
+        public BlockForm Form => BlockForm.Solid;
+        public BlockPlacement Placement => BlockPlacement.Default;
     }
 }
