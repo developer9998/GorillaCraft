@@ -292,7 +292,7 @@
 			<HintPath>$(GameAssemblyPath)\UnityEngine.XRModule.dll</HintPath>
 		</Reference>
 		<Reference Include="Utilla">
-			<HintPath>$(PluginsPath)\Utilla\Utilla.dll</HintPath>
+			<HintPath>$(PluginsPath)\TillaHook\TillaHook.dll</HintPath>
 		</Reference>
 		<Reference Include="Zenject">
 			<HintPath>$(PluginsPath)\Extenject\Zenject.dll</HintPath>
