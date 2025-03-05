@@ -33,6 +33,13 @@ namespace GorillaCraft.Behaviours
 
         private bool IndexActivated;
 
+        private float held_time = 0;
+
+        public void Awake()
+        {
+            enabled = false;
+        }
+
         [Inject]
         public async void Construct(AssetLoader assetLoader, BlockHandler blockHandler, List<IBlock> blockList)
         {
@@ -64,6 +71,8 @@ namespace GorillaCraft.Behaviours
             _destroyObject = Instantiate(await _assetLoader.LoadAsset<GameObject>("BlockRemovalIndicator"));
             _destroyObject.SetActive(false);
             _destroyObject.transform.localPosition = Vector3.zero;
+
+            enabled = true;
         }
 
         public IBlock Block
@@ -79,10 +88,11 @@ namespace GorillaCraft.Behaviours
 
         public void LateUpdate()
         {
-            if (!Player || !_placeObject || !_destroyObject || !_lineRenderer) return;
+            //if (!Player || !_placeObject || !_destroyObject || !_lineRenderer) return;
 
             if (!Main.InModdedRoom || (MenuHandler.IsViewingMenuList && InteractMode == 0) || InteractMode == 2)
             {
+                held_time = 0;
                 if (_placeObject.activeSelf || _destroyObject.activeSelf || _crosshairObject.activeSelf)
                 {
                     _placeObject.SetActive(false);
@@ -93,15 +103,20 @@ namespace GorillaCraft.Behaviours
                 return;
             }
 
-            _lineRenderer.SetPosition(0, Player.rightControllerTransform.position);
+            var player_controller = Player.rightControllerTransform;
+            var player_follower = Player.rightHandFollower;
+
+            _lineRenderer.SetPosition(0, player_controller.position);
+
+            float player_scale = Player.NativeScale * Player.ScaleMultiplier;
 
             // Adjust the scale for the preview objects based on the player's scale
-            _placeObject.transform.localScale = Vector3.one * Mathf.Clamp01(Player.scale);
-            _crosshairObject.transform.localScale = Vector3.one * 0.04458661f * Mathf.Clamp01(Player.scale);
-            _lineRenderer.startWidth = 0.007f * Mathf.Clamp01(Player.scale);
-            _lineRenderer.endWidth = 0.007f * Mathf.Clamp01(Player.scale);
+            _placeObject.transform.localScale = Vector3.one * Mathf.Clamp01(player_scale);
+            _crosshairObject.transform.localScale = Vector3.one * 0.04458661f * Mathf.Clamp01(player_scale);
+            _lineRenderer.startWidth = 0.007f * Mathf.Clamp01(player_scale);
+            _lineRenderer.endWidth = 0.007f * Mathf.Clamp01(player_scale);
 
-            if (Physics.Raycast(Player.rightHandFollower.position, -Player.rightControllerTransform.up, out RaycastHit hit, 25 * Mathf.Clamp01(Player.scale), InteractMode == 0 ? _buildLayerMask : _removeLayerMask, QueryTriggerInteraction.UseGlobal))
+            if (Physics.Raycast(player_follower.position, -player_controller.up, out RaycastHit hit, 25 * Mathf.Clamp01(player_scale), InteractMode == 0 ? _buildLayerMask : _removeLayerMask, QueryTriggerInteraction.UseGlobal))
             {
                 _lineRenderer.enabled = true;
                 if (!_crosshairObject.activeSelf) _crosshairObject.SetActive(true);
@@ -112,67 +127,92 @@ namespace GorillaCraft.Behaviours
                     _destroyObject.SetActive(false);
                 }
 
-                bool blockExists = hit.transform.GetComponentInChildren<BlockFace>() != null;
-                if (InteractMode == 1 && blockExists && !_destroyObject.activeSelf)
+                var block_surface = hit.transform.GetComponentInChildren<BlockFace>();
+
+                if (InteractMode == 1 && (bool)block_surface && !_destroyObject.activeSelf)
                 {
                     _placeObject.SetActive(false);
                     _destroyObject.SetActive(true);
-                    _destroyObject.transform.localScale = hit.transform.GetComponentInChildren<BlockFace>().Root.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(Player.scale)));
+                    _destroyObject.transform.localScale = block_surface.Root.transform.localScale + (Vector3.one * (0.02f * Mathf.Clamp01(player_scale)));
                 }
-                else if (InteractMode == 1 && !blockExists)
+                else if (InteractMode == 1 && !(bool)block_surface)
                 {
                     _placeObject.SetActive(false);
                     _destroyObject.SetActive(false);
                 }
 
-                Vector3 adjustedPosition = new(hit.point.x.RoundToInt(Player.scale), hit.point.y.RoundToInt(Player.scale), hit.point.z.RoundToInt(Player.scale));
-                adjustedPosition = InteractMode == 1 && hit.transform.GetComponentInChildren<BlockFace>() != null ? hit.transform.GetComponentInChildren<BlockFace>().Root.transform.position : adjustedPosition;
+                Vector3 block_target_position = new(hit.point.x.RoundToInt(player_scale), hit.point.y.RoundToInt(player_scale), hit.point.z.RoundToInt(player_scale));
+                block_target_position = InteractMode == 1 && (bool)block_surface ? block_surface.Root.transform.position : block_target_position;
 
-                _placeObject.transform.position = adjustedPosition;
-                _destroyObject.transform.position = adjustedPosition;
+                _placeObject.transform.position = block_target_position;
+                _destroyObject.transform.position = block_target_position;
 
                 _lineRenderer.SetPosition(1, hit.point);
                 _crosshairObject.transform.position = hit.point;
                 _crosshairObject.transform.up = hit.normal;
 
                 bool triggerPressed = ControllerInputPoller.instance.rightControllerIndexFloat > 0.5f;
-                if (triggerPressed && triggerPressed != IndexActivated)
+                if (triggerPressed)
                 {
-                    if (InteractMode == 0)
+                    if (!IndexActivated)
                     {
-                        Vector3 eulerAngles = _blockList[Placement].Placement switch
-                        {
-                            BlockPlacement.VerticalRotation_90 => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90) - 90 : 0, 0f),
-                            BlockPlacement.VerticalRotation_45 => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 45f) * 45f) - 90 : 0, 0f),
-                            BlockPlacement.FullRotation => new Vector3(Mathf.RoundToInt(Player.rightControllerTransform.eulerAngles.x) != 0 ? Mathf.RoundToInt(Player.rightControllerTransform.eulerAngles.x / 90f) * 90 : 0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f),
-                            _ => Vector3.zero,
-                        };
+                        IndexActivated = true;
+                        held_time = 0f;
 
-                        IndexActivated = triggerPressed;
-                        if (_blockHandler.PlacementAllowed(_blockList[Placement].GetType().FullName, hit))
+                        if (InteractMode == 0)
                         {
-                            _blockHandler.PlaceBlock(BlockPlaceType.Local, _blockList[Placement].GetType().Name, _placeObject.transform.position, _blockList[Placement].Form != BlockForm.Ladder ? eulerAngles : hit.collider.transform.eulerAngles, Vector3.one * Mathf.Clamp01(Player.scale), PhotonNetwork.LocalPlayer, out BlockObject parent, BlockInclusions.Audio);
-                            if (parent && _blockList[Placement].Form == BlockForm.Ladder)
+                            Vector3 eulerAngles = _blockList[Placement].Placement switch
                             {
-                                parent.ParentalBlocks.Add(hit.collider.GetComponent<BlockFace>().Root);
-                                hit.collider.GetComponent<BlockFace>().Root.ChildrenBlocks.Add(parent);
+                                BlockPlacement.VerticalRotation_90 => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90) - 90 : 0, 0f),
+                                BlockPlacement.VerticalRotation_45 => new Vector3(0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? (Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 45f) * 45f) - 90 : 0, 0f),
+                                BlockPlacement.FullRotation => new Vector3(Mathf.RoundToInt(player_controller.eulerAngles.x) != 0 ? Mathf.RoundToInt(player_controller.eulerAngles.x / 90f) * 90 : 0, Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f),
+                                _ => Vector3.zero,
+                            };
+
+                            //IndexActivated = triggerPressed;
+                            if (_blockHandler.PlacementAllowed(_blockList[Placement].GetType().FullName, hit))
+                            {
+                                _blockHandler.PlaceBlock(BlockPlaceType.Local, _blockList[Placement].GetType().Name, _placeObject.transform.position, _blockList[Placement].Form != BlockForm.Ladder ? eulerAngles : hit.collider.transform.eulerAngles, Vector3.one * Mathf.Clamp01(player_scale), PhotonNetwork.LocalPlayer, out BlockObject parent, BlockInclusions.Audio);
+                                if (parent && _blockList[Placement].Form == BlockForm.Ladder)
+                                {
+                                    parent.ParentalBlocks.Add(hit.collider.GetComponent<BlockFace>().Root);
+                                    hit.collider.GetComponent<BlockFace>().Root.ChildrenBlocks.Add(parent);
+                                }
                             }
+
+                            return;
                         }
 
+                        if ((bool)block_surface)
+                        {
+                            bool networkBreakFactor = block_surface.Root.Owner.IsLocal;
+                            // bool networkBreakFactor = true;
+                            if (networkBreakFactor)
+                            {
+                                _blockHandler.RemoveBlock(block_surface.Root, PhotonNetwork.LocalPlayer);
+                            }
+                        }
                         return;
                     }
 
-                    if (hit.transform.GetComponentInChildren<BlockFace>() is BlockFace face && face)
+                    // trigger is held, but is on cooldown
+
+                    held_time += Time.deltaTime;
+
+                    if (held_time > 0.25f)
                     {
-                        bool networkBreakFactor = face.Root.Owner.IsLocal;
-                        // bool networkBreakFactor = true;
-                        if (networkBreakFactor)
-                        {
-                            _blockHandler.RemoveBlock(face.Root, PhotonNetwork.LocalPlayer);
-                        }
+                        held_time = 0f;
+                        IndexActivated = false;
                     }
+
+                    return;
                 }
-                IndexActivated = triggerPressed;
+
+                // trigger isn't held
+
+                IndexActivated = false;
+                held_time = 0f;
+
                 return;
             }
 

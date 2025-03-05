@@ -28,6 +28,11 @@ namespace GorillaCraft.Behaviours
 
         private bool _currentModeBinding;
 
+        public void Awake()
+        {
+            enabled = false;
+        }
+
         [Inject]
         public void Construct(PlacementHelper placementHelper, AssetLoader assetLoader, Configuration configuration)
         {
@@ -40,7 +45,7 @@ namespace GorillaCraft.Behaviours
         {
             Plugin.Allowed.AddCallback(AllowStateChanged);
 
-            GameObject itemSelectionMenu = Instantiate(await _assetLoader.LoadAsset<GameObject>("ItemSelector"));
+            GameObject itemSelectionMenu = Instantiate(await _assetLoader.LoadAsset<GameObject>(Constants.ItemSelectorName));
             itemSelectionMenu.transform.SetParent(GorillaTagger.Instance.offlineVRRig.leftHandTransform.parent);
 
             _menuHandler = itemSelectionMenu.AddComponent<MenuHandler>();
@@ -58,11 +63,13 @@ namespace GorillaCraft.Behaviours
             _gamemodeHandler._placementHelper = _placementHelper;
 
             PhotonNetwork.LocalPlayer.SetCustomProperties(new() { { "GC", Constants.Version } });
+
+            enabled = true;
         }
 
         public void Update()
         {
-            if (!_gamemodeHandler || !_menuHandler) return;
+            // if (!_gamemodeHandler || !_menuHandler) return;
 
             if (!InModdedRoom)
             {
@@ -164,7 +171,7 @@ namespace GorillaCraft.Behaviours
                         await Task.Delay(60);
                     }
 
-                    blocks.Add(block.BlockType.GetType().Name);
+                    blocks.Add(block.BlockType.GetType().Name); // TODO: sending strings thru events is bad, try going for sending an index
                     blocks.Add(Utils.PackVector3ToLong(block.Position));
                     blocks.Add(Utils.PackVector3ToLong(block.EulerAngles));
                     blocks.Add(Utils.PackVector3ToLong(block.Size));

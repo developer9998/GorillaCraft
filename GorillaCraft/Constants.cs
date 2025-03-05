@@ -6,6 +6,8 @@
         public const string Name = "GorillaCraft";
         public const string Version = "1.0.0.8";
 
+        public const bool IsClosedAccessRelease = false;
+
         public const string BundleDirectory = "GorillaCraft.Content.devminecraft";
 
         public const string ItemSelectorName = "ItemSelector";

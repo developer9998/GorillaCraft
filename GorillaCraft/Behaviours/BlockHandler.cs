@@ -137,7 +137,7 @@ namespace GorillaCraft.Behaviours
 
                         _rendererObject.materials = _materialArray;
                     }
-                    else if (_currentBlock.Form == BlockForm.StairsTest)
+                    else if (_currentBlock.Form == BlockForm.StairsTest) // didn't work out :<
                     {
                         _currentObject = Instantiate(_stairObject);
 

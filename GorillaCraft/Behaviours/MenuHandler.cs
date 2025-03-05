@@ -6,6 +6,7 @@ using GorillaCraft.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -135,7 +136,7 @@ namespace GorillaCraft.Behaviours
             slider_BlockResource.SliderData = new ButtonSliderData()
             {
                 Least = 0f,
-                Greatest = 1f
+                Greatest = Constants.IsClosedAccessRelease ? 1f : 2f
             };
             slider_BlockResource.SliderContentOverride = new Dictionary<float, string>()
             {
