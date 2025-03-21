@@ -2,10 +2,12 @@
 using Bepinject;
 using GorillaCraft.Models;
 using HarmonyLib;
+using Utilla.Attributes;
 
 namespace GorillaCraft
 {
-    [BepInPlugin(Constants.GUID, Constants.Name, Constants.Version), BepInDependency("dev.tillahook", "1.0.0")]
+    [BepInPlugin(Constants.GUID, Constants.Name, Constants.Version), BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
+    [ModdedGamemode]
     public class Plugin : BaseUnityPlugin
     {
         public static Watchable<bool> Allowed { get; private set; }
@@ -17,9 +19,18 @@ namespace GorillaCraft
             Zenjector.Install<MainInstaller>().OnProject().WithConfig(Config).WithLog(Logger);
 
             Harmony.CreateAndPatchAll(typeof(Plugin).Assembly, Constants.GUID);
+        }
 
-            TillaHook.TillaHook.OnModdedJoin += (string gameMode) => Allowed.value = true;
-            TillaHook.TillaHook.OnModdedLeave += (string gameMode) => Allowed.value = false;
+        [ModdedGamemodeJoin]
+        public void OnModdedJoin()
+        {
+            Allowed.value = true;
+        }
+
+        [ModdedGamemodeLeave]
+        public void OnModdedLeave()
+        {
+            Allowed.value = false;
         }
     }
 }

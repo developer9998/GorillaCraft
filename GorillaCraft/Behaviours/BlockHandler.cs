@@ -247,12 +247,12 @@ namespace GorillaCraft.Behaviours
             }
             else if (intersects)
             {
-                Vector3 playerPosition = GorillaLocomotion.Player.Instance.transform.position;
+                Vector3 playerPosition = GorillaLocomotion.GTPlayer.Instance.transform.position;
                 Vector3 destination = Vector3.MoveTowards(playerPosition, blockPosition, -1.2f * blockScale.y);
                 Vector3 offset = playerPosition - destination;
                 offset.y = -offset.y;
                 destination = offset + playerPosition + (Vector3.up * blockScale.y);
-                GorillaLocomotion.Player.Instance.TeleportTo(destination, GorillaLocomotion.Player.Instance.transform.rotation);
+                GorillaLocomotion.GTPlayer.Instance.TeleportTo(destination, GorillaLocomotion.GTPlayer.Instance.transform.rotation);
             }
 
             VRRig rig = GorillaGameManager.StaticFindRigForPlayer(player);

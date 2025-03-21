@@ -9,10 +9,10 @@ using UnityEngine.XR;
 
 namespace GorillaCraft.Patches
 {
-    [HarmonyPatch(typeof(Player), "EndClimbing")]
+    [HarmonyPatch(typeof(GTPlayer), "EndClimbing")]
     public class EndClimbPatch
     {
-        public static bool Prefix(Player __instance, GorillaHandClimber hand, bool startingNewClimb, bool doDontReclimb, ref GorillaHandClimber ___currentClimber, ref GorillaClimbable ___currentClimbable)
+        public static bool Prefix(GTPlayer __instance, GorillaHandClimber hand, bool startingNewClimb, bool doDontReclimb, ref GorillaHandClimber ___currentClimber, ref GorillaClimbable ___currentClimbable)
         {
             if (___currentClimbable && ___currentClimbable.TryGetComponent(out Ladder ladder))
             {
@@ -42,7 +42,7 @@ namespace GorillaCraft.Patches
 
                     if (gorillaVelocityTracker.GetAverageVelocity(false, 0.2f, true).sqrMagnitude > 1.3f)
                     {
-                        Player.Instance.GetComponent<BlockHandler>().PlayTapSound(GorillaTagger.Instance.offlineVRRig, ladder.GetComponent<BlockFace>().SurfaceType, ___currentClimber.xrNode == XRNode.LeftHand);
+                        GTPlayer.Instance.GetComponent<BlockHandler>().PlayTapSound(GorillaTagger.Instance.offlineVRRig, ladder.GetComponent<BlockFace>().SurfaceType, ___currentClimber.xrNode == XRNode.LeftHand);
                         NetworkUtils.SurfaceTap(ladder.GetComponent<BlockFace>().SurfaceType.FullName, ___currentClimber.xrNode == XRNode.LeftHand);
                     }
                 }

@@ -12,7 +12,7 @@ namespace GorillaCraft.Models
 {
     public class MainInstaller : Installer
     {
-        public GameObject Player => UnityEngine.Object.FindObjectOfType<Player>().gameObject;
+        public GameObject Player => UnityEngine.Object.FindObjectOfType<GTPlayer>().gameObject;
 
         public override void InstallBindings()
         {

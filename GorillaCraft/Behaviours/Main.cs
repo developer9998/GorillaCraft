@@ -136,11 +136,11 @@ namespace GorillaCraft.Behaviours
 
                 if (build)
                 {
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], Utils.UnpackVector3FromLong((long)eventData[2]), Utils.UnpackVector3FromLong((long)eventData[3]), Utils.UnpackVector3FromLong((long)eventData[4]), sender, out _, BlockInclusions.Audio);
+                    GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], Utils.UnpackVector3FromLong((long)eventData[2]), Utils.UnpackVector3FromLong((long)eventData[3]), Utils.UnpackVector3FromLong((long)eventData[4]), sender, out _, BlockInclusions.Audio);
                     return;
                 }
 
-                GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1], sender);
+                GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1], sender);
                 return;
             }
 
@@ -149,7 +149,7 @@ namespace GorillaCraft.Behaviours
                 Type surfaceType = typeof(Plugin).Assembly.GetType((string)eventData[0]);
                 if (surfaceType != null)
                 {
-                    GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlayTapSound(RigCacheUtils.GetRigContainer(sender).Rig, surfaceType, (bool)eventData[1]);
+                    GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlayTapSound(RigCacheUtils.GetRigContainer(sender).Rig, surfaceType, (bool)eventData[1]);
                 }
                 return;
             }
@@ -226,7 +226,7 @@ namespace GorillaCraft.Behaviours
                                 break;
                             case 3:
                                 blkSize = (long)blkData;
-                                GorillaLocomotion.Player.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Sent, blkName, Utils.UnpackVector3FromLong(blkPos), Utils.UnpackVector3FromLong(blkAngle), Utils.UnpackVector3FromLong(blkSize), sender, out _, BlockInclusions.None);
+                                GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Sent, blkName, Utils.UnpackVector3FromLong(blkPos), Utils.UnpackVector3FromLong(blkAngle), Utils.UnpackVector3FromLong(blkSize), sender, out _, BlockInclusions.None);
                                 Logging.Info("Block placed");
                                 break;
                         }

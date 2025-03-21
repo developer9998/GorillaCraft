@@ -5,7 +5,7 @@ namespace GorillaCraft.Behaviours.UI
 {
     public abstract class MenuButton : MonoBehaviour
     {
-        private bool Viewed => Vector3.Dot(Player.Instance.headCollider.transform.forward, (transform.position - Player.Instance.headCollider.transform.position).normalized) > 0.64f;
+        private bool Viewed => Vector3.Dot(GTPlayer.Instance.headCollider.transform.forward, (transform.position - GTPlayer.Instance.headCollider.transform.position).normalized) > 0.64f;
 
         private float _pressTime;
 

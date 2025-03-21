@@ -14,10 +14,10 @@ namespace GorillaCraft.Patches
         {
             if (!__instance.isOfflineVRRig) return true;
 
-            GorillaSurfaceOverride currentOverride = isLeftHand ? Player.Instance.leftHandSurfaceOverride : Player.Instance.rightHandSurfaceOverride;
+            GorillaSurfaceOverride currentOverride = isLeftHand ? GTPlayer.Instance.leftHandSurfaceOverride : GTPlayer.Instance.rightHandSurfaceOverride;
             if (currentOverride && currentOverride.TryGetComponent(out _currentFace))
             {
-                Player.Instance.GetComponent<BlockHandler>().PlayTapSound(__instance, _currentFace.SurfaceType, isLeftHand);
+                GTPlayer.Instance.GetComponent<BlockHandler>().PlayTapSound(__instance, _currentFace.SurfaceType, isLeftHand);
                 return false;
             }
 

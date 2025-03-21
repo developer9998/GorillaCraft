@@ -17,7 +17,7 @@ namespace GorillaCraft.Behaviours
 
         private bool _initialized;
 
-        private Player Player;
+        private GTPlayer Player;
 
         private LayerMask _buildLayerMask, _removeLayerMask;
 
@@ -46,7 +46,7 @@ namespace GorillaCraft.Behaviours
             if (_initialized) return;
             _initialized = true;
 
-            Player = GetComponent<Player>();
+            Player = GetComponent<GTPlayer>();
 
             _buildLayerMask = (int)Player.locomotionEnabledLayers;
             _removeLayerMask = (int)Player.locomotionEnabledLayers;
@@ -108,7 +108,7 @@ namespace GorillaCraft.Behaviours
 
             _lineRenderer.SetPosition(0, player_controller.position);
 
-            float player_scale = Player.NativeScale * Player.ScaleMultiplier;
+            float player_scale = Mathf.Clamp01(GTPlayer.Instance.scale);
 
             // Adjust the scale for the preview objects based on the player's scale
             _placeObject.transform.localScale = Vector3.one * Mathf.Clamp01(player_scale);
