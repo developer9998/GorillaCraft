@@ -3,6 +3,7 @@ using GorillaCraft.Utilities;
 using GorillaLocomotion;
 using HarmonyLib;
 using Photon.Pun;
+using System.Linq;
 
 namespace GorillaCraft.Patches
 {
@@ -13,10 +14,8 @@ namespace GorillaCraft.Patches
 
         public static bool Prefix(string methodName, PhotonView __instance, params object[] parameters)
         {
-            if (methodName == "OnHandTapRPC" && __instance.IsMine)
+            if (methodName == "OnHandTapRPC" && __instance.IsMine && parameters.ElementAtOrDefault(2) is bool isLeftHand)
             {
-                bool isLeftHand = (bool)parameters[1];
-
                 GorillaSurfaceOverride currentOverride = isLeftHand ? GTPlayer.Instance.leftHandSurfaceOverride : GTPlayer.Instance.rightHandSurfaceOverride;
                 if (currentOverride && currentOverride.TryGetComponent(out _currentFace))
                 {
