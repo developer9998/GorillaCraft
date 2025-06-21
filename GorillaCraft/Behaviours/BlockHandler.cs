@@ -81,8 +81,12 @@ namespace GorillaCraft.Behaviours
                 blockFace.Root = _blockParent;
                 blockFace.SurfaceType = info.FaceSurfaceType;
 
+                // 0: default
+                // 59: iceground
+                // 147: Snowman
+
                 GorillaSurfaceOverride surface = relativeFace.gameObject.AddComponent<GorillaSurfaceOverride>();
-                surface.overrideIndex = info.FaceSurfaceType == typeof(Surface_Snow) ? 32 : ((_blockParent.BlockType.GetType() == typeof(IceBlock) || _blockParent.BlockType.GetType() == typeof(PackedIceBlock)) ? 59 : 0);
+                surface.overrideIndex = info.FaceSurfaceType == typeof(Surface_Snow) ? 147 : ((_blockParent.BlockType.GetType() == typeof(IceBlock) || _blockParent.BlockType.GetType() == typeof(PackedIceBlock)) ? 59 : 0);
 
                 return blockFace;
             }

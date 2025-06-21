@@ -4,6 +4,7 @@ using GorillaCraft.Behaviours.UI;
 using GorillaCraft.Models;
 using GorillaCraft.Tools;
 using GorillaCraft.Utilities;
+using GorillaTag;
 using Photon.Pun;
 using Photon.Realtime;
 using System;
@@ -95,6 +96,8 @@ namespace GorillaCraft.Behaviours
 
         private void AllowStateChanged(bool state)
         {
+            if (GTAppState.isQuitting) return;
+
             InModdedRoom = state;
             if (InModdedRoom)
             {

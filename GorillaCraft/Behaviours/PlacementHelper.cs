@@ -13,7 +13,7 @@ namespace GorillaCraft.Behaviours
 {
     public class PlacementHelper : MonoBehaviour
     {
-        public static int InteractMode;
+        public static int InteractMode = 2;
 
         private bool _initialized;
 
