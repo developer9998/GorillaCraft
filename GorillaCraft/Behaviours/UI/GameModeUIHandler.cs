@@ -1,6 +1,4 @@
-﻿using BepInEx.Logging;
-using GorillaCraft.Extensions;
-using GorillaCraft.Tools;
+﻿using GorillaCraft.Tools;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

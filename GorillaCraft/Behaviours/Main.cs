@@ -237,7 +237,7 @@ namespace GorillaCraft.Behaviours
                         float progress = Mathf.Round((blkDataIndex + 1) / 4f * 100f);
                         Logging.Info($"Block construction at {progress}%");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Logging.Error($"Block constructon threw an exception: {ex}");
                         i += 4 - blkDataIndex; // skip this block
