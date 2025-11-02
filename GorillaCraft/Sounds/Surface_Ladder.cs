@@ -7,6 +7,6 @@ namespace GorillaCraft.Sounds
         public string Name => "ladder";
         public float Volume => 0.3f;
         public float Pitch => 1f;
-        public int MaxRange => 5;
+        public int Range => 5;
     }
 }

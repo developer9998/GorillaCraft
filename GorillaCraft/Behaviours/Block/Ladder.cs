@@ -11,7 +11,7 @@ namespace GorillaCraft.Behaviours.Block
         public void Awake()
         {
             Climbable = gameObject.AddComponent<GorillaClimbable>();
-            Climbable.maxDistanceSnap = 1f / 3f;
+            Climbable.maxDistanceSnap = 1f / 2f;
         }
 
         public void OnDestroy() => Destroy(Climbable);

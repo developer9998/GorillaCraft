@@ -16,10 +16,10 @@ namespace GorillaCraft.Patches
         {
             if (methodName == "OnHandTapRPC" && __instance.IsMine && parameters.ElementAtOrDefault(2) is bool isLeftHand)
             {
-                GorillaSurfaceOverride currentOverride = isLeftHand ? GTPlayer.Instance.leftHandSurfaceOverride : GTPlayer.Instance.rightHandSurfaceOverride;
+                GorillaSurfaceOverride currentOverride = (isLeftHand ? GTPlayer.Instance.leftHand : GTPlayer.Instance.rightHand).surfaceOverride;
                 if (currentOverride && currentOverride.TryGetComponent(out _currentFace))
                 {
-                    NetworkUtils.SurfaceTap(_currentFace.SurfaceType.FullName, isLeftHand);
+                    NetworkUtility.SurfaceTap(_currentFace.SurfaceType.Name, isLeftHand);
                     return false;
                 }
             }

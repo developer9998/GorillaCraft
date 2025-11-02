@@ -12,7 +12,7 @@ namespace GorillaCraft.Models
 {
     public class MainInstaller : Installer
     {
-        public GameObject Player => UnityEngine.Object.FindObjectOfType<GTPlayer>().gameObject;
+        public GameObject Player => UnityEngine.Object.FindFirstObjectByType<GTPlayer>().gameObject;
 
         public override void InstallBindings()
         {
@@ -197,8 +197,6 @@ namespace GorillaCraft.Models
             Container.Bind<IBlock>().To<PurpleStainedGlass>().AsSingle();
             Container.Bind<IBlock>().To<MagentaStainedGlass>().AsSingle();
             Container.Bind<IBlock>().To<PinkStainedGlass>().AsSingle();
-
-            Container.Bind<IBlock>().To<OakStairsBlock>().AsSingle();
         }
     }
 }

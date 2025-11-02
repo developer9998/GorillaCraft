@@ -5,6 +5,6 @@
         public string Name { get; }
         public float Volume { get; }
         public float Pitch { get; }
-        public int MaxRange { get; }
+        public int Range { get; }
     }
 }

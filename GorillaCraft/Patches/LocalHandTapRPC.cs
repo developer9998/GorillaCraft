@@ -14,7 +14,7 @@ namespace GorillaCraft.Patches
         {
             if (!__instance.isOfflineVRRig) return true;
 
-            GorillaSurfaceOverride currentOverride = isLeftHand ? GTPlayer.Instance.leftHandSurfaceOverride : GTPlayer.Instance.rightHandSurfaceOverride;
+            GorillaSurfaceOverride currentOverride = (isLeftHand ? GTPlayer.Instance.leftHand : GTPlayer.Instance.rightHand).surfaceOverride;
             if (currentOverride && currentOverride.TryGetComponent(out _currentFace))
             {
                 effectContext.soundFX = null;

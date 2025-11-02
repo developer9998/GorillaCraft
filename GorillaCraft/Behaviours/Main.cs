@@ -1,4 +1,5 @@
-﻿using ExitGames.Client.Photon;
+﻿using BepInEx;
+using ExitGames.Client.Photon;
 using GorillaCraft.Behaviours.Networking;
 using GorillaCraft.Behaviours.UI;
 using GorillaCraft.Models;
@@ -63,7 +64,7 @@ namespace GorillaCraft.Behaviours
             _gamemodeHandler._onSprite = await _assetLoader.LoadAsset<Sprite>("selection");
             _gamemodeHandler._placementHelper = _placementHelper;
 
-            PhotonNetwork.LocalPlayer.SetCustomProperties(new() { { "GC", Constants.Version } });
+            // PhotonNetwork.LocalPlayer.SetCustomProperties(new() { { "GC", Constants.Version } });
 
             enabled = true;
         }
@@ -124,131 +125,150 @@ namespace GorillaCraft.Behaviours
             Destroy(GorillaTagger.Instance.offlineVRRig.gameObject.GetComponent<GorillaCrafter>());
         }
 
-        public async void OnEvent(EventData data)
+        public void OnEvent(EventData data)
         {
-            if (data.Code != (int)GorillaCraftNetworkType.BlockInteractionCode && data.Code != (int)GorillaCraftNetworkType.SurfaceTapCode && data.Code != (int)GorillaCraftNetworkType.RequestBlocksCode && data.Code != (int)GorillaCraftNetworkType.SendBlocksCode) return;
+            if (data.Code != NetworkUtility.EventCode) return;
+
+            object[] eventData = (object[])data.CustomData;
+            if (eventData.Length == 0 || eventData[0] is not int) return;
+
+            int eventId = (int)eventData[0];
+            if (eventId != NetworkUtility.Id_BlockInteraction && eventId != NetworkUtility.Id_SurfaceTap && eventId != NetworkUtility.Id_RequestBlocks && eventId != NetworkUtility.Id_SendBlocks) return;
 
             Player sender = PhotonNetwork.CurrentRoom.GetPlayer(data.Sender);
-            object[] eventData = (object[])data.CustomData;
 
             Logging.Info($"{sender.NickName} ({string.Join(", ", eventData)})");
 
-            if (data.Code == (int)GorillaCraftNetworkType.BlockInteractionCode)
+            try
             {
-                bool build = (bool)eventData[0];
-
-                if (build)
+                if (eventId == NetworkUtility.Id_BlockInteraction)
                 {
-                    GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1], Utils.UnpackVector3FromLong((long)eventData[2]), Utils.UnpackVector3FromLong((long)eventData[3]), Utils.UnpackVector3FromLong((long)eventData[4]), sender, out _, BlockInclusions.Audio);
+                    bool build = (bool)eventData[0 + 1];
+
+                    if (build)
+                    {
+                        GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Server, (string)eventData[1 + 1], Utils.UnpackVector3FromLong((long)eventData[2 + 1]), Utils.UnpackVector3FromLong((long)eventData[3 + 1]), Utils.UnpackVector3FromLong((long)eventData[4 + 1]), sender, out _, BlockInclusions.Audio);
+                        return;
+                    }
+
+                    GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1 + 1], sender);
                     return;
                 }
 
-                GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().RemoveBlock((long)eventData[1], sender);
-                return;
-            }
-
-            if (data.Code == (int)GorillaCraftNetworkType.SurfaceTapCode)
-            {
-                Type surfaceType = typeof(Plugin).Assembly.GetType((string)eventData[0]);
-                if (surfaceType != null)
+                if (eventId == NetworkUtility.Id_SurfaceTap)
                 {
-                    GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlayTapSound(RigCacheUtils.GetRigContainer(sender).Rig, surfaceType, (bool)eventData[1]);
-                }
-                return;
-            }
-
-            if (data.Code == (int)GorillaCraftNetworkType.RequestBlocksCode)
-            {
-                if (sender.IsLocal) return;
-
-                Player player = (Player)eventData[0];
-                List<object> blocks = [];
-
-                foreach (var block in GorillaCrafter.Local.Blocks.Values)
-                {
-                    if (Mathf.FloorToInt(blocks.Count / 4f) >= 10)
+                    Type surfaceType = typeof(Plugin).Assembly.GetType($"GorillaCraft.Sounds.{(string)eventData[0 + 1]}");
+                    if (surfaceType != null)
                     {
-                        Logging.Info(string.Format("Sending current list of blocks of count {0}", blocks.Count));
-                        NetworkUtils.SendBlocks([.. blocks], player);
-                        blocks.Clear();
-                        await Task.Delay(60);
+                        GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlayTapSound(VRRigCache.Instance.TryGetVrrig(sender, out RigContainer playerRig) ? playerRig.Rig : null, surfaceType, (bool)eventData[1 + 1]);
                     }
-
-                    blocks.Add(block.BlockType.GetType().Name); // TODO: sending strings thru events is bad, try going for sending an index
-                    blocks.Add(Utils.PackVector3ToLong(block.Position));
-                    blocks.Add(Utils.PackVector3ToLong(block.EulerAngles));
-                    blocks.Add(Utils.PackVector3ToLong(block.Size));
+                    return;
                 }
 
-                if (blocks.Count > 0)
+                if (eventId == NetworkUtility.Id_RequestBlocks)
                 {
-                    await Task.Delay(60);
-                    NetworkUtils.SendBlocks([.. blocks], player);
-                }
+                    if (sender.IsLocal) return;
 
-                return;
-            }
-
-            if (data.Code == (int)GorillaCraftNetworkType.SendBlocksCode)
-            {
-                if (sender.IsLocal) return;
-
-                int minActorNum = NetworkSystem.Instance.AllNetPlayers.Select(netPlayer => netPlayer.ActorNumber).Min();
-                int baseActorNum = sender.ActorNumber - minActorNum;
-                if (baseActorNum > 0)
-                {
-                    int delay = baseActorNum * 6;
-                    Logging.Info($"Construction delay by {delay} milliseconds ({minActorNum}, {baseActorNum})");
-                    await Task.Delay(delay);
-                }
-
-                Logging.Info($"Constructing {Mathf.Floor(eventData.Length / 4f)} blocks");
-
-                string blkName = "";
-                long blkPos = 0u, blkAngle = 0u, blkSize;
-
-                for (int i = 0; i < eventData.Length; i++)
-                {
-                    object blkData = eventData[i];
-
-                    Logging.Info(blkData);
-                    int blkDataIndex = i % 4;
-
-                    try
+                    ThreadingHelper.Instance.StartSyncInvoke(async () =>
                     {
-                        switch (blkDataIndex)
+                        Player player = (Player)eventData[0 + 1];
+                        List<object> blocks = [];
+
+                        foreach (var block in GorillaCrafter.Local.Blocks.Values)
                         {
-                            case 0:
-                                blkName = (string)blkData;
-                                break;
-                            case 1:
-                                blkPos = (long)blkData;
-                                break;
-                            case 2:
-                                blkAngle = (long)blkData;
-                                break;
-                            case 3:
-                                blkSize = (long)blkData;
-                                GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Sent, blkName, Utils.UnpackVector3FromLong(blkPos), Utils.UnpackVector3FromLong(blkAngle), Utils.UnpackVector3FromLong(blkSize), sender, out _, BlockInclusions.None);
-                                Logging.Info("Block placed");
-                                break;
+                            if (Mathf.FloorToInt(blocks.Count / 4f) >= 10)
+                            {
+                                Logging.Info(string.Format("Sending current list of blocks of count {0}", blocks.Count));
+                                NetworkUtility.SendBlocks([.. blocks], player);
+                                blocks.Clear();
+                                await Task.Delay(60);
+                            }
+
+                            blocks.Add(block.BlockType.GetType().Name); // TODO: sending strings thru events is bad, try going for sending an index
+                            blocks.Add(Utils.PackVector3ToLong(block.Position));
+                            blocks.Add(Utils.PackVector3ToLong(block.EulerAngles));
+                            blocks.Add(Utils.PackVector3ToLong(block.Size));
                         }
 
-                        float progress = Mathf.Round((blkDataIndex + 1) / 4f * 100f);
-                        Logging.Info($"Block construction at {progress}%");
-                    }
-                    catch (Exception ex)
-                    {
-                        Logging.Error($"Block constructon threw an exception: {ex}");
-                        i += 4 - blkDataIndex; // skip this block
-                        Logging.Warning("Construction skipped");
-                        continue;
-                    }
-                }
-                return;
-            }
+                        if (blocks.Count > 0)
+                        {
+                            await Task.Delay(60);
+                            NetworkUtility.SendBlocks([.. blocks], player);
+                        }
+                    });
 
-            Logging.Warning("Howdy! I am your worst enemy.");
+                    return;
+                }
+
+                if (eventId == NetworkUtility.Id_SendBlocks)
+                {
+                    if (sender.IsLocal) return;
+
+                    ThreadingHelper.Instance.StartSyncInvoke(async () =>
+                    {
+                        await Task.Delay(500);
+
+                        int minActorNum = NetworkSystem.Instance.AllNetPlayers.Select(netPlayer => netPlayer.ActorNumber).Min();
+                        int baseActorNum = sender.ActorNumber - minActorNum;
+                        if (baseActorNum > 0)
+                        {
+                            int delay = baseActorNum * 100;
+                            Logging.Info($"Construction delay by {delay} milliseconds ({minActorNum}, {baseActorNum})");
+                            await Task.Delay(delay);
+                        }
+
+                        Logging.Info($"Constructing {Mathf.Floor(eventData.Length / 4f)} blocks");
+
+                        string blkName = "";
+                        long blkPos = 0u, blkAngle = 0u, blkSize;
+
+                        for (int i = 0; i < eventData.Length; i++)
+                        {
+                            object blkData = eventData[i];
+
+                            Logging.Info(blkData);
+                            int blkDataIndex = i % 4;
+
+                            try
+                            {
+                                switch (blkDataIndex)
+                                {
+                                    case 0:
+                                        blkName = (string)blkData;
+                                        break;
+                                    case 1:
+                                        blkPos = (long)blkData;
+                                        break;
+                                    case 2:
+                                        blkAngle = (long)blkData;
+                                        break;
+                                    case 3:
+                                        blkSize = (long)blkData;
+                                        GorillaLocomotion.GTPlayer.Instance.GetComponent<BlockHandler>().PlaceBlock(BlockPlaceType.Sent, blkName, Utils.UnpackVector3FromLong(blkPos), Utils.UnpackVector3FromLong(blkAngle), Utils.UnpackVector3FromLong(blkSize), sender, out _, BlockInclusions.None);
+                                        Logging.Info("Block placed");
+                                        break;
+                                }
+
+                                float progress = Mathf.Round((blkDataIndex + 1) / 4f * 100f);
+                                Logging.Info($"Block construction at {progress}%");
+                            }
+                            catch (Exception ex)
+                            {
+                                Logging.Error($"Block constructon threw an exception: {ex}");
+                                i += 4 - blkDataIndex; // skip this block
+                                Logging.Warning("Construction skipped");
+                                continue;
+                            }
+                        }
+                    });
+
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Error(ex);
+            }
         }
     }
 }

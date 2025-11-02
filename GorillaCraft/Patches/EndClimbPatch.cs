@@ -29,10 +29,10 @@ namespace GorillaCraft.Patches
                     ___currentClimber.queuedToBecomeValidToGrabAgain = true;
                     ___currentClimber.lastAutoReleasePos = ___currentClimber.handRoot.localPosition;
 
-                    GorillaVelocityTracker gorillaVelocityTracker = ___currentClimber.xrNode != XRNode.LeftHand ? __instance.rightInteractPointVelocityTracker : __instance.leftInteractPointVelocityTracker;
+                    GorillaVelocityTracker gorillaVelocityTracker = ___currentClimber.xrNode != XRNode.LeftHand ? __instance.rightHand.interactPointVelocityTracker : __instance.leftHand.interactPointVelocityTracker;
                     if (!startingNewClimb)
                     {
-                        __instance.bodyCollider.attachedRigidbody.velocity = __instance.bodyVelocityTracker.GetAverageVelocity(true) * 0.1f;
+                        __instance.bodyCollider.attachedRigidbody.linearVelocity = __instance.bodyVelocityTracker.GetAverageVelocity(true) * 0.1f;
 
                         Vector3 force = __instance.turnParent.transform.rotation * -(gorillaVelocityTracker.GetAverageVelocity(false, 0.1f, true) * 0.33f) * __instance.scale;
                         force = Vector3.ClampMagnitude(force, 5.5f * __instance.scale);
@@ -43,7 +43,7 @@ namespace GorillaCraft.Patches
                     if (gorillaVelocityTracker.GetAverageVelocity(false, 0.2f, true).sqrMagnitude > 1.3f)
                     {
                         GTPlayer.Instance.GetComponent<BlockHandler>().PlayTapSound(GorillaTagger.Instance.offlineVRRig, ladder.GetComponent<BlockFace>().SurfaceType, ___currentClimber.xrNode == XRNode.LeftHand);
-                        NetworkUtils.SurfaceTap(ladder.GetComponent<BlockFace>().SurfaceType.FullName, ___currentClimber.xrNode == XRNode.LeftHand);
+                        NetworkUtility.SurfaceTap(ladder.GetComponent<BlockFace>().SurfaceType.Name, ___currentClimber.xrNode == XRNode.LeftHand);
                     }
                 }
 

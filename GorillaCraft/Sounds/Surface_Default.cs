@@ -7,6 +7,6 @@ namespace GorillaCraft.Sounds
         public string Name => "Stone";
         public float Volume => 0.15f;
         public float Pitch => 1f;
-        public int MaxRange => 6;
+        public int Range => 6;
     }
 }

@@ -52,7 +52,7 @@ namespace GorillaCraft.Behaviours.Networking
 
             if (HasGorillaCraft)
             {
-                NetworkUtils.RequestBlocks(PhotonNetwork.CurrentRoom.GetPlayer(Creator.ActorNumber));
+                NetworkUtility.RequestBlocks(Creator.GetPlayerRef());
             }
         }
 
@@ -88,7 +88,7 @@ namespace GorillaCraft.Behaviours.Networking
                     {
                         long blockEulerAngles = Utils.PackVector3ToLong(block.EulerAngles);
                         long blockScale = Utils.PackVector3ToLong(block.Size);
-                        NetworkUtils.BlockInteraction(true, block.BlockType.GetType().Name, blockPosition, blockEulerAngles, blockScale);
+                        NetworkUtility.BlockInteraction(true, block.BlockType.GetType().Name, blockPosition, blockEulerAngles, blockScale);
                     }
 
                 }
@@ -97,7 +97,7 @@ namespace GorillaCraft.Behaviours.Networking
                     Blocks.Remove(blockPosition);
                     if (Creator.IsLocal)
                     {
-                        NetworkUtils.BlockInteraction(false, blockPosition);
+                        NetworkUtility.BlockInteraction(false, blockPosition);
                     }
                 }
             }

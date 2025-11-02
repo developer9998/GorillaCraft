@@ -35,7 +35,7 @@ namespace GorillaCraft.Behaviours
 
         private Dictionary<Type, IDataType> _footstepCache, _interactionCache;
 
-        private PhysicMaterial _slipperyPhysicMaterial;
+        private PhysicsMaterial _slipperyPhysicMaterial;
 
         [Inject]
         public async void Construct(AssetLoader assetLoader, List<IBlock> blockList, BlockDataFactory_PL factory, Configuration config)
@@ -49,13 +49,13 @@ namespace GorillaCraft.Behaviours
 
             _blockList = blockList;
 
-            _slipperyPhysicMaterial = new PhysicMaterial
+            _slipperyPhysicMaterial = new PhysicsMaterial
             {
                 dynamicFriction = -0,
                 staticFriction = -0,
                 bounciness = 0,
-                frictionCombine = PhysicMaterialCombine.Minimum,
-                bounceCombine = PhysicMaterialCombine.Minimum
+                frictionCombine = PhysicsMaterialCombine.Minimum,
+                bounceCombine = PhysicsMaterialCombine.Minimum
             };
 
             // Define lists, dictionaries, etc.
@@ -299,7 +299,7 @@ namespace GorillaCraft.Behaviours
                 newBlock.transform.eulerAngles = blockEuler;
             }
 
-            if (inclusions.HasFlag(BlockInclusions.Audio)) BlockAudioUtils.PlaySound(_assetLoader, newBlock, GetInteractionType(block.PlaceSound), _configuration.PlaceBreakVolume.Value / 100f);
+            if (inclusions.HasFlag(BlockInclusions.Audio)) SoundUtility.PlaySound(_assetLoader, newBlock, GetInteractionType(block.PlaceSound), _configuration.PlaceBreakVolume.Value / 100f);
 
             blockParent = newBlock.GetOrAddComponent<BlockObject>();
             blockParent.Owner = player;
@@ -351,7 +351,7 @@ namespace GorillaCraft.Behaviours
             Logging.Warning("Tried to remove block that doesn't exist at specified position");
         }
 
-        public void RemoveBlock(BlockObject parent, NetPlayer sender, BlockInclusions inclusions = BlockInclusions.Audio | BlockInclusions.Particles)
+        public void RemoveBlock(BlockObject parent, NetPlayer sender, BlockInclusions inclusions = BlockInclusions.Audio)
         {
             bool networkBreakFactor = parent.Owner.ActorNumber == sender.ActorNumber;
             // bool networkBreakFactor = true;
@@ -369,7 +369,7 @@ namespace GorillaCraft.Behaviours
 
             if (parent.ChildrenBlocks.Any()) // remove any children connected to this block, local client or not
             {
-                List<BlockObject> list = new(parent.ChildrenBlocks);
+                List<BlockObject> list = [.. parent.ChildrenBlocks];
                 list.ForEach(child =>
                 {
                     Logging.Warning($"Remove child attempt at [{child.transform.position.x}, {child.transform.position.y}, {child.transform.position.z}");
@@ -379,7 +379,7 @@ namespace GorillaCraft.Behaviours
 
             if (inclusions.HasFlag(BlockInclusions.Audio))
             {
-                BlockAudioUtils.PlaySound(_assetLoader, parent.gameObject, GetInteractionType(parent.BlockType.BreakSound), _configuration.PlaceBreakVolume.Value / 100f);
+                SoundUtility.PlaySound(_assetLoader, parent.gameObject, GetInteractionType(parent.BlockType.BreakSound), _configuration.PlaceBreakVolume.Value / 100f);
             }
 
             if (inclusions.HasFlag(BlockInclusions.Particles) && parent.BlockType.Form != BlockForm.Decoration && parent.BlockType.Form != BlockForm.Ladder)
@@ -442,7 +442,7 @@ namespace GorillaCraft.Behaviours
         public async void PlayTapSound(VRRig referenceRig, Type tapSoundType, bool isLeftHand)
         {
             IDataType currentFootType = GetFootstepType(tapSoundType);
-            string currentSound = string.Concat("Step_", currentFootType.Name, UnityEngine.Random.Range(1, currentFootType.MaxRange));
+            string currentSound = string.Concat("Step_", currentFootType.Name, UnityEngine.Random.Range(1, currentFootType.Range));
             var currentSource = isLeftHand ? referenceRig.leftHandPlayer : referenceRig.rightHandPlayer;
 
             currentSource.volume = currentFootType.Volume * (_configuration.FootstepVolume.Value / 100f);

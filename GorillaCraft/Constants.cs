@@ -6,7 +6,7 @@
         public const string Name = "GorillaCraft";
         public const string Version = "1.0.0.8";
 
-        public const bool IsClosedAccessRelease = true;
+        public static readonly bool IsClosedAccessRelease = true;
 
         public const string BundleDirectory = "GorillaCraft.Content.devminecraft";
 

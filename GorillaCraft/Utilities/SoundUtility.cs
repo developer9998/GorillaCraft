@@ -6,11 +6,11 @@ using UnityEngine;
 
 namespace GorillaCraft.Utilities
 {
-    public static class BlockAudioUtils
+    public static class SoundUtility
     {
         public static async void PlaySound(AssetLoader assetLoader, GameObject block, IDataType dataType, float volume)
         {
-            RngObject randomSound = new(1, dataType.MaxRange);
+            RngObject randomSound = new(1, dataType.Range);
 
             string currentSound = string.Concat("Dig_", dataType.Name, randomSound.Get());
             AudioClip sound = await assetLoader.LoadAsset<AudioClip>(currentSound);

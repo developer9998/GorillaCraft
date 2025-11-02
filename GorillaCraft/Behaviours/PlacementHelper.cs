@@ -103,8 +103,8 @@ namespace GorillaCraft.Behaviours
                 return;
             }
 
-            var player_controller = Player.rightControllerTransform;
-            var player_follower = Player.rightHandFollower;
+            var player_controller = Player.rightHand.controllerTransform;
+            var player_follower = Player.rightHand.handFollower;
 
             _lineRenderer.SetPosition(0, player_controller.position);
 
@@ -189,7 +189,7 @@ namespace GorillaCraft.Behaviours
                             // bool networkBreakFactor = true;
                             if (networkBreakFactor)
                             {
-                                _blockHandler.RemoveBlock(block_surface.Root, PhotonNetwork.LocalPlayer);
+                                _blockHandler.RemoveBlock(block_surface.Root, PhotonNetwork.LocalPlayer, BlockInclusions.Audio | BlockInclusions.Particles);
                             }
                         }
                         return;

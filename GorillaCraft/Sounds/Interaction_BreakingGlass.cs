@@ -7,6 +7,6 @@ namespace GorillaCraft.Sounds
         public string Name => "Glass";
         public float Volume => 1f;
         public float Pitch => 0.8f;
-        public int MaxRange => 3;
+        public int Range => 3;
     }
 }
