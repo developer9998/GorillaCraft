@@ -64,7 +64,8 @@ namespace GorillaCraft.Behaviours
             _gamemodeHandler._onSprite = await _assetLoader.LoadAsset<Sprite>("selection");
             _gamemodeHandler._placementHelper = _placementHelper;
 
-            // PhotonNetwork.LocalPlayer.SetCustomProperties(new() { { "GC", Constants.Version } });
+            // required for networking
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new() { { "GC", Constants.Version } });
 
             enabled = true;
         }
@@ -181,7 +182,7 @@ namespace GorillaCraft.Behaviours
                                 Logging.Info(string.Format("Sending current list of blocks of count {0}", blocks.Count));
                                 NetworkUtility.SendBlocks([.. blocks], player);
                                 blocks.Clear();
-                                await Task.Delay(60);
+                                await Task.Delay(150);
                             }
 
                             blocks.Add(block.BlockType.GetType().Name); // TODO: sending strings thru events is bad, try going for sending an index
@@ -192,7 +193,7 @@ namespace GorillaCraft.Behaviours
 
                         if (blocks.Count > 0)
                         {
-                            await Task.Delay(60);
+                            await Task.Delay(150);
                             NetworkUtility.SendBlocks([.. blocks], player);
                         }
                     });
@@ -217,14 +218,16 @@ namespace GorillaCraft.Behaviours
                             await Task.Delay(delay);
                         }
 
-                        Logging.Info($"Constructing {Mathf.Floor(eventData.Length / 4f)} blocks");
+                        object[] blockData = (object[])eventData[1];
+
+                        Logging.Info($"Constructing {Mathf.Floor(blockData.Length / 4f)} blocks");
 
                         string blkName = "";
                         long blkPos = 0u, blkAngle = 0u, blkSize;
 
-                        for (int i = 0; i < eventData.Length; i++)
+                        for (int i = 0; i < blockData.Length; i++)
                         {
-                            object blkData = eventData[i];
+                            object blkData = blockData[i];
 
                             Logging.Info(blkData);
                             int blkDataIndex = i % 4;
