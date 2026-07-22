@@ -1,6 +1,7 @@
 ﻿using GorillaCraft.Behaviours;
 using GorillaCraft.Behaviours.Blocks;
 using GorillaCraft.Utilities;
+using GorillaLibrary.Extensions;
 using GorillaLibrary.Utilities;
 using GorillaLocomotion;
 using GorillaLocomotion.Climbing;
@@ -29,15 +30,12 @@ public class EndClimbPatch
                 __instance.enablePlayerGravity(useGravity: true);
             }
 
-            Rigidbody component = null;
-            if ((bool)__instance.currentClimbable)
+            if (__instance.currentClimbable.IsObjectExistent())
             {
-                __instance.currentClimbable.TryGetComponent(out component);
                 __instance.currentClimbable.isBeingClimbed = false;
             }
 
-            Vector3 force = Vector3.zero;
-            if ((bool)__instance.currentClimber)
+            if (__instance.currentClimber.IsObjectExistent())
             {
                 __instance.currentClimber.isClimbing = false;
                 if (doDontReclimb)
@@ -51,48 +49,33 @@ public class EndClimbPatch
 
                 __instance.currentClimber.queuedToBecomeValidToGrabAgain = true;
                 __instance.currentClimber.lastAutoReleasePos = __instance.currentClimber.handRoot.localPosition;
-                if (!startingNewClimb && (bool)__instance.currentClimbable)
+                if (!startingNewClimb && __instance.currentClimbable.IsObjectExistent())
                 {
                     GorillaVelocityTracker interactPointVelocityTracker = __instance.GetInteractPointVelocityTracker(__instance.currentClimber.xrNode == XRNode.LeftHand);
-                    if ((bool)component)
-                    {
-                        __instance.playerRigidBody.linearVelocity = component.linearVelocity;
-                    }
-                    else if ((bool)__instance.currentSwing)
-                    {
-                        __instance.playerRigidBody.linearVelocity = __instance.currentSwing.velocityTracker.GetAverageVelocity(worldSpace: true, 0.25f);
-                    }
-                    else if ((bool)__instance.currentZipline)
-                    {
-                        __instance.playerRigidBody.linearVelocity = __instance.currentZipline.GetCurrentDirection() * __instance.currentZipline.currentSpeed;
-                    }
-                    else
-                    {
-                        __instance.playerRigidBody.linearVelocity = Vector3.zero;
-                    }
+                    __instance.playerRigidBody.linearVelocity = Vector3.zero;
 
-                    force = __instance.turnParent.transform.rotation * -interactPointVelocityTracker.GetAverageVelocity(worldSpace: false, 0.1f, doMagnitudeCheck: true) * __instance.scale;
+                    Vector3 force = __instance.turnParent.transform.rotation * -(interactPointVelocityTracker.GetAverageVelocity(false, 0.1f, true) * 0.33f) * __instance.scale;
                     force = Vector3.ClampMagnitude(force, 5.5f * __instance.scale);
-                    __instance.playerRigidBody.AddForce(force, ForceMode.VelocityChange);
+                    __instance.bodyCollider.attachedRigidbody.AddForce(force, ForceMode.VelocityChange);
+
+                    if (interactPointVelocityTracker.GetAverageVelocity(false, 0.2f, true).sqrMagnitude > 1.3f)
+                    {
+                        bool isLeftHand = __instance.currentClimber.xrNode == XRNode.LeftHand;
+                        var tapSound = ladder.GetComponent<BlockFace>().FaceObject.TapSound;
+                        MainScript.BlockScript.PlayTapSound(RigUtility.LocalRig, tapSound, isLeftHand);
+                        NetworkUtility.SurfaceTap(tapSound.SoundId, isLeftHand);
+                    }
                 }
             }
 
-            if ((bool)__instance.currentSwing)
+            if (__instance.currentSwing.IsObjectExistent())
             {
                 __instance.currentSwing.DetachLocalPlayer();
             }
 
-            if (__instance.currentClimbable.TryGetComponent<PhotonView>(out var _) || __instance.currentClimbable.TryGetComponent<PhotonViewXSceneRef>(out var _) || __instance.currentClimbable.IsPlayerAttached)
+            if (__instance.currentClimbable.GetComponent<PhotonView>().IsObjectExistent() || __instance.currentClimbable.GetComponent<PhotonViewXSceneRef>().IsObjectExistent() || __instance.currentClimbable.IsPlayerAttached)
             {
                 VRRig.DetachLocalPlayerFromPhotonView();
-            }
-
-            if (!startingNewClimb && force.magnitude > 2f && (bool)__instance.currentClimbable)
-            {
-                bool isLeftHand = __instance.currentClimber.xrNode == XRNode.LeftHand;
-                var tapSound = ladder.GetComponent<BlockFace>().FaceObject.TapSound;
-                MainScript.BlockScript.PlayTapSound(RigUtility.LocalRig, tapSound, isLeftHand);
-                NetworkUtility.SurfaceTap(tapSound.SoundId, isLeftHand);
             }
 
             __instance.currentClimbable = null;
