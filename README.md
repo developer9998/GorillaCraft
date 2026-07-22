@@ -1,57 +1,50 @@
-<div align="center">
- <a href="https://github.com/developer9998/GorillaCraft/blob/main/LICENSE/">   
- <img src="https://img.shields.io/github/license/developer9998/GorillaCraft?label=License&style=flat-square"</img></a>
- <a href="https://github.com/developer9998/GorillaCraft/releases/latest">
- <img src="https://img.shields.io/github/downloads/developer9998/GorillaCraft/total?label=Downloads&style=flat-square"<img></a>
- <a href="https://discord.gg/dev9998">
- <img src="https://img.shields.io/discord/989239017511989258?label=Discord&style=flat-square"</img></a>
-</div>
-<div align="center">
-  <img src="https://github.com/developer9998/GorillaCraft/blob/main/Marketing/Banner_Revision1.png?raw=true" title = "GorillaCraft. A yellow label reads 'monke monke monke'." alt = "GorillaCraft. A yellow label reads 'monke monke monke'." style="display: block;  margin-left: auto; margin-right: auto; width=50%;">
+# GorillaCraft
 
- GorillaCraft is a gameplay-based mod for Gorilla Tag which simulates the general building aspect from Minecraft.<br>
-</div>
+*GorillaCraft* is a mod for Gorilla Tag that brings Creative mode inspired mechanics into the game including a selection of solid and decorational blocks that are shared amongst players within a room.
 
-## Features
-### <i>The possibilities are endless!</i>
-GorillaCraft is packaged in with eighty blocks accessible to any player using the mod. These blocks can range from different forms and behaviours you can use to structure your own creators.
+## Installation
 
-<img src="https://github.com/developer9998/GorillaCraft/blob/main/Marketing/BlockShowcase1005.gif?raw=true" width=50%;>
+Navigate to the latest release and download ``GorillaCraft.dll`` - place this file in your Plugins folder.
 
-### <i>Multiplayer with other players!</i>
-GorillaCraft includes networking, which provides for online play with your friends or others you play with who have the mod. 
+Your plugins folder can be found at [Your Gorilla Tag Installation] / BepInEx / plugins. You can find your Gorilla Tag installation through the platform you installed it through, like your Steam library for Steam.
 
-<img src="https://github.com/developer9998/GorillaCraft/blob/main/Marketing/HouseBuilding1005.gif?raw=true" width=50%;>
+This mod requires GorillaLibrary to function, so make sure to install that as well:<br>https://github.com/GorillaTagModdingHub/GorillaLibrary/releases/latest
 
-## <i>Usage</i>
-GorillaCraft can be used under the condition that the player is in a room under a modded gamemode. When the primary left face button is held, a gamemode menu will be visible and can be used to switch between the avaliable modes the mod has to offer.
+## Credits
 
-## <i>Installation</i>
-The process of installation can be done through ZIP and DLL files. In any form of installation, you must have the requirements downloaded and installed in addition to GorillaCraft, otherwise the mod may not function correctly.
-| File Type | Method |
-| --- | --- |
-| DLL | Place the file into your plugins folder |
-| ZIP | Extract the zip file into your Gorilla Tag folder |
+### Contributors
 
-## <i>Requirements</i>
-- Bepinject
-- Extenject
-- Utilla
-- Newtonsoft.JSON
+* **Dev9998**: Creation / Programming / Design<br/>
+[GitHub Profile](https://github.com/developer9998) / [YouTube Profile](https://www.youtube.com/@danedev)
 
-GorillaCraft often relies on these libraries in order to function correctely. They are all avaliable through [MonkeModManager](https://github.com/BzzzThe18th/MonkeModManager/releases/latest).
+* **Cresmondo**: Art / Design<br/>
+[Steam Profile](https://steamcommunity.com/id/crescentmondo)
 
-## <i>Maintenance: Issues</i>
-If you encounter any bugs or issues while using GorillaCraft, you can note them in the Issues tab of the repository. We'll try to get to the issue when possible.
+* **Axogma**: Art / Design<br/>
+[Twitter Profile](https://x.com/axogma)
 
-## <i>Maintenance: Pull Requests</i>
-If you feel like contributing to GorillaCraft, for example optimization work or fixing an issue, you're welcome to create a fork and submit a pull request there. We'll try to get to the pull request when possible.
+### Testers
 
-## <i>Contributors</i>
-GorillaCraft was created and programmed by [Dev](https://github.com/developer9998/). GorillaCraft has been contributed by other individuals who have helped in various ways.
-- [Staircase](https://steamcommunity.com/id/spiralingstaircases/) (Art)
-- [Axogma](https://twitter.com/axogma) (Art)
-- [Luna](https://github.com/lunakittyyy/) (Testing)
+* **Astria**<br/>
+  [YouTube Profile](https://www.youtube.com/@astriagt/)
+  
+* **CyanGT**<br/>
+  
+* **Chucken**<br/>
+  [Steam Profile](https://steamcommunity.com/profiles/76561198988974214)
+  
+* **Deactivated**<br/>
+  [TikTok Profile](https://www.tiktok.com/@astrophotos)
+  
+* **GizmoGoat**<br/>
+  [CodeBerg Profile](https://codeberg.org/gizmogoat)
+  
+* **Goat**<br/>
+  [YouTube Profile](https://www.youtube.com/@goaatvr)
+  
+* **Lapis**<br/>
+  [GitHub Profile](https://github.com/LapisGit)
 
-## <i>Disclaimer</i>
-***This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. © 2021 Another Axiom LLC.***
+## Disclaimer
+
+This product is not affiliated with Another Axiom Inc. or its videogames Gorilla Tag and Orion Drift and is not endorsed or otherwise sponsored by Another Axiom. Portions of the materials contained herein are property of Another Axiom. ©2021 Another Axiom Inc.
