@@ -8,7 +8,7 @@ namespace GorillaCraft.Behaviours.UI
 {
     public class GameModeUIHandler : MonoBehaviour
     {
-        public PlacementHelper _placementHelper;
+        public BuildScript _placementHelper;
         public Sprite _offSprite, _onSprite;
 
         private int _currentModeIndex;
@@ -43,6 +43,7 @@ namespace GorillaCraft.Behaviours.UI
             }
 
             _modeText = transform.Find(Constants.CurrentModeName).GetComponent<Text>();
+            _currentModeIndex = BuildScript.InteractMode;
             Redraw();
         }
 
@@ -69,7 +70,7 @@ namespace GorillaCraft.Behaviours.UI
             source.PlayOneShot(source.clip);
 
             _currentModeIndex = _modeItemCollection[sender];
-            PlacementHelper.InteractMode = _currentModeIndex;
+            BuildScript.InteractMode = _currentModeIndex;
             Redraw();
         }
     }

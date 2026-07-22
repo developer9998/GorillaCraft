@@ -1,110 +1,151 @@
-﻿using GorillaCraft.Behaviours.Block;
+﻿using GorillaCraft.Behaviours.Blocks;
+using GorillaCraft.Models;
 using GorillaCraft.Tools;
 using GorillaCraft.Utilities;
+using GorillaLibrary.Extensions;
 using Photon.Pun;
+using Photon.Realtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace GorillaCraft.Behaviours.Networking
+namespace GorillaCraft.Behaviours.Networking;
+
+[DisallowMultipleComponent, RequireComponent(typeof(RigContainer))]
+public class GorillaCrafter : MonoBehaviourPunCallbacks, IPhotonViewCallback
 {
+    public static GorillaCrafter Local { get; private set; }
+    public VRRig Rig => _rigContainer.Rig;
+    public Player Creator => _player;
+    public bool IsPunished => _isPunished;
 
-    [DisallowMultipleComponent]
-    public class GorillaCrafter : MonoBehaviourPunCallbacks, IPhotonViewCallback
+    public readonly Dictionary<Guid, Block> Blocks = [];
+
+    private RigContainer _rigContainer;
+
+    private Player _player;
+
+    private bool _isPunished;
+
+    private int _strikes;
+
+    private float _strikeTimer;
+
+    public void Start()
     {
-        public static GorillaCrafter Local;
+        _rigContainer = GetComponent<RigContainer>();
+        _player = _rigContainer.Creator.GetPlayerRef();
 
-        public NetPlayer Creator => rigContainer.Creator;
-        public bool HasGorillaCraft => Creator.GetPlayerRef().CustomProperties.ContainsKey("GC");
-
-        public readonly Dictionary<long, BlockObject> Blocks = [];
-
-        private RigContainer rigContainer;
-
-        public void Awake()
+        if (Local == null && Creator.IsLocal)
         {
-            rigContainer = GetComponent<RigContainer>();
-
-            if (!rigContainer)
-            {
-                Destroy(this);
-                return;
-            }
+            Local = this;
+            MainScript.Instance.AddUser(Creator);
+            return;
         }
 
-        public void Start()
+        if (Local != this && Creator.IsLocal)
         {
-            //                                   Nickname              IsLocal               HasGorillaCraft
-            Logging.Info($"GorillaCrafter Start (N: {Creator.NickName} IL: {Creator.IsLocal} HGC: {HasGorillaCraft}");
-
-            if (Local == null && Creator.IsLocal)
-            {
-                Local = this;
-                return;
-            }
-            else if (Local != this && Creator.IsLocal)
-            {
-                Destroy(Local);
-                Local = this;
-                return;
-            }
-
-            if (HasGorillaCraft)
-            {
-                NetworkUtility.RequestBlocks(Creator.GetPlayerRef());
-            }
-        }
-
-        public void OnDestroy()
-        {
-            if (Local == this)
-            {
-                Local = null;
-            }
-
-            for (int i = 0; i < Blocks.Count; i++)
-            {
-                var block = Blocks.Values.ElementAt(i);
-                block.Destroy(false);
-            }
-
-            Blocks.Clear();
-
             Destroy(this);
+            return;
         }
 
-        public void DistributeBlock(bool isCreating, BlockObject block)
+        NetworkUtility.RequestBlocks(Creator);
+    }
+
+    public void Update()
+    {
+        if (_strikes == 0 && _strikeTimer == 0) return;
+
+        _strikeTimer = Mathf.Max(_strikeTimer - Time.unscaledDeltaTime, 0f);
+        if (_strikeTimer == 0)
         {
-            try
+            _strikeTimer = Constants.PunishmentCooldown;
+            _strikes--;
+        }
+    }
+
+    public void AddBlock(Block block) => ManageBlock(true, block);
+
+    public void RemoveBlock(Block block) => ManageBlock(false, block);
+
+    private void ManageBlock(bool isCreating, Block block)
+    {
+        try
+        {
+            Guid serialNumber = block.SerialNumber;
+
+            if (isCreating)
             {
-                long blockPosition = Utils.PackVector3ToLong(block.Position);
+                if (Blocks.ContainsKey(serialNumber)) return;
+                Blocks.Add(serialNumber, block);
 
-                if (isCreating)
+                if (Creator.IsLocal)
                 {
-                    Blocks.Add(blockPosition, block);
+                    byte faceIndex = 0;
+                    if (block.ParentalBlock.IsObjectExistent() && block.ParentalBlock.FindChildFace(block) is BlockFace face && face.IsObjectExistent()) faceIndex = block.ParentalBlock.GetIndex(face);
 
-                    if (Creator.IsLocal)
-                    {
-                        long blockEulerAngles = Utils.PackVector3ToLong(block.EulerAngles);
-                        long blockScale = Utils.PackVector3ToLong(block.Size);
-                        NetworkUtility.BlockInteraction(true, block.BlockType.GetType().Name, blockPosition, blockEulerAngles, blockScale);
-                    }
+                    long blockPosition = Utils.PackVector3ToLong(block.Position);
+                    long blockEulerAngles = Utils.PackVector3ToLong(block.EulerAngles);
+                    NetworkUtility.BlockInteraction_Place(block.Reference.BlockId, serialNumber, block.ParentalBlock.IsObjectExistent() ? block.ParentalBlock.SerialNumber : null, faceIndex, blockPosition, blockEulerAngles, block.Size);
+                }
 
-                }
-                else if (Blocks.TryGetValue(blockPosition, out var lookupBlock))
-                {
-                    Blocks.Remove(blockPosition);
-                    if (Creator.IsLocal)
-                    {
-                        NetworkUtility.BlockInteraction(false, blockPosition);
-                    }
-                }
+                return;
             }
-            catch (Exception ex)
+
+            if (Blocks.TryGetValue(serialNumber, out var lookupBlock))
             {
-                Logging.Error($"{nameof(DistributeBlock)} threw an exception {ex}");
+                Blocks.Remove(serialNumber);
+
+                if (Creator.IsLocal)
+                {
+                    NetworkUtility.BlockInteraction_Destroy(serialNumber);
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Logging.Error($"{nameof(ManageBlock)} threw an exception {ex}");
+        }
+    }
+
+    public void Punish(BlockStrikePurpose strikePurpose)
+    {
+        if (_isPunished) return;
+
+        _strikes++;
+        _strikeTimer = Constants.PunishmentCooldown;
+
+        Logging.Warning($"{Creator} has recieved Strike #{_strikes} per {strikePurpose}");
+
+        if (_strikes >= Constants.PunishmentTotal)
+        {
+            _isPunished = true;
+            RemoveUser();
+        }
+    }
+
+    public void Remove()
+    {
+        if (!enabled) return;
+        enabled = false;
+
+        if (Local == this) Local = null;
+
+        RemoveUser();
+        Destroy(this);
+    }
+
+    public void RemoveUser()
+    {
+        var blocks = Blocks.Values.ToArray();
+
+        for (int i = 0; i < blocks.Length; i++)
+        {
+            var block = blocks.ElementAtOrDefault(i);
+            block?.Destroy(useDestroyEffects: false);
+        }
+
+        MainScript.Instance.RemoveUser(Creator);
     }
 }

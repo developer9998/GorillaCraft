@@ -2,33 +2,37 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
-		<LangVersion>preview</LangVersion>
+		<LangVersion>8.0</LangVersion>
+		<RootNamespace>GorillaCraft_Editor</RootNamespace>
+		<AssemblyName>GorillaCraft</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Remove="Content\devminecraft" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Include="Content\devminecraft" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="..\.editorconfig" Link=".editorconfig" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
+		<Compile Include="..\GorillaCraft\Models\BlockContainerObject.cs">
+			<Link>Models\BlockContainerObject.cs</Link>
+		</Compile>
+		<Compile Include="..\GorillaCraft\Models\BlockFaceObject.cs">
+			<Link>Models\BlockFaceObject.cs</Link>
+		</Compile>
+		<Compile Include="..\GorillaCraft\Models\BlockObject.cs">
+			<Link>Models\BlockObject.cs</Link>
+		</Compile>
+		<Compile Include="..\GorillaCraft\Models\BlockSoundObject.cs">
+			<Link>Models\BlockSoundObject.cs</Link>
+		</Compile>
+		<Compile Include="..\GorillaCraft\Models\BlockForm.cs">
+			<Link>Models\BlockForm.cs</Link>
+		</Compile>
+		<Compile Include="..\GorillaCraft\Models\BlockPlacement.cs">
+			<Link>Models\BlockPlacement.cs</Link>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="0Harmony">
 			<HintPath>$(BepInExAssemblyPath)\0Harmony.dll</HintPath>
 		</Reference>
-		<Reference Include="Assembly-CSharp" Publicize="true">
+		<Reference Include="Assembly-CSharp">
 			<HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
 		</Reference>
 		<Reference Include="BakeryRuntimeAssembly">
@@ -41,7 +45,7 @@
 			<HintPath>$(BepInExAssemblyPath)\BepInEx.Harmony.dll</HintPath>
 		</Reference>
 		<Reference Include="Fusion.Runtime">
-		  <HintPath>$(GameAssemblyPath)\Fusion.Runtime.dll</HintPath>
+			<HintPath>$(GameAssemblyPath)\Fusion.Runtime.dll</HintPath>
 		</Reference>
 		<Reference Include="Mono.Security">
 			<HintPath>$(GameAssemblyPath)\Mono.Security.dll</HintPath>
@@ -293,4 +297,5 @@
 			<HintPath>$(PluginsPath)\GorillaLibrary\GorillaLibrary.dll</HintPath>
 		</Reference>
 	</ItemGroup>
+
 </Project>

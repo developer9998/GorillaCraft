@@ -1,60 +1,71 @@
 ﻿using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace GorillaCraft.Utilities
+namespace GorillaCraft.Utilities;
+
+public class NetworkUtility
 {
-    public class NetworkUtility
+    public const byte EventCode = 176;
+
+    public static readonly int Id_BlockInteraction = StaticHash.Compute("GorillaCraft1009".GetStaticHash(), "BlockInteraction".GetStaticHash());
+
+    public static readonly int Id_SurfaceTap = StaticHash.Compute("GorillaCraft1009".GetStaticHash(), "SurfaceTap".GetStaticHash());
+
+    public static readonly int Id_RequestBlocks = StaticHash.Compute("GorillaCraft1009".GetStaticHash(), "RequestBlocks".GetStaticHash());
+
+    public static readonly int Id_SendBlocks = StaticHash.Compute("GorillaCraft1009".GetStaticHash(), "SendBlocks".GetStaticHash());
+
+    public static void BlockInteraction_Place(short block, Guid instanceId, Guid? parentId, byte parentFace, long position, long rotation, float scale)
     {
-        public const byte EventCode = 176;
+        BlockInteraction(true, block, instanceId.ToString(), parentId != null ? parentId.ToString() : 0, parentFace, position, rotation, scale);
+    }
 
-        public static readonly int Id_BlockInteraction = StaticHash.Compute(Constants.Name.GetStaticHash(), "BlockInteraction".GetStaticHash());
+    public static void BlockInteraction_Destroy(Guid guid)
+    {
+        BlockInteraction(false, guid.ToString());
+    }
 
-        public static readonly int Id_SurfaceTap = StaticHash.Compute(Constants.Name.GetStaticHash(), "SurfaceTap".GetStaticHash());
-
-        public static readonly int Id_RequestBlocks = StaticHash.Compute(Constants.Name.GetStaticHash(), "RequestBlocks".GetStaticHash());
-
-        public static readonly int Id_SendBlocks = StaticHash.Compute(Constants.Name.GetStaticHash(), "SendBlocks".GetStaticHash());
-
-        public static void BlockInteraction(params object[] content)
+    private static void BlockInteraction(params object[] content)
+    {
+        RaiseEventOptions raiseEventOptions = new()
         {
-            // object[] content = [isCreating, block, blockPosition, blockEuler, blockScale];
-            RaiseEventOptions raiseEventOptions = new()
-            {
-                Receivers = ReceiverGroup.Others
-            };
-            PhotonNetwork.RaiseEvent(EventCode, new object[1] { Id_BlockInteraction }.Concat(content).ToArray(), raiseEventOptions, SendOptions.SendReliable);
-        }
+            Receivers = ReceiverGroup.Others
+        };
+        PhotonNetwork.RaiseEvent(EventCode, new object[1] { Id_BlockInteraction }.Concat(content).ToArray(), raiseEventOptions, SendOptions.SendReliable);
+    }
 
-        public static void SurfaceTap(string typeName, bool isLeftHand)
+    public static void SurfaceTap(byte soundId, bool isLeftHand)
+    {
+        object[] content = [Id_SurfaceTap, soundId, isLeftHand];
+        RaiseEventOptions raiseEventOptions = new()
         {
-            object[] content = [Id_SurfaceTap, typeName, isLeftHand];
-            RaiseEventOptions raiseEventOptions = new()
-            {
-                Receivers = ReceiverGroup.Others
-            };
-            PhotonNetwork.RaiseEvent(EventCode, content, raiseEventOptions, SendOptions.SendReliable);
-        }
+            Receivers = ReceiverGroup.Others
+        };
+        PhotonNetwork.RaiseEvent(EventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
 
-        public static void RequestBlocks(Player targetPlayer)
+    public static void RequestBlocks(Player targetPlayer)
+    {
+        object[] content = [Id_RequestBlocks, PhotonNetwork.LocalPlayer];
+        RaiseEventOptions raiseEventOptions = new()
         {
-            object[] content = [Id_RequestBlocks, PhotonNetwork.LocalPlayer];
-            RaiseEventOptions raiseEventOptions = new()
-            {
-                TargetActors = [targetPlayer.ActorNumber]
-            };
-            PhotonNetwork.RaiseEvent(EventCode, content, raiseEventOptions, SendOptions.SendReliable);
-        }
+            TargetActors = [targetPlayer.ActorNumber]
+        };
+        PhotonNetwork.RaiseEvent(EventCode, content, raiseEventOptions, SendOptions.SendReliable);
+    }
 
-        public static void SendBlocks(object[] blocks, Player targetPlayer)
+    public static void SendBlocks(Player targetPlayer, List<object[]> blocks)
+    {
+        List<object> content = [Id_SendBlocks];
+        blocks.ForEach(array => content.Add(array));
+        RaiseEventOptions raiseEventOptions = new()
         {
-            object[] content = [Id_SendBlocks, blocks];
-            RaiseEventOptions raiseEventOptions = new()
-            {
-                TargetActors = [targetPlayer.ActorNumber]
-            };
-            PhotonNetwork.RaiseEvent(EventCode, content, raiseEventOptions, SendOptions.SendReliable);
-        }
+            TargetActors = [targetPlayer.ActorNumber]
+        };
+        PhotonNetwork.RaiseEvent(EventCode, content.ToArray(), raiseEventOptions, SendOptions.SendReliable);
     }
 }

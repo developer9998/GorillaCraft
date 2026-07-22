@@ -5,77 +5,76 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace GorillaCraft.Tools
+namespace GorillaCraft.Tools;
+
+public class AssetLoader
 {
-    public class AssetLoader
+    private AssetBundle _assetBundle = null;
+    private Task _loadingTask = null;
+    private bool _bundleLoaded;
+
+    private Dictionary<string, Object> _loadedObjects;
+
+    private GameObject _instantiateParent;
+
+    private async Task LoadBundle()
     {
-        private AssetBundle _assetBundle = null;
-        private Task _loadingTask = null;
-        private bool _bundleLoaded;
+        Stream _bundleStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(Constants.BundleDirectory);
+        var _bundleCreationRequest = AssetBundle.LoadFromStreamAsync(_bundleStream);
 
-        private Dictionary<string, Object> _loadedObjects;
-
-        private GameObject _instantiateParent;
-
-        private async Task LoadBundle()
+        var _completionSource = new TaskCompletionSource<AssetBundle>();
+        _bundleCreationRequest.completed += operation =>
         {
-            Stream _bundleStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(Constants.BundleDirectory);
-            var _bundleCreationRequest = AssetBundle.LoadFromStreamAsync(_bundleStream);
+            var outRequest = operation as AssetBundleCreateRequest;
+            _completionSource.SetResult(outRequest.assetBundle);
+        };
 
-            var _completionSource = new TaskCompletionSource<AssetBundle>();
-            _bundleCreationRequest.completed += operation =>
-            {
-                var outRequest = operation as AssetBundleCreateRequest;
-                _completionSource.SetResult(outRequest.assetBundle);
-            };
+        _assetBundle = await _completionSource.Task;
+        _bundleLoaded = true;
+    }
 
-            _assetBundle = await _completionSource.Task;
-            _bundleLoaded = true;
+    public async Task<T> LoadAsset<T>(string name) where T : Object
+    {
+        if (!_bundleLoaded)
+        {
+            _loadingTask ??= LoadBundle();
+            await _loadingTask;
         }
 
-        public async Task<T> LoadAsset<T>(string name) where T : Object
+        if (_loadedObjects != null && _loadedObjects.TryGetValue(name, out var _loadedObject))
+            return _loadedObject as T;
+
+        Logging.Info(string.Concat("Loading asset: ", name));
+
+        _loadedObjects ??= [];
+
+        var _bundleLoadRequest = _assetBundle.LoadAssetAsync<T>(name);
+        var _completionSource = new TaskCompletionSource<T>();
+        _bundleLoadRequest.completed += operation =>
         {
-            if (!_bundleLoaded)
+            var outRequest = operation as AssetBundleRequest;
+            if (outRequest.asset == null)
             {
-                _loadingTask ??= LoadBundle();
-                await _loadingTask;
+                _completionSource.SetResult(null);
+                return;
             }
 
-            if (_loadedObjects != null && _loadedObjects.TryGetValue(name, out var _loadedObject))
-                return _loadedObject as T;
+            _completionSource.SetResult(outRequest.asset as T);
+        };
 
-            Logging.Info(string.Concat("Loading asset: ", name));
+        var _finishedTask = await _completionSource.Task;
+        _loadedObjects.Add(name, _finishedTask);
+        return _finishedTask;
+    }
 
-            _loadedObjects ??= [];
-
-            var _bundleLoadRequest = _assetBundle.LoadAssetAsync<T>(name);
-            var _completionSource = new TaskCompletionSource<T>();
-            _bundleLoadRequest.completed += operation =>
-            {
-                var outRequest = operation as AssetBundleRequest;
-                if (outRequest.asset == null)
-                {
-                    _completionSource.SetResult(null);
-                    return;
-                }
-
-                _completionSource.SetResult(outRequest.asset as T);
-            };
-
-            var _finishedTask = await _completionSource.Task;
-            _loadedObjects.Add(name, _finishedTask);
-            return _finishedTask;
-        }
-
-        public GameObject SetObjectParent(GameObject gameObject)
+    public GameObject SetObjectParent(GameObject gameObject)
+    {
+        if (_instantiateParent == null)
         {
-            if (_instantiateParent == null)
-            {
-                _instantiateParent = new GameObject("GorillaCraft Objects");
-            }
-
-            gameObject.transform.SetParent(_instantiateParent.transform, true);
-            return gameObject;
+            _instantiateParent = new GameObject("GorillaCraft Objects");
         }
+
+        gameObject.transform.SetParent(_instantiateParent.transform, true);
+        return gameObject;
     }
 }

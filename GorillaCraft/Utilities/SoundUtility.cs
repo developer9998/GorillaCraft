@@ -1,29 +1,19 @@
-﻿using GorillaCraft.Extensions;
-using GorillaCraft.Interfaces;
-using GorillaCraft.Models;
-using GorillaCraft.Tools;
+﻿using GorillaCraft.Models;
 using UnityEngine;
 
-namespace GorillaCraft.Utilities
+namespace GorillaCraft.Utilities;
+
+public static class SoundUtility
 {
-    public static class SoundUtility
+    public static async void PlaySound(GameObject block, BlockSoundObject dataType, float volume)
     {
-        public static async void PlaySound(AssetLoader assetLoader, GameObject block, IDataType dataType, float volume)
-        {
-            RngObject randomSound = new(1, dataType.Range);
-
-            string currentSound = string.Concat("Dig_", dataType.Name, randomSound.Get());
-            AudioClip sound = await assetLoader.LoadAsset<AudioClip>(currentSound);
-
-            AudioSource audioSource = block.GetOrAddComponent<AudioSource>();
-            audioSource.spatialBlend = 1f;
-            audioSource.clip = sound;
-            audioSource.volume = dataType.Volume / 4f * volume;
-            audioSource.pitch = dataType.Pitch;
-            audioSource.Play();
-
-            randomSound.Dispose();
-            Object.Destroy(audioSource, sound.length);
-        }
+        AudioClip audio = dataType.Audio[Random.Range(0, dataType.Audio.Length)];
+        AudioSource audioSource = block.AddComponent<AudioSource>();
+        audioSource.spatialBlend = 1f;
+        audioSource.clip = audio;
+        audioSource.volume = dataType.Volume / 4f * volume;
+        audioSource.pitch = dataType.Pitch;
+        audioSource.Play();
+        Object.Destroy(audioSource, audio.length);
     }
 }

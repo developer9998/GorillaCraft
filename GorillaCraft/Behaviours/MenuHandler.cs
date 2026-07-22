@@ -1,7 +1,7 @@
 ﻿using GorillaCraft.Behaviours.UI;
-using GorillaCraft.Interfaces;
 using GorillaCraft.Models;
 using GorillaCraft.Tools;
+using GorillaLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +14,8 @@ namespace GorillaCraft.Behaviours
     {
         public static bool IsViewingMenuList;
 
-        public AssetLoader AssetLoader;
-        public PlacementHelper Placement;
+        public AssetLoaderSync AssetLoader;
+        public BuildScript Placement;
         public Configuration Config;
 
         private Transform _uiParent;
@@ -105,7 +105,7 @@ namespace GorillaCraft.Behaviours
                 },
                 new MenuObject()
                 {
-                    Alias = "Credits",
+                    Alias = "Contributors",
                     MenuName = "Menu 2",
                     PageName = "Credit Page"
                 }
@@ -130,11 +130,11 @@ namespace GorillaCraft.Behaviours
 
             Input_Slider slider_BlockResource = _uiParent.Find("Pages/Settings Page/BlockResourceSlider").AddComponent<Input_Slider>();
             slider_BlockResource.MenuParent = this;
-            slider_BlockResource.Split = 1;
+            slider_BlockResource.Split = 2;
             slider_BlockResource.SliderData = new ButtonSliderData()
             {
                 Least = 0f,
-                Greatest = Constants.IsClosedAccessRelease ? 1f : 2f
+                Greatest = 2f
             };
             slider_BlockResource.SliderContentOverride = new Dictionary<float, string>()
             {
@@ -240,7 +240,7 @@ namespace GorillaCraft.Behaviours
 
             source.PlayOneShot(source.clip);
 
-            IBlock _newBlock = Placement.SetBlock(_blockItemCollection[sender]);
+            BlockObject _newBlock = Placement.SelectBlock(_blockItemCollection[sender]);
 
             _currentItemText.text = _newBlock.Definition;
             _currentItemImage.sprite = sender.GetComponent<Image>().sprite;
@@ -272,7 +272,7 @@ namespace GorillaCraft.Behaviours
 
                     sender.TryGetComponent(out AudioSource source);
 
-                    source.PlayOneShot(IsViewingMenuList ? await AssetLoader.LoadAsset<AudioClip>("Lever2") : await AssetLoader.LoadAsset<AudioClip>("Lever1"));
+                    source.PlayOneShot(IsViewingMenuList ? AssetLoader.LoadAsset<AudioClip>("Lever2") : AssetLoader.LoadAsset<AudioClip>("Lever1"));
                 }
                 else
                 {
