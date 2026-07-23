@@ -1,6 +1,6 @@
 # GorillaCraft
 
-*GorillaCraft* is a mod for Gorilla Tag that brings Creative mode inspired mechanics into the game including a selection of solid and decorational blocks that are shared amongst players within a room.
+*GorillaCraft* is a mod for Gorilla Tag that brings creative mode inspired mechanics into the game including a selection of solid and decorational blocks that are shared amongst players within a room.
 
 ## Installation
 
